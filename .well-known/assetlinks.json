@@ -2,7 +2,7 @@
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
-        "package_name": "ascension.fitness.app",
-        "sha256_cert_fingerprints": ["20:C8:4D:C1:B3:B1:46:27:40:8E:B1:83:33:46:02:EA:50:3E:3B:CB:D0:82:D6:A1:93:14:90:18:E6:11:49:8C"]
+        "package_name": "io.github.kvrysv.twa",
+        "sha256_cert_fingerprints": ["30:22:AF:1A:A8:32:76:92:E5:56:32:98:98:3C:46:18:81:7A:E9:5F:2F:CB:DB:15:BA:15:18:D8:89:36:F7:EA"]
       }
     }]
