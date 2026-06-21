@@ -3,6 +3,8 @@
       "target": {
         "namespace": "android_app",
         "package_name": "ascension.fitness.app",
-        "sha256_cert_fingerprints": ["AB:E8:0A:FB:19:E9:D8:78:93:18:CE:B7:2B:11:91:8B:71:34:76:CF:AC:84:E4:C7:B4:1E:51:6A:09:57:42:36"]
+        "sha256_cert_fingerprints": [
+              "AB:E8:0A:FB:19:E9:D8:78:93:18:CE:B7:2B:11:91:8B:71:34:76:CF:AC:84:E4:C7:B4:1E:51:6A:09:57:42:36"
+        ]
       }
     }]
