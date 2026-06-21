@@ -1,12 +1,8 @@
 [{
-      "relation": [
-            "delegate_permission/common.handle_all_urls"
-      ],
+      "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
         "package_name": "ascension.fitness.app",
-        "sha256_cert_fingerprints": [
-              "38:C3:E6:32:3A:B7:D1:DF:9D:CF:AC:B3:1E:95:20:37:12:6D:67:C0:85:83:3F:3F:49:E8:CE:47:80:B0:99:6B"
-        ]
+        "sha256_cert_fingerprints": ["20:C8:4D:C1:B3:B1:46:27:40:8E:B1:83:33:46:02:EA:50:3E:3B:CB:D0:82:D6:A1:93:14:90:18:E6:11:49:8C"]
       }
     }]
