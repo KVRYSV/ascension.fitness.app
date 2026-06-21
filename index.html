@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05060a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ASCENSION">
+<title>ASCENSION // System</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+/* ============================================================
+   ASCENSION — offline Solo-Leveling-style training system
+   Single file. No external dependencies. Runs in any browser.
+   ============================================================ */
+
+:root{
+  --void:#05060a;
+  --panel:#0a0f1c;
+  --panel-2:#0c1426;
+  --line:rgba(82,216,255,.18);
+  --line-strong:rgba(82,216,255,.45);
+  --cyan:#52d8ff;
+  --cyan-dim:#2a9fce;
+  --azure:#1b6fae;
+  --violet:#a855f7;
+  --violet-dim:#6d3fae;
+  --amber:#ffd27a;
+  --crimson:#ff4d5e;
+  --green:#46e6a0;
+  --text:#cfe6f7;
+  --muted:#6f86a8;
+  --muted-2:#46587a;
+  --accent:var(--cyan);
+  --accent-soft:rgba(82,216,255,.12);
+  --glow:0 0 14px rgba(82,216,255,.45), inset 0 0 22px rgba(82,216,255,.06);
+  --mono:ui-monospace,"SF Mono","Cascadia Code","JetBrains Mono",Consolas,"Liberation Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+html[data-accent="violet"]{ --accent:var(--violet); --accent-soft:rgba(168,85,247,.14);
+  --line:rgba(168,85,247,.2); --line-strong:rgba(168,85,247,.5);
+  --glow:0 0 14px rgba(168,85,247,.5), inset 0 0 22px rgba(168,85,247,.07); --cyan:#c98bff; --cyan-dim:#8a52c9;}
+html[data-accent="crimson"]{ --accent:var(--crimson); --accent-soft:rgba(255,77,94,.14);
+  --line:rgba(255,77,94,.2); --line-strong:rgba(255,77,94,.5);
+  --glow:0 0 14px rgba(255,77,94,.5), inset 0 0 22px rgba(255,77,94,.07); --cyan:#ff7d89; --cyan-dim:#c94b56;}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--void);color:var(--text);font-family:var(--sans);overscroll-behavior:none;}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(82,216,255,.10), transparent 60%),
+    radial-gradient(900px 600px at 80% 110%, rgba(168,85,247,.08), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px),
+    var(--void);
+  background-attachment:fixed;
+}
+::selection{background:var(--accent);color:#02060c;}
+
+/* scrollbars */
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:0;}
+::-webkit-scrollbar-track{background:transparent;}
+
+.app{max-width:560px;margin:0 auto;padding:0 14px calc(96px + env(safe-area-inset-bottom)) 14px;}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top)) 4px 10px 4px;
+  background:linear-gradient(180deg, var(--void) 60%, transparent);
+}
+.brand{font-family:var(--mono);font-size:13px;letter-spacing:.32em;color:var(--accent);text-shadow:0 0 12px var(--accent);font-weight:700;}
+.brand small{display:block;font-size:9px;letter-spacing:.3em;color:var(--muted);text-shadow:none;margin-top:2px;}
+.topbar .rankpill{
+  font-family:var(--mono);font-size:11px;letter-spacing:.2em;padding:6px 10px;
+  border:1px solid var(--line-strong);color:var(--accent);background:var(--accent-soft);
+  display:flex;align-items:center;gap:8px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+}
+
+/* ---------- system panel (signature framing) ---------- */
+.panel{
+  position:relative;
+  background:linear-gradient(180deg, rgba(12,20,38,.92), rgba(8,13,24,.92));
+  border:1px solid var(--line);
+  margin:12px 0;
+  padding:16px 14px;
+  box-shadow:var(--glow);
+  clip-path:polygon(0 14px,14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px));
+}
+.panel::before,.panel::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--accent);opacity:.85;pointer-events:none;}
+.panel::before{top:6px;left:6px;border-right:none;border-bottom:none;}
+.panel::after{bottom:6px;right:6px;border-left:none;border-top:none;}
+.panel.flat{box-shadow:none;background:rgba(10,15,28,.7);}
+.panel-title{
+  font-family:var(--mono);font-size:11px;letter-spacing:.28em;color:var(--accent);
+  text-transform:uppercase;margin:0 0 12px 0;display:flex;align-items:center;gap:8px;
+}
+.panel-title::before{content:"▸";color:var(--accent);font-size:10px;}
+.panel-title .sub{margin-left:auto;color:var(--muted);font-size:9px;letter-spacing:.2em;}
+
+/* ---------- status window (hero) ---------- */
+.status .name{font-family:var(--mono);font-size:20px;letter-spacing:.06em;color:#eaf6ff;text-shadow:0 0 16px var(--accent);}
+.status .class{font-family:var(--mono);font-size:11px;color:var(--violet);letter-spacing:.22em;margin-top:2px;text-shadow:0 0 10px var(--violet);}
+.status .lvrow{display:flex;align-items:baseline;gap:10px;margin-top:12px;}
+.status .lv{font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:.2em;}
+.status .lvnum{font-family:var(--mono);font-size:34px;color:#fff;line-height:1;text-shadow:0 0 18px var(--accent);}
+.bar{height:10px;background:#0b1322;border:1px solid var(--line);position:relative;overflow:hidden;}
+.bar > i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),#bff3ff);box-shadow:0 0 12px var(--accent);transition:width .7s cubic-bezier(.2,.8,.2,1);}
+.bar.hp > i{background:linear-gradient(90deg,#ff5d6c,#ffb0b7);box-shadow:0 0 12px #ff5d6c;}
+.bar.mp > i{background:linear-gradient(90deg,#3aa0ff,#9fd0ff);box-shadow:0 0 12px #3aa0ff;}
+.bar-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);margin:10px 0 4px;}
+.bar-label b{color:var(--text);font-weight:600;}
+
+/* stat grid */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px;}
+.stat{border:1px solid var(--line);background:rgba(82,216,255,.04);padding:9px 4px;text-align:center;position:relative;}
+.stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);}
+.stat .v{font-family:var(--mono);font-size:20px;color:#fff;margin-top:2px;text-shadow:0 0 10px var(--accent);}
+.stat .plus{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border:1px solid var(--accent);background:var(--void);color:var(--accent);font-size:13px;line-height:18px;cursor:pointer;display:none;}
+.stat.alloc .plus{display:block;animation:pulse 1.6s infinite;}
+.pointsleft{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:.16em;margin-top:10px;text-align:center;text-shadow:0 0 10px var(--amber);display:none;}
+.pointsleft.show{display:block;}
+
+/* ---------- generic UI ---------- */
+.row{display:flex;gap:10px;align-items:center;}
+.row.wrap{flex-wrap:wrap;}
+.spread{justify-content:space-between;}
+.muted{color:var(--muted);}
+.tiny{font-size:11px;}
+.mono{font-family:var(--mono);}
+.center{text-align:center;}
+.mt{margin-top:12px;} .mt2{margin-top:20px;} .mb{margin-bottom:10px;}
+.grow{flex:1;}
+.hi{color:var(--accent);} .vi{color:var(--violet);} .am{color:var(--amber);} .gr{color:var(--green);} .cr{color:var(--crimson);}
+
+h2.section{font-family:var(--mono);font-size:12px;letter-spacing:.26em;color:var(--accent);text-transform:uppercase;margin:18px 4px 4px;}
+p.lead{color:var(--muted);font-size:13px;line-height:1.55;margin:6px 0;}
+
+.btn{
+  font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid var(--line-strong);background:var(--accent-soft);color:var(--accent);
+  padding:12px 14px;cursor:pointer;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+  transition:.15s; user-select:none;
+}
+.btn:hover{background:var(--accent);color:#02060c;box-shadow:0 0 16px var(--accent);}
+.btn:active{transform:translateY(1px);}
+.btn.full{width:100%;}
+.btn.ghost{background:transparent;color:var(--muted);border-color:var(--line);}
+.btn.ghost:hover{color:var(--text);background:rgba(255,255,255,.04);box-shadow:none;}
+.btn.warn{color:var(--crimson);border-color:rgba(255,77,94,.4);background:rgba(255,77,94,.08);}
+.btn.warn:hover{background:var(--crimson);color:#fff;box-shadow:0 0 16px var(--crimson);}
+.btn.sm{padding:8px 10px;font-size:11px;}
+.btn:disabled{opacity:.35;pointer-events:none;}
+
+input,select,textarea{
+  font-family:var(--mono);font-size:14px;color:var(--text);background:#070c17;
+  border:1px solid var(--line);padding:11px 12px;width:100%;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+label.fld{display:block;margin:12px 0 0;}
+label.fld > span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+/* chip selector */
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  font-family:var(--mono);font-size:12px;letter-spacing:.08em;padding:9px 12px;cursor:pointer;user-select:none;
+  border:1px solid var(--line);color:var(--muted);background:transparent;
+}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);box-shadow:0 0 10px rgba(82,216,255,.2);}
+
+/* ---------- bottom nav (HUD) ---------- */
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  display:grid;grid-template-columns:repeat(5,1fr);
+  max-width:560px;margin:0 auto;
+  background:linear-gradient(0deg, var(--void) 70%, rgba(5,6,10,.4));
+  border-top:1px solid var(--line-strong);
+  padding-bottom:env(safe-area-inset-bottom);
+  backdrop-filter:blur(6px);
+}
+.nav button{
+  background:none;border:none;color:var(--muted);font-family:var(--mono);
+  font-size:9px;letter-spacing:.12em;padding:12px 2px 14px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;text-transform:uppercase;
+}
+.nav button .ic{font-size:18px;line-height:1;filter:grayscale(1) opacity(.6);}
+.nav button.active{color:var(--accent);text-shadow:0 0 10px var(--accent);}
+.nav button.active .ic{filter:none;}
+.nav button.active::before{content:"";position:absolute;}
+.nav .marker{position:absolute;top:0;height:2px;background:var(--accent);box-shadow:0 0 10px var(--accent);transition:.3s;width:20%;}
+
+/* ---------- exercise / quest cards ---------- */
+.ex{border:1px solid var(--line);background:rgba(10,16,30,.7);margin:10px 0;padding:12px;}
+.ex .hd{display:flex;align-items:flex-start;gap:10px;}
+.ex .nm{font-family:var(--mono);font-size:14px;color:#eaf6ff;letter-spacing:.04em;}
+.ex .meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.tag{font-family:var(--mono);font-size:9px;letter-spacing:.12em;padding:3px 6px;border:1px solid var(--line);color:var(--muted);text-transform:uppercase;}
+.tag.str{color:#ff8f6b;border-color:rgba(255,143,107,.4);}
+.tag.agi{color:#6bd6ff;border-color:rgba(107,214,255,.4);}
+.tag.vit{color:#7dffb0;border-color:rgba(125,255,176,.4);}
+.tag.sen{color:#c98bff;border-color:rgba(201,139,255,.4);}
+.scheme{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:.08em;margin-top:8px;}
+.cues{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px;}
+
+.setgrid{display:grid;grid-template-columns:28px 1fr 1fr 46px 34px;gap:6px;align-items:center;margin-top:8px;}
+.setgrid .h{font-family:var(--mono);font-size:9px;color:var(--muted-2);letter-spacing:.1em;text-transform:uppercase;text-align:center;}
+.setgrid input{padding:8px 4px;text-align:center;font-size:13px;}
+.setgrid .si{text-align:center;font-family:var(--mono);color:var(--muted);font-size:12px;}
+.setdone{width:30px;height:30px;border:1px solid var(--line-strong);background:#070c17;color:var(--muted);cursor:pointer;font-size:14px;}
+.setdone.on{background:var(--green);color:#02120a;border-color:var(--green);box-shadow:0 0 10px var(--green);}
+
+.vbtn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  color:var(--accent);border:1px solid var(--line);padding:8px 10px;cursor:pointer;text-decoration:none;margin-top:10px;}
+.vbtn:hover{background:var(--accent-soft);}
+.vbtn .play{width:0;height:0;border-left:8px solid var(--accent);border-top:5px solid transparent;border-bottom:5px solid transparent;}
+.embed{position:relative;width:100%;aspect-ratio:16/9;margin-top:10px;border:1px solid var(--line);background:#000;display:none;}
+.embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.embed.show{display:block;}
+
+/* quest */
+.quest{border:1px solid var(--line);background:rgba(10,16,30,.7);padding:11px 12px;margin:9px 0;display:flex;align-items:center;gap:12px;}
+.quest .qx{width:26px;height:26px;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);cursor:pointer;flex:0 0 auto;}
+.quest.done .qx{background:var(--green);border-color:var(--green);color:#02120a;box-shadow:0 0 10px var(--green);}
+.quest .ql{font-family:var(--mono);font-size:13px;color:var(--text);letter-spacing:.03em;}
+.quest.done .ql{color:var(--muted);text-decoration:line-through;}
+.quest .qr{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--amber);}
+.questbox{border:1px solid var(--amber);box-shadow:0 0 16px rgba(255,210,122,.18);}
+.questbox.penalty{border-color:var(--crimson);box-shadow:0 0 16px rgba(255,77,94,.2);}
+
+/* skill tree */
+.tree{display:flex;flex-direction:column;gap:18px;}
+.branch{border-left:2px solid var(--line);padding-left:12px;}
+.branch h3{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--accent);margin:0 0 4px;text-transform:uppercase;}
+.branch .bd{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.node{display:flex;gap:10px;align-items:flex-start;padding:9px;border:1px solid var(--line);background:rgba(10,16,30,.6);margin-bottom:8px;position:relative;}
+.node.locked{opacity:.5;}
+.node.owned{border-color:var(--green);box-shadow:0 0 10px rgba(70,230,160,.12);}
+.node .dot{width:14px;height:14px;border:2px solid var(--muted);border-radius:50%;margin-top:2px;flex:0 0 auto;}
+.node.owned .dot{background:var(--green);border-color:var(--green);box-shadow:0 0 8px var(--green);}
+.node.avail .dot{border-color:var(--accent);box-shadow:0 0 8px var(--accent);}
+.node .nn{font-family:var(--mono);font-size:12px;color:#eaf6ff;letter-spacing:.04em;}
+.node .nd{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45;}
+.node .nreq{font-family:var(--mono);font-size:9px;color:var(--muted-2);letter-spacing:.1em;margin-top:4px;}
+.node .nbuy{margin-left:auto;}
+
+/* chart */
+.chart{width:100%;height:160px;}
+.chart text{font-family:var(--mono);fill:var(--muted);font-size:9px;}
+.legend{display:flex;gap:14px;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px;flex-wrap:wrap;}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:middle;}
+
+/* ring */
+.ring-wrap{display:flex;gap:14px;align-items:center;}
+.ring{width:96px;height:96px;flex:0 0 auto;}
+.ring text.big{fill:#fff;font-size:18px;font-family:var(--mono);}
+.ring text.sm{fill:var(--muted);font-size:8px;font-family:var(--mono);}
+
+/* notification overlay (SIGNATURE) */
+.sysoverlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(5,12,24,.5), rgba(2,4,8,.86));backdrop-filter:blur(2px);padding:24px;}
+.sysoverlay.show{display:flex;}
+.syswin{
+  width:100%;max-width:380px;background:linear-gradient(180deg, rgba(10,22,42,.96), rgba(6,12,24,.96));
+  border:1px solid var(--accent);box-shadow:0 0 30px var(--accent), inset 0 0 30px rgba(82,216,255,.08);
+  padding:22px 20px;text-align:center;position:relative;
+  clip-path:polygon(0 16px,16px 0,calc(100% - 16px) 0,100% 16px,100% calc(100% - 16px),calc(100% - 16px) 100%,16px 100%,0 calc(100% - 16px));
+  animation:sysin .4s cubic-bezier(.2,.9,.2,1);
+}
+.syswin .stamp{font-family:var(--mono);font-size:11px;letter-spacing:.4em;color:var(--accent);text-shadow:0 0 12px var(--accent);}
+.syswin .line{height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);margin:14px 0;}
+.syswin .big{font-family:var(--mono);font-size:22px;color:#fff;text-shadow:0 0 16px var(--accent);letter-spacing:.04em;line-height:1.3;}
+.syswin .msg{color:var(--text);font-size:14px;line-height:1.6;margin-top:8px;}
+.syswin .msg b{color:var(--accent);}
+@keyframes sysin{from{opacity:0;transform:translateY(14px) scale(.96);}to{opacity:1;transform:none;}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(82,216,255,.5);}50%{box-shadow:0 0 8px 2px rgba(82,216,255,.2);}}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:120;
+  font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--accent);
+  border:1px solid var(--accent);background:rgba(6,12,24,.95);padding:11px 16px;box-shadow:0 0 18px rgba(82,216,255,.3);
+  opacity:0;pointer-events:none;transition:.3s;max-width:90%;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+.banner{font-family:var(--mono);font-size:11px;color:var(--amber);border:1px dashed rgba(255,210,122,.5);
+  background:rgba(255,210,122,.06);padding:9px 12px;margin:10px 0;line-height:1.5;}
+
+.screen{display:none;}
+.screen.active{display:block;}
+.screen.entering{animation:screenIn .34s cubic-bezier(.2,.85,.2,1);}
+@keyframes screenIn{from{opacity:0;transform:translateY(12px) scale(.992);}to{opacity:1;transform:none;}}
+/* staggered panel reveal — only when a screen is first entered */
+.screen.entering .panel{animation:rise .4s cubic-bezier(.2,.85,.2,1) both;}
+.screen.entering .panel:nth-child(1){animation-delay:.02s;}
+.screen.entering .panel:nth-child(2){animation-delay:.07s;}
+.screen.entering .panel:nth-child(3){animation-delay:.12s;}
+.screen.entering .panel:nth-child(4){animation-delay:.17s;}
+.screen.entering .panel:nth-child(5){animation-delay:.22s;}
+.screen.entering .grid2{animation:rise .4s cubic-bezier(.2,.85,.2,1) both;animation-delay:.16s;}
+@keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+/* exercise cards cascade in when the Train screen is entered */
+#s-train.entering .ex{animation:rise .38s cubic-bezier(.2,.85,.2,1) both;}
+#s-train.entering .ex:nth-child(2){animation-delay:.05s;}
+#s-train.entering .ex:nth-child(3){animation-delay:.09s;}
+#s-train.entering .ex:nth-child(4){animation-delay:.13s;}
+#s-train.entering .ex:nth-child(5){animation-delay:.17s;}
+#s-train.entering .ex:nth-child(6){animation-delay:.21s;}
+/* tab press feedback */
+.nav button:active{transform:scale(.92);}
+.nav button .ic{transition:filter .25s, transform .25s;}
+.nav button.active .ic{transform:translateY(-1px) scale(1.08);}
+
+/* weekly directive strip */
+.directive{font-family:var(--mono);font-size:11px;letter-spacing:.06em;border:1px solid var(--line-strong);
+  background:linear-gradient(90deg,var(--accent-soft),transparent);padding:9px 11px;margin-top:10px;color:var(--text);
+  display:flex;align-items:center;gap:9px;}
+.directive .pip{width:7px;height:7px;background:var(--accent);box-shadow:0 0 8px var(--accent);flex:0 0 auto;}
+.directive.deload{border-color:rgba(125,255,176,.45);background:linear-gradient(90deg,rgba(70,230,160,.12),transparent);}
+.directive.deload .pip{background:var(--green);box-shadow:0 0 8px var(--green);}
+
+/* ---------- SPLASH / BOOT (signature launch) ---------- */
+#boot{position:fixed;inset:0;z-index:500;background:
+    radial-gradient(900px 600px at 50% 38%, rgba(82,216,255,.12), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px), var(--void);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  transition:opacity .5s ease;}
+#boot.hide{opacity:0;pointer-events:none;}
+#boot .mk{position:relative;width:96px;height:96px;}
+#boot .mk svg{width:100%;height:100%;filter:drop-shadow(0 0 14px var(--accent));animation:pulseGlow 2.4s ease-in-out infinite;}
+#boot .word{font-family:var(--mono);font-size:24px;letter-spacing:.5em;color:#eaf6ff;text-shadow:0 0 18px var(--accent);
+  padding-left:.5em;opacity:0;animation:bootword .7s ease .15s forwards;}
+#boot .term{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);min-height:64px;width:min(86vw,320px);text-align:left;}
+#boot .term .ln{opacity:0;transform:translateY(4px);}
+#boot .term .ln.in{opacity:1;transform:none;transition:.25s;}
+#boot .term .ln b{color:var(--accent);}
+#boot .term .ln .ok{color:var(--green);float:right;}
+#boot .loadbar{width:min(86vw,320px);height:4px;background:#0b1322;border:1px solid var(--line);overflow:hidden;}
+#boot .loadbar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#bff3ff);box-shadow:0 0 12px var(--accent);
+  animation:bootload 1.5s cubic-bezier(.4,.1,.2,1) .1s forwards;}
+@keyframes bootword{to{opacity:1;}}
+@keyframes bootload{to{width:100%;}}
+.bootdraw{stroke-dasharray:340;stroke-dashoffset:340;animation:bootdraw 1.1s ease forwards;}
+@keyframes bootdraw{to{stroke-dashoffset:0;}}
+@keyframes pulseGlow{0%,100%{filter:drop-shadow(0 0 10px var(--accent));}50%{filter:drop-shadow(0 0 22px var(--accent));}}
+
+.kv{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;padding:7px 0;border-bottom:1px solid var(--line);}
+.kv:last-child{border-bottom:none;}
+.kv .k{color:var(--muted);} .kv .v{color:#eaf6ff;}
+
+.macro{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
+.macro .m{border:1px solid var(--line);padding:10px;text-align:center;}
+.macro .m .v{font-family:var(--mono);font-size:18px;color:#fff;text-shadow:0 0 8px var(--accent);}
+.macro .m .k{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.14em;margin-top:3px;text-transform:uppercase;}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<!-- SPLASH / BOOT -->
+<div id="boot">
+  <div class="mk">
+    <svg viewBox="0 0 100 100" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+      <path class="bootdraw" d="M22 78 L50 24 L78 78" stroke="#52d8ff"/>
+      <path class="bootdraw" d="M32 78 L50 44 L68 78" stroke="#52d8ff" stroke-opacity=".55" stroke-width="4" style="animation-delay:.15s"/>
+      <path class="bootdraw" d="M37 64 L63 64" stroke="#52d8ff" stroke-width="4" style="animation-delay:.3s"/>
+    </svg>
+  </div>
+  <div class="word">ASCENSION</div>
+  <div class="term" id="bootterm"></div>
+  <div class="loadbar"><i></i></div>
+</div>
+
+
+<!-- ONBOARDING -->
+<div id="onboard" class="app" style="display:none;">
+  <div class="topbar"><div class="brand">ASCENSION<small>PLAYER REGISTRATION</small></div></div>
+  <div class="panel">
+    <div class="panel-title">System // Awakening<span class="sub">REQUIRED</span></div>
+    <p class="lead">You have been selected as a <span class="hi">Player</span>. Register your vessel to begin the climb from <b class="hi">E-Rank</b>. All data stays on this device.</p>
+
+    <label class="fld"><span>Hunter name</span><input id="ob_name" placeholder="e.g. Kurisu" autocomplete="off"></label>
+    <div class="grid2">
+      <label class="fld"><span>Biological sex (for BMR)</span>
+        <select id="ob_sex"><option value="male">Male</option><option value="female">Female</option></select></label>
+      <label class="fld"><span>Age</span><input id="ob_age" type="number" inputmode="numeric" placeholder="24"></label>
+    </div>
+    <div class="grid2">
+      <label class="fld"><span>Height (cm)</span><input id="ob_h" type="number" inputmode="decimal" placeholder="178"></label>
+      <label class="fld"><span>Weight (kg)</span><input id="ob_w" type="number" inputmode="decimal" placeholder="62"></label>
+    </div>
+
+    <label class="fld"><span>Daily activity (outside training)</span>
+      <select id="ob_act">
+        <option value="1.2">Sedentary — desk / mostly sitting</option>
+        <option value="1.375" selected>Light — on feet sometimes</option>
+        <option value="1.55">Moderate — active job / lots of walking</option>
+        <option value="1.725">Very active — physical job</option>
+      </select></label>
+
+    <h2 class="section">Equipment access</h2>
+    <div class="chips" id="ob_equip">
+      <div class="chip" data-v="gym" aria-pressed="true">Full gym (machines + bar)</div>
+      <div class="chip" data-v="home" aria-pressed="false">Dumbbells + pull-up bar</div>
+      <div class="chip" data-v="minimal" aria-pressed="false">Dumbbells only</div>
+      <div class="chip" data-v="calisthenics" aria-pressed="false">Bodyweight only</div>
+    </div>
+
+    <h2 class="section">Training days available</h2>
+    <p class="lead tiny">Tap the days you can train. The System builds your split around this and inserts recovery automatically.</p>
+    <div class="chips" id="ob_days">
+      <div class="chip" data-v="0" aria-pressed="false">Sun</div>
+      <div class="chip" data-v="1" aria-pressed="true">Mon</div>
+      <div class="chip" data-v="2" aria-pressed="false">Tue</div>
+      <div class="chip" data-v="3" aria-pressed="true">Wed</div>
+      <div class="chip" data-v="4" aria-pressed="false">Thu</div>
+      <div class="chip" data-v="5" aria-pressed="true">Fri</div>
+      <div class="chip" data-v="6" aria-pressed="false">Sat</div>
+    </div>
+
+    <h2 class="section">Objective</h2>
+    <p class="lead tiny">Your build target. The System steers nutrition + volume accordingly. A skinny beginner gets best results on <b class="hi">Lean Build</b> — newbie gains let you add muscle while staying lean en route to shredded.</p>
+    <div class="chips" id="ob_goal">
+      <div class="chip" data-v="leanbulk" aria-pressed="true">Lean Build (recommended)</div>
+      <div class="chip" data-v="recomp" aria-pressed="false">Recomposition</div>
+      <div class="chip" data-v="cut" aria-pressed="false">Cut / definition</div>
+    </div>
+
+    <div class="banner mt2">⚠ This System gives evidence-based training and nutrition guidance only — no supplements or "remedies" without research backing. It is not medical advice. Clear new exercise with a doctor if you have any condition.</div>
+    <button class="btn full mt2" id="ob_start">▣ Awaken — Begin Ascension</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main" class="app" style="display:none;">
+  <div class="topbar">
+    <div class="brand">ASCENSION<small id="tb_name">PLAYER</small></div>
+    <div class="rankpill"><span id="tb_rank">E</span>·RANK <span class="muted" style="letter-spacing:0">|</span> Lv <b id="tb_lv">1</b></div>
+  </div>
+
+  <!-- STATUS -->
+  <section class="screen active" id="s-status"></section>
+  <!-- QUESTS -->
+  <section class="screen" id="s-quests"></section>
+  <!-- TRAIN -->
+  <section class="screen" id="s-train"></section>
+  <!-- STATS -->
+  <section class="screen" id="s-stats"></section>
+  <!-- SYSTEM -->
+  <section class="screen" id="s-system"></section>
+</div>
+
+<!-- nav -->
+<nav class="nav" id="nav" style="display:none;">
+  <div class="marker" id="navmark"></div>
+  <button data-t="status" class="active"><span class="ic">◈</span>Status</button>
+  <button data-t="quests"><span class="ic">❖</span>Quests</button>
+  <button data-t="train"><span class="ic">⚔</span>Train</button>
+  <button data-t="stats"><span class="ic">▤</span>Stats</button>
+  <button data-t="system"><span class="ic">⚙</span>System</button>
+</nav>
+
+<!-- notification overlay -->
+<div class="sysoverlay" id="sysoverlay" onclick="closeSys(event)">
+  <div class="syswin" id="syswin" onclick="event.stopPropagation()">
+    <div class="stamp">[ SYSTEM ]</div>
+    <div class="line"></div>
+    <div class="big" id="sys_big">NOTIFICATION</div>
+    <div class="msg" id="sys_msg"></div>
+    <div class="line"></div>
+    <button class="btn full" id="sys_ok" onclick="closeSys()">Confirm</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="importfile" accept="application/json,.json" style="display:none;">
+
+<script>
+/* ============================================================ DATA ========================================================== */
+
+const DAYNAMES=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+/* Exercise database — every entry is a real, evidence-based movement.
+   stat: which attribute it trains. eq: which equipment tiers it's valid for.
+   yt: search query (always-current YouTube link). embed: optional video id for inline player. */
+const EX = {
+  // ---- compound strength ----
+  squat:{n:"Back Squat",cat:"Legs",stat:"STR",eq:["gym"],yt:"barbell back squat proper form beginner",cues:"Brace core, sit between hips, knees track toes, drive through midfoot. Depth = hip crease below knee."},
+  goblet:{n:"Goblet Squat",cat:"Legs",stat:"STR",eq:["gym","home","minimal"],yt:"goblet squat form",cues:"Hold dumbbell at chest, elbows inside knees at bottom, tall chest."},
+  splitsquat:{n:"Bulgarian Split Squat",cat:"Legs",stat:"STR",eq:["gym","home","minimal","calisthenics"],yt:"bulgarian split squat form",cues:"Rear foot elevated, front shin near vertical, control the descent."},
+  pistolprog:{n:"Pistol Squat Progression",cat:"Legs",stat:"AGI",eq:["calisthenics","home","minimal","gym"],yt:"pistol squat progression beginner",cues:"Start to a box/bench, one leg, control down + up. Builds single-leg strength + balance."},
+  deadlift:{n:"Conventional Deadlift",cat:"Pull",stat:"STR",eq:["gym"],yt:"deadlift proper form beginner",cues:"Bar over midfoot, neutral spine, push floor away, lock hips + knees together."},
+  rdl:{n:"Romanian Deadlift",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"romanian deadlift form dumbbell",cues:"Soft knees, hinge at hips, bar/db close, feel hamstrings, flat back."},
+  hipthrust:{n:"Hip Thrust",cat:"Legs",stat:"STR",eq:["gym","home","minimal"],yt:"hip thrust form glute",cues:"Upper back on bench, chin tucked, drive hips to full lockout, squeeze glutes."},
+  bench:{n:"Barbell Bench Press",cat:"Push",stat:"STR",eq:["gym"],yt:"bench press proper form beginner",cues:"Retract scapula, slight arch, bar to lower chest, elbows ~45°, drive up."},
+  dbpress:{n:"Dumbbell Bench Press",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"dumbbell bench press form",cues:"Wrists stacked, lower with control to chest level, press up + slightly in."},
+  ohp:{n:"Overhead Press",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"overhead press barbell form",cues:"Brace glutes + core, bar/db from shoulders to overhead, head 'through' at top."},
+  pullup:{n:"Pull-up",cat:"Pull",stat:"AGI",eq:["gym","home","calisthenics"],yt:"pull up proper form beginner",cues:"Dead hang, pull elbows to ribs, chest to bar, control the negative. Use band if needed."},
+  pulldown:{n:"Lat Pulldown",cat:"Pull",stat:"STR",eq:["gym"],yt:"lat pulldown proper form",cues:"Slight lean back, pull bar to upper chest, drive elbows down, squeeze lats."},
+  row:{n:"Barbell Row",cat:"Pull",stat:"STR",eq:["gym"],yt:"barbell row proper form",cues:"Hinge ~45°, flat back, pull to lower ribs, elbows tight, control down."},
+  dbrow:{n:"Dumbbell Row",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"single arm dumbbell row form",cues:"Brace on bench, flat back, row to hip, no torso twisting."},
+  invrow:{n:"Inverted Row",cat:"Pull",stat:"AGI",eq:["gym","home","calisthenics"],yt:"inverted row bodyweight form",cues:"Body straight, pull chest to bar, squeeze shoulder blades. Lower bar = harder."},
+  dip:{n:"Dips",cat:"Push",stat:"AGI",eq:["gym","home","calisthenics"],yt:"parallel bar dips form chest triceps",cues:"Lean slightly forward for chest, lower until shoulders ~elbow height, press up."},
+  pushup:{n:"Push-up",cat:"Push",stat:"AGI",eq:["calisthenics","home","minimal","gym"],yt:"perfect push up form",cues:"Body line straight, elbows ~45°, chest to floor, full lockout. Scale on knees if needed."},
+  pseudoplanche:{n:"Pseudo-Planche Push-up",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"pseudo planche push up tutorial",cues:"Hands by waist, lean forward over hands, protract shoulders. Builds straight-arm strength."},
+  // ---- isolation ----
+  curl:{n:"Biceps Curl",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"dumbbell biceps curl form",cues:"Elbows pinned, no swing, full range, squeeze at top."},
+  pushdown:{n:"Triceps Pushdown",cat:"Push",stat:"STR",eq:["gym"],yt:"triceps pushdown form",cues:"Elbows tucked, extend fully, control return."},
+  latraise:{n:"Lateral Raise",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"lateral raise form shoulders",cues:"Lead with elbows, slight forward lean, raise to shoulder height, no shrugging."},
+  facepull:{n:"Face Pull",cat:"Pull",stat:"SEN",eq:["gym","home"],yt:"face pull form rear delt",cues:"Pull rope/band to face, externally rotate, great for shoulder health + posture."},
+  calf:{n:"Calf Raise",cat:"Legs",stat:"STR",eq:["gym","home","minimal","calisthenics"],yt:"standing calf raise form",cues:"Full stretch at bottom, pause + squeeze at top, controlled tempo."},
+  legcurl:{n:"Leg Curl (machine)",cat:"Legs",stat:"STR",eq:["gym"],yt:"seated leg curl form hamstring",cues:"Controlled, full range, squeeze hamstrings, no hip lifting."},
+  // ---- core / calisthenic skill (climber + Bruce Lee) ----
+  hollow:{n:"Hollow Body Hold",cat:"Core",stat:"AGI",eq:["calisthenics","home","minimal","gym"],yt:"hollow body hold tutorial",cues:"Lower back pressed to floor, arms + legs extended, ribs down. Foundation for all skills."},
+  legraise:{n:"Hanging Leg Raise",cat:"Core",stat:"AGI",eq:["gym","home","calisthenics"],yt:"hanging leg raise form",cues:"No swing, posterior pelvic tilt, raise legs with control. Knee-raise to scale."},
+  lsit:{n:"L-Sit Progression",cat:"Core",stat:"AGI",eq:["gym","home","calisthenics"],yt:"L sit progression tutorial",cues:"Depress shoulders, tuck knees then extend over time. Parallettes or floor."},
+  dragonflag:{n:"Dragon Flag Progression",cat:"Core",stat:"AGI",eq:["calisthenics","home","gym"],yt:"dragon flag progression bruce lee",cues:"Bruce Lee's signature. Grip behind head, keep body rigid, lower slowly. Bend knees to scale."},
+  plank:{n:"Plank",cat:"Core",stat:"VIT",eq:["calisthenics","home","minimal","gym"],yt:"forearm plank proper form",cues:"Straight line, squeeze glutes + abs, don't sag hips. Quality > duration."},
+  frontleverprog:{n:"Front Lever Progression",cat:"Pull",stat:"AGI",eq:["calisthenics","home","gym"],yt:"front lever progression tuck",cues:"Climber strength. Straight arms, pull bar to hips, tuck → advanced tuck → straddle over months."},
+  deadhang:{n:"Dead Hang",cat:"Pull",stat:"VIT",eq:["gym","home","calisthenics"],yt:"dead hang grip strength benefits",cues:"Climber grip + shoulder health. Hang from bar, active shoulders, build time gradually."},
+  // ---- mobility ----
+  cossack:{n:"Cossack Squat",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","minimal","gym"],yt:"cossack squat mobility tutorial",cues:"Wide stance, shift side to side deep, keep heel down. Hip + groin mobility."},
+  deepsquathold:{n:"Deep Squat Hold",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","minimal","gym"],yt:"deep squat hold mobility",cues:"Sink to full depth, elbows push knees out, tall spine. Hold + breathe."},
+  thoracic:{n:"Thoracic Rotations",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","minimal","gym"],yt:"thoracic spine rotation mobility",cues:"Quadruped, hand behind head, rotate open + reach under. Spinal rotation."},
+  shoulderdis:{n:"Band Shoulder Dislocates",cat:"Mobility",stat:"SEN",eq:["gym","home","minimal","calisthenics"],yt:"band shoulder dislocates mobility",cues:"Wide grip on band/towel, pass overhead front to back, keep arms straight."},
+  wristprep:{n:"Wrist Prep Routine",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","minimal","gym"],yt:"wrist prep routine calisthenics",cues:"Essential for push skills + climbing. Flexion/extension on floor, circles, stretches."},
+  ankle:{n:"Ankle Mobility (knee-to-wall)",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","minimal","gym"],yt:"ankle mobility knee to wall",cues:"Drive knee over toes to wall, heel down, builds squat depth."},
+  // ---- conditioning ----
+  jumprope:{n:"Jump Rope Intervals",cat:"Conditioning",stat:"VIT",eq:["calisthenics","home","minimal","gym"],yt:"jump rope beginner workout",cues:"30s on / 30s off. Light on feet, wrists turn the rope. Bruce-Lee staple for footwork."},
+  incline:{n:"Incline Walk",cat:"Conditioning",stat:"VIT",eq:["gym","home","calisthenics","minimal"],yt:"incline treadmill walk fat loss",cues:"Brisk uphill walk, low-impact conditioning, keeps muscle while leaning out."},
+  intervals:{n:"Sprint Intervals",cat:"Conditioning",stat:"VIT",eq:["calisthenics","home","gym","minimal"],yt:"running sprint intervals beginner",cues:"Hard effort + full recovery. Builds engine without burning muscle."},
+  burpee:{n:"Burpees",cat:"Conditioning",stat:"VIT",eq:["calisthenics","home","minimal","gym"],yt:"burpee proper form",cues:"Full-body conditioning. Chest to floor, explode up, soft landing."},
+};
+
+/* embed map: a handful of inline video ids for headline lifts.
+   If any is dead, the always-current "search YouTube" button beside it still works. */
+const EMBED = {
+  squat:"ultWZbUMPL8", deadlift:"op9kVnSso6Q", bench:"rT7DgCr-3pg", ohp:"2yjwXTZQDDI",
+  pullup:"eGo4IYlbE5g", row:"9efgcAjQe7E", dbrow:"pYcpY20QaE8", pushup:"IODxDxX7oi4",
+  dip:"2z8JmcrW-As", hollow:"LlDNef_Ztsc", dragonflag:"pvz7k5gO99w", frontleverprog:"jSEYWdNRBg4",
+  goblet:"MeIiIdhvXT4", rdl:"FQKfr1YDhEk", hipthrust:"SEdqd1n0cvg", pistolprog:"vq5-vdgJc0I",
+};
+
+/* Program blueprint. Each split = ordered day list. Each slot lists candidate exercise ids
+   in priority order; the generator picks the first valid for the user's equipment.
+   Phases (Arcs) tweave in skill/conditioning emphasis over the 24-week climb. */
+const SPLITS = {
+  3:[ // full body A/B/C
+    {key:"FB-A",name:"Full Body — Drive",slots:[
+      {ids:["squat","goblet","splitsquat"],s:3,r:"5–8"},
+      {ids:["bench","dbpress","pushup"],s:3,r:"6–10"},
+      {ids:["row","dbrow","invrow"],s:3,r:"8–12"},
+      {ids:["hollow"],s:3,r:"20–40s"},
+      {ids:["deepsquathold","cossack"],s:2,r:"30s"} ]},
+    {key:"FB-B",name:"Full Body — Pull",slots:[
+      {ids:["deadlift","rdl"],s:3,r:"5–8"},
+      {ids:["ohp","dbpress"],s:3,r:"6–10"},
+      {ids:["pullup","pulldown","invrow"],s:3,r:"5–10"},
+      {ids:["legraise"],s:3,r:"8–12"},
+      {ids:["shoulderdis","thoracic"],s:2,r:"10 reps"} ]},
+    {key:"FB-C",name:"Full Body — Skill",slots:[
+      {ids:["hipthrust","splitsquat"],s:3,r:"8–12"},
+      {ids:["dip","pushup"],s:3,r:"6–12"},
+      {ids:["dbrow","invrow","pullup"],s:3,r:"8–12"},
+      {ids:["frontleverprog","lsit"],s:3,r:"10–20s"},
+      {ids:["wristprep","ankle"],s:1,r:"routine"} ]},
+  ],
+  4:[ // upper / lower x2
+    {key:"UP-1",name:"Upper — Strength",slots:[
+      {ids:["bench","dbpress"],s:4,r:"5–8"},
+      {ids:["row","dbrow"],s:4,r:"6–10"},
+      {ids:["ohp","dbpress"],s:3,r:"6–10"},
+      {ids:["pullup","pulldown"],s:3,r:"5–10"},
+      {ids:["curl"],s:2,r:"10–12"},{ids:["pushdown","dip"],s:2,r:"10–12"} ]},
+    {key:"LO-1",name:"Lower — Strength",slots:[
+      {ids:["squat","goblet"],s:4,r:"5–8"},
+      {ids:["rdl","deadlift"],s:3,r:"6–10"},
+      {ids:["splitsquat"],s:3,r:"8–12"},
+      {ids:["legraise","hollow"],s:3,r:"12–20"},
+      {ids:["calf"],s:3,r:"12–20"} ]},
+    {key:"UP-2",name:"Upper — Hypertrophy",slots:[
+      {ids:["dbpress","dip"],s:3,r:"8–12"},
+      {ids:["pulldown","pullup","invrow"],s:3,r:"8–12"},
+      {ids:["latraise"],s:3,r:"12–15"},
+      {ids:["facepull"],s:3,r:"12–15"},
+      {ids:["frontleverprog","lsit"],s:3,r:"10–20s"} ]},
+    {key:"LO-2",name:"Lower — Skill + Mobility",slots:[
+      {ids:["hipthrust"],s:3,r:"8–12"},
+      {ids:["pistolprog","splitsquat"],s:3,r:"5–8"},
+      {ids:["legcurl","rdl"],s:3,r:"10–12"},
+      {ids:["cossack","deepsquathold"],s:2,r:"30s"},
+      {ids:["ankle","wristprep"],s:1,r:"routine"} ]},
+  ],
+  5:[ // PPL + UL
+    {key:"PUSH",name:"Push",slots:[
+      {ids:["bench","dbpress"],s:4,r:"5–8"},{ids:["ohp","dbpress"],s:3,r:"6–10"},
+      {ids:["dip","pushup"],s:3,r:"8–12"},{ids:["latraise"],s:3,r:"12–15"},{ids:["pushdown"],s:3,r:"10–12"} ]},
+    {key:"PULL",name:"Pull",slots:[
+      {ids:["deadlift","rdl"],s:3,r:"5–6"},{ids:["pullup","pulldown"],s:4,r:"5–10"},
+      {ids:["row","dbrow"],s:3,r:"8–12"},{ids:["facepull"],s:3,r:"12–15"},{ids:["curl"],s:3,r:"10–12"} ]},
+    {key:"LEGS",name:"Legs",slots:[
+      {ids:["squat","goblet"],s:4,r:"5–8"},{ids:["rdl"],s:3,r:"8–12"},
+      {ids:["splitsquat","pistolprog"],s:3,r:"8–12"},{ids:["legraise"],s:3,r:"12–20"},{ids:["calf"],s:4,r:"12–20"} ]},
+    {key:"UPPER",name:"Upper — Skill",slots:[
+      {ids:["frontleverprog"],s:4,r:"10–20s"},{ids:["dip","pushup"],s:3,r:"8–12"},
+      {ids:["invrow","dbrow"],s:3,r:"8–12"},{ids:["pseudoplanche","pushup"],s:3,r:"6–10"},{ids:["lsit"],s:3,r:"10–20s"} ]},
+    {key:"COND",name:"Conditioning + Mobility",slots:[
+      {ids:["jumprope","intervals","burpee"],s:6,r:"30s"},{ids:["incline"],s:1,r:"15–20m"},
+      {ids:["cossack"],s:2,r:"30s"},{ids:["thoracic"],s:2,r:"10 reps"},{ids:["deadhang"],s:3,r:"max"} ]},
+  ],
+  6:[ // PPL x2
+    {key:"PUSH-H",name:"Push — Heavy",slots:[
+      {ids:["bench","dbpress"],s:5,r:"4–6"},{ids:["ohp"],s:3,r:"6–8"},
+      {ids:["dip","pushup"],s:3,r:"8–12"},{ids:["latraise"],s:4,r:"12–15"},{ids:["pushdown"],s:3,r:"10–12"} ]},
+    {key:"PULL-H",name:"Pull — Heavy",slots:[
+      {ids:["deadlift","rdl"],s:4,r:"4–6"},{ids:["pullup","pulldown"],s:4,r:"5–10"},
+      {ids:["row","dbrow"],s:3,r:"8–12"},{ids:["facepull"],s:3,r:"15"},{ids:["curl"],s:3,r:"10–12"} ]},
+    {key:"LEGS-H",name:"Legs — Heavy",slots:[
+      {ids:["squat","goblet"],s:5,r:"4–6"},{ids:["rdl"],s:3,r:"8–10"},
+      {ids:["splitsquat"],s:3,r:"8–12"},{ids:["legcurl","legraise"],s:3,r:"12"},{ids:["calf"],s:4,r:"15–20"} ]},
+    {key:"PUSH-V",name:"Push — Volume + Skill",slots:[
+      {ids:["dbpress","pushup"],s:4,r:"8–12"},{ids:["pseudoplanche","pushup"],s:3,r:"6–10"},
+      {ids:["dip"],s:3,r:"8–12"},{ids:["latraise"],s:3,r:"15"},{ids:["lsit"],s:3,r:"10–20s"} ]},
+    {key:"PULL-V",name:"Pull — Volume + Skill",slots:[
+      {ids:["pullup","invrow"],s:4,r:"6–10"},{ids:["frontleverprog"],s:4,r:"10–20s"},
+      {ids:["dbrow"],s:3,r:"10–12"},{ids:["facepull"],s:3,r:"15"},{ids:["deadhang"],s:3,r:"max"} ]},
+    {key:"LEGS-V",name:"Legs — Skill + Mobility",slots:[
+      {ids:["hipthrust"],s:4,r:"8–12"},{ids:["pistolprog"],s:3,r:"5–8"},
+      {ids:["rdl"],s:3,r:"10–12"},{ids:["cossack","deepsquathold"],s:2,r:"30s"},{ids:["ankle"],s:1,r:"routine"} ]},
+  ],
+};
+
+const ARCS=[
+  {n:"I — Awakening",wk:[1,8],desc:"Foundation. Drill movement patterns, build a base, daily mobility. Add a little weight every week."},
+  {n:"II — Ascendant",wk:[9,16],desc:"Hypertrophy + strength. More volume, harder calisthenic progressions, intent on every rep."},
+  {n:"III — Monarch",wk:[17,24],desc:"Definition + skill. Lever/planche work, grip, conditioning dialed up, nutrition tightened toward shredded."},
+];
+
+const RANKS=[["E",1],["D",10],["C",20],["B",35],["A",50],["S",70],["MONARCH",90]];
+const CLASS_BY_RANK={E:"Awakened Novice",D:"Iron Aspirant",C:"Tempered Fighter",B:"Shadow Athlete",A:"Apex Hunter",S:"Sovereign",MONARCH:"Shadow Monarch"};
+
+const SKILLTREE=[
+  {br:"Iron Body", desc:"Raw strength + structural integrity.", nodes:[
+    {id:"ib1",n:"Tempered Frame",lv:3,cost:1,d:"+5% EXP from STR exercises. Your tendons learn to hold load."},
+    {id:"ib2",n:"Brace Protocol",lv:8,cost:1,d:"Unlocks heavy 4–6 rep schemes guidance. +5% strength EXP."},
+    {id:"ib3",n:"Unbreakable",lv:20,cost:2,d:"+10% EXP on all lifts. VIT contributes to recovery rating."},
+  ]},
+  {br:"Shadow Step", desc:"Agility, calisthenic mastery, climber strength.", nodes:[
+    {id:"ss1",n:"Hollow Mastery",lv:4,cost:1,d:"Unlocks L-sit + leg-raise focus. +5% AGI EXP."},
+    {id:"ss2",n:"Straight-Arm Strength",lv:12,cost:1,d:"Unlocks front-lever + planche guidance. +8% AGI EXP."},
+    {id:"ss3",n:"Monarch's Form",lv:30,cost:2,d:"Dragon flag + advanced levers. +12% AGI EXP, daily quest grants bonus."},
+  ]},
+  {br:"Beast Lungs", desc:"Conditioning, work capacity, leanness.", nodes:[
+    {id:"bl1",n:"Engine I",lv:6,cost:1,d:"Conditioning sessions grant +20% EXP."},
+    {id:"bl2",n:"Fat Adapted",lv:14,cost:1,d:"Sharper definition phase. Nutrition tracker flags surplus drift."},
+    {id:"bl3",n:"Endless Stamina",lv:28,cost:2,d:"+10% EXP everywhere; longer holds count for more."},
+  ]},
+  {br:"Discipline", desc:"Consistency, nutrition, the System's favor.", nodes:[
+    {id:"dp1",n:"Daily Devotion",lv:5,cost:1,d:"Streak milestones grant 2× bonus EXP."},
+    {id:"dp2",n:"Macro Sense",lv:10,cost:1,d:"Protein + calorie targets auto-recalc as weight changes."},
+    {id:"dp3",n:"System's Chosen",lv:25,cost:2,d:"+10% EXP from all sources. The System favors the relentless."},
+  ]},
+];
+
+/* evidence-based supplements only */
+const SUPPS=[
+  {id:"creatine",n:"Creatine Monohydrate",dose:"3–5 g/day, any time",why:"Most-studied legal performance supplement. More strength + lean mass over time."},
+  {id:"protein",n:"Whey / Protein Powder",dose:"as needed to hit target",why:"Convenient protein to reach your daily goal. A tool, not magic."},
+  {id:"vitd",n:"Vitamin D3",dose:"1000–2000 IU (if deficient)",why:"Common deficiency; supports bone + muscle. Test levels ideally."},
+  {id:"omega3",n:"Omega-3 (fish oil)",dose:"1–2 g EPA+DHA",why:"Recovery + general health if fish intake is low."},
+  {id:"caffeine",n:"Caffeine (pre-train)",dose:"100–200 mg, ~45 min prior",why:"Reliable acute performance + focus boost. Skip late in day."},
+  {id:"electro",n:"Electrolytes",dose:"around hard/long sessions",why:"Sodium/potassium for hydration during heavy sweat sessions."},
+];
+
+/* ============================================================ STATE ========================================================= */
+
+const KEY="ascension_save_v1";
+let storageOK=true;
+let S=null;
+
+function defaultState(){
+  return {
+    version:1,
+    profile:null,
+    rpg:{level:1,exp:0,stats:{STR:10,AGI:10,VIT:10,SEN:10,INT:10},statPoints:0,skillPoints:0},
+    skills:{owned:[]},
+    program:{startDate:todayStr(),seq:0},
+    sessions:[],
+    quests:{date:null,items:[],penaltyDone:true},
+    streak:{current:0,longest:0,last:null},
+    metrics:{weight:[]},
+    nutrition:{log:[],targetsLocked:false,goalOverride:null},
+    supps:{checks:{}},
+    settings:{accent:"cyan"}
+  };
+}
+
+function todayStr(d){ d=d||new Date(); return d.toISOString().slice(0,10); }
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw){ S=JSON.parse(raw); }
+    else { S=defaultState(); }
+    // quick write test
+    localStorage.setItem(KEY+"_t","1"); localStorage.removeItem(KEY+"_t");
+  }catch(e){ storageOK=false; if(!S) S=defaultState(); }
+  // migrate / fill gaps
+  S=Object.assign(defaultState(),S);
+}
+function save(){
+  if(!storageOK){ return; }
+  try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ storageOK=false; }
+}
+
+/* ============================================================ RPG MATH ====================================================== */
+
+function expToNext(lv){ return Math.floor(60 + 45*Math.pow(lv,1.45)); }
+function rankFor(lv){ let r=RANKS[0][0]; for(const[name,min] of RANKS){ if(lv>=min) r=name; } return r; }
+function expMult(){ // skill-tree EXP bonuses, simplified flat sum
+  let m=1; const o=S.skills.owned;
+  if(o.includes("ib1"))m+=.05; if(o.includes("ib2"))m+=.05; if(o.includes("ib3"))m+=.10;
+  if(o.includes("ss1"))m+=.05; if(o.includes("ss2"))m+=.08; if(o.includes("ss3"))m+=.12;
+  if(o.includes("bl3"))m+=.10; if(o.includes("dp3"))m+=.10;
+  return m;
+}
+function addExp(amount,reason){
+  amount=Math.round(amount*expMult());
+  S.rpg.exp+=amount;
+  let leveled=[];
+  while(S.rpg.exp>=expToNext(S.rpg.level)){
+    S.rpg.exp-=expToNext(S.rpg.level);
+    S.rpg.level++;
+    S.rpg.statPoints+=3;
+    S.rpg.skillPoints+=1;
+    leveled.push(S.rpg.level);
+  }
+  save();
+  return {gained:amount,leveled};
+}
+
+/* ============================================================ PROGRAM GEN =================================================== */
+
+function pickEx(slot,equip){
+  for(const id of slot.ids){ if(EX[id] && EX[id].eq.includes(equip)) return id; }
+  return slot.ids[slot.ids.length-1];
+}
+function currentWeek(){
+  const start=new Date(S.program.startDate+"T00:00:00");
+  const diff=Math.floor((Date.now()-start.getTime())/(1000*60*60*24));
+  return Math.max(1, Math.min(24, Math.floor(diff/7)+1));
+}
+function currentArc(){ const w=currentWeek(); return ARCS.find(a=>w>=a.wk[0]&&w<=a.wk[1])||ARCS[0]; }
+
+/* Week-by-week periodization. Each 8-week arc runs a wave that ends in a deload,
+   so the same training days progress in a structured way across all 24 weeks. */
+function weekDirective(week){
+  const pos=((week-1)%8)+1; // 1..8 within the current arc
+  if(pos===8) return {phase:"Deload",deload:true,setDelta:-1,rir:"3–4 RIR",
+    note:"Recovery week. Cut a set, drop load ~20–30%, keep 3–4 reps in reserve. Prioritise sleep + mobility — this is where adaptation locks in."};
+  if(pos<=2) return {phase:"Accumulation",deload:false,setDelta:0,rir:"2–3 RIR",
+    note:"Groove the patterns. Stay at the lower end of each rep range with clean form; leave 2–3 reps in reserve."};
+  if(pos<=4) return {phase:"Build",deload:false,setDelta:1,rir:"2 RIR",
+    note:"Add one set or +1–2 reps vs last week. Two reps in reserve. Beat the logbook."};
+  if(pos<=6) return {phase:"Intensify",deload:false,setDelta:1,rir:"1–2 RIR",
+    note:"Reach the top of each rep range, then nudge the load up. One to two reps in reserve."};
+  return {phase:"Peak",deload:false,setDelta:0,rir:"1 RIR",
+    note:"Heaviest work of the block. Last set close to failure with solid form — deload follows next week."};
+}
+
+function splitForDays(n){
+  if(n<=3) return SPLITS[3];
+  if(n===4) return SPLITS[4];
+  if(n===5) return SPLITS[5];
+  return SPLITS[6];
+}
+function isTrainingDay(date){ return S.profile.days.includes(date.getDay()); }
+function adjSets(base,delta){ // clamp: never below 1 (or 2 for multi-set slots), never more than +1
+  let v=base+delta; if(base>=3) v=Math.max(2,v); else v=Math.max(1,v); return Math.min(base+1,v);
+}
+
+function todaysWorkout(){
+  const p=S.profile;
+  const split=splitForDays(p.days.length);
+  const today=new Date();
+  const wk=currentWeek(); const dir=weekDirective(wk);
+  if(!isTrainingDay(today)){
+    return {rest:true, arc:currentArc(), week:wk, dir};
+  }
+  const day=split[ S.program.seq % split.length ];
+  const exercises=day.slots.map(sl=>{
+    const id=pickEx(sl,p.equip);
+    return {id, ex:EX[id], sets:adjSets(sl.s,dir.setDelta), reps:sl.r};
+  });
+  return {rest:false, day, exercises, arc:currentArc(), week:wk, dir};
+}
+
+/* ============================================================ NUTRITION ===================================================== */
+
+function bmr(){
+  const p=S.profile; if(!p) return 0;
+  const w=p.weightKg, h=p.heightCm, a=p.age;
+  const base=10*w+6.25*h-5*a;
+  return Math.round(p.sex==="female"? base-161 : base+5);
+}
+function tdee(){ return Math.round(bmr()*S.profile.activity); }
+function goalMode(){ return S.nutrition.goalOverride || S.profile.goal; }
+function calorieTarget(){
+  const t=tdee(); const g=goalMode();
+  if(g==="leanbulk") return t+ (S.profile.bmrHigh? 400:300);
+  if(g==="recomp") return t;
+  if(g==="cut") return t-450;
+  return t;
+}
+function proteinTarget(){ // g/day ~2.0 g/kg, a touch higher on cut
+  const g=goalMode(); const perKg = g==="cut"?2.2:1.9;
+  return Math.round(S.profile.weightKg*perKg);
+}
+function fatTarget(){ return Math.round(S.profile.weightKg*0.9); }
+function carbTarget(){
+  const cals=calorieTarget(); const pcal=proteinTarget()*4; const fcal=fatTarget()*9;
+  return Math.max(0, Math.round((cals-pcal-fcal)/4));
+}
+
+/* ============================================================ QUESTS ======================================================== */
+
+function genDailyQuest(){
+  const lv=S.rpg.level;
+  const scale=(base,per)=> Math.round(base + per*Math.min(lv-1,40));
+  // Solo-Leveling homage, scaled to the player + always doable
+  const items=[
+    {id:"q_push",label:`${scale(20,1)} Push-ups`, exp:25, done:false},
+    {id:"q_squat",label:`${scale(25,1)} Bodyweight Squats`, exp:25, done:false},
+    {id:"q_core",label:`${scale(20,1)} Sit-ups / Leg raises`, exp:25, done:false},
+    {id:"q_hang",label:`Dead hang or plank — ${scale(20,1)}s`, exp:20, done:false},
+    {id:"q_mob",label:`5 min mobility (hips / shoulders / wrists)`, exp:20, done:false},
+  ];
+  S.quests={date:todayStr(), items, penaltyDone:false};
+  save();
+}
+function ensureDailyQuest(){
+  if(S.quests.date!==todayStr()){ genDailyQuest(); }
+}
+
+/* ============================================================ STREAK ======================================================== */
+
+function markActivityToday(){
+  const t=todayStr();
+  if(S.streak.last===t) return;
+  const yesterday=todayStr(new Date(Date.now()-864e5));
+  if(S.streak.last===yesterday){ S.streak.current++; }
+  else { S.streak.current=1; }
+  S.streak.last=t;
+  S.streak.longest=Math.max(S.streak.longest,S.streak.current);
+  // streak milestone bonus
+  if([3,7,14,30,60,100].includes(S.streak.current)){
+    const mult=S.skills.owned.includes("dp1")?2:1;
+    const r=addExp(50*S.streak.current*0.6*mult,"streak");
+    queueSys("STREAK MILESTONE", `Day <b>${S.streak.current}</b> streak. The System rewards consistency.<br>+${r.gained} EXP`);
+    handleLevels(r);
+  }
+  save();
+}
+
+/* ============================================================ NOTIFICATIONS ================================================= */
+
+let sysQueue=[];
+function queueSys(big,msg){ sysQueue.push({big,msg}); flushSys(); }
+function flushSys(){
+  const ov=document.getElementById("sysoverlay");
+  if(ov.classList.contains("show")) return;
+  const n=sysQueue.shift(); if(!n) return;
+  document.getElementById("sys_big").textContent=n.big;
+  document.getElementById("sys_msg").innerHTML=n.msg;
+  ov.classList.add("show");
+}
+function closeSys(e){
+  if(e && e.target.id!=="sysoverlay" && e.target.id!=="sys_ok") {} // allow backdrop too
+  document.getElementById("sysoverlay").classList.remove("show");
+  setTimeout(()=>{ render(); flushSys(); },120);
+}
+function handleLevels(res){
+  if(res.leveled && res.leveled.length){
+    const top=res.leveled[res.leveled.length-1];
+    const rank=rankFor(top);
+    const prevRank=rankFor(top-res.leveled.length);
+    let msg=`You reached <b>Level ${top}</b>.<br>+${res.leveled.length*3} stat points · +${res.leveled.length} skill point`;
+    if(rank!==prevRank) msg+=`<br><br><b>RANK UP → ${rank}</b><br><span class="vi">${CLASS_BY_RANK[rank]}</span>`;
+    queueSys("LEVEL UP", msg);
+  }
+}
+let toastTimer;
+function toast(t){
+  const el=document.getElementById("toast"); el.textContent=t; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("show"),1900);
+}
+
+/* ============================================================ RENDER ======================================================== */
+
+let activeTab="status";
+
+function render(){
+  if(!S.profile){ return; }
+  ensureDailyQuest();
+  document.getElementById("tb_name").textContent=(S.profile.name||"PLAYER").toUpperCase();
+  document.getElementById("tb_rank").textContent=rankFor(S.rpg.level);
+  document.getElementById("tb_lv").textContent=S.rpg.level;
+  document.documentElement.setAttribute("data-accent",S.settings.accent||"cyan");
+  renderStatus(); renderQuests(); renderTrain(); renderStats(); renderSystem();
+}
+
+/* ---- STATUS ---- */
+function renderStatus(){
+  const lv=S.rpg.level, need=expToNext(lv), have=S.rpg.exp;
+  const rank=rankFor(lv);
+  const st=S.rpg.stats;
+  const alloc=S.rpg.statPoints>0;
+  const hpMax=80+st.VIT*4, mpMax=60+st.SEN*3;
+  const arc=currentArc(), wk=currentWeek();
+  const el=document.getElementById("s-status");
+  el.innerHTML=`
+    <div class="panel status">
+      <div class="panel-title">Player Status<span class="sub">${rank}-RANK</span></div>
+      <div class="name">${esc(S.profile.name||"Player")}</div>
+      <div class="class">${CLASS_BY_RANK[rank]}</div>
+      <div class="lvrow"><span class="lv">LEVEL</span><span class="lvnum">${lv}</span>
+        <span class="muted mono tiny" style="margin-left:auto">Week ${wk}/24 · Arc ${arc.n.split(" ")[0]}</span></div>
+
+      <div class="bar-label"><span>EXP</span><b>${have} / ${need}</b></div>
+      <div class="bar"><i style="width:${Math.min(100,have/need*100)}%"></i></div>
+
+      <div class="bar-label"><span>HP — recovery</span><b>${hpMax}</b></div>
+      <div class="bar hp"><i style="width:${recoveryPct()}%"></i></div>
+      <div class="bar-label"><span>MP — readiness</span><b>${mpMax}</b></div>
+      <div class="bar mp"><i style="width:${readinessPct()}%"></i></div>
+
+      <div class="stats">
+        ${statCell("STR",st.STR,alloc)}${statCell("AGI",st.AGI,alloc)}${statCell("VIT",st.VIT,alloc)}
+        ${statCell("SEN",st.SEN,alloc)}${statCell("INT",st.INT,alloc)}
+      </div>
+      <div class="pointsleft ${alloc?'show':''}">▲ ${S.rpg.statPoints} ABILITY POINTS — tap + to allocate</div>
+    </div>
+
+    <div class="panel flat">
+      <div class="panel-title">Today<span class="sub">${DAYNAMES[new Date().getDay()]}</span></div>
+      ${todayCard()}
+    </div>
+
+    <div class="grid2">
+      <div class="panel flat" style="margin:0">
+        <div class="panel-title">Streak</div>
+        <div class="row spread"><div><div class="lvnum" style="font-size:30px">${S.streak.current}</div><div class="muted tiny mono">CURRENT</div></div>
+        <div style="text-align:right"><div class="mono hi" style="font-size:20px">${S.streak.longest}</div><div class="muted tiny mono">BEST</div></div></div>
+      </div>
+      <div class="panel flat" style="margin:0">
+        <div class="panel-title">Body</div>
+        <div class="lvnum" style="font-size:30px">${latestWeight()??S.profile.weightKg}<span class="muted" style="font-size:13px;font-family:var(--mono)"> kg</span></div>
+        <button class="btn ghost sm full mt" onclick="logWeightPrompt()">＋ Log weight</button>
+      </div>
+    </div>`;
+  // wire stat plus buttons
+  el.querySelectorAll(".plus").forEach(b=>b.onclick=()=>allocStat(b.dataset.k));
+}
+function statCell(k,v,alloc){
+  return `<div class="stat ${alloc?'alloc':''}"><div class="k">${k}</div><div class="v">${v}</div><div class="plus" data-k="${k}">+</div></div>`;
+}
+function allocStat(k){
+  if(S.rpg.statPoints<=0) return;
+  S.rpg.stats[k]++; S.rpg.statPoints--; save(); renderStatus();
+  toast(`${k} increased`);
+}
+function recoveryPct(){
+  // simple: full if rested yesterday or trained today, lower if 3+ consecutive training days
+  const recent=lastNSessions(3);
+  const base=100 - recent.length*8;
+  return Math.max(40, Math.min(100, base + (isTrainingDay(new Date())?0:15)));
+}
+function readinessPct(){
+  ensureDailyQuest();
+  const q=S.quests.items; const done=q.filter(i=>i.done).length;
+  return Math.max(25, Math.round(40 + done/q.length*60));
+}
+function todayCard(){
+  const w=todaysWorkout();
+  if(w.rest){
+    return `<p class="lead">Scheduled <b class="gr">recovery day</b> · Arc ${w.arc.n} · <span class="hi">${w.dir.phase}</span> week. Recovery is when you grow.</p>
+      <div class="directive ${w.dir.deload?'deload':''}"><span class="pip"></span>${w.dir.note}</div>
+      <div class="row mt"><button class="btn full" onclick="go('quests')">❖ Open Daily Quest</button></div>`;
+  }
+  return `<p class="lead"><b class="hi">${w.day.name}</b> · ${w.exercises.length} movements · Arc ${w.arc.n} · <span class="am">${w.dir.phase}</span></p>
+    <div class="directive ${w.dir.deload?'deload':''}"><span class="pip"></span>${w.dir.note}</div>
+    <div class="row mt"><button class="btn full" onclick="go('train')">⚔ Enter Today's Gate</button></div>`;
+}
+
+/* ---- QUESTS ---- */
+function renderQuests(){
+  ensureDailyQuest();
+  const q=S.quests.items; const all=q.every(i=>i.done);
+  const el=document.getElementById("s-quests");
+  el.innerHTML=`
+    <div class="panel questbox">
+      <div class="panel-title">Daily Quest<span class="sub">${all?'CLEAR':'ACTIVE'}</span></div>
+      <p class="lead tiny">The System's standing order. Scaled to your level — always clearable, never optional. Clear all for bonus EXP.</p>
+      ${q.map(qi=>`
+        <div class="quest ${qi.done?'done':''}" data-id="${qi.id}">
+          <div class="qx" onclick="toggleQuest('${qi.id}')">${qi.done?'✓':''}</div>
+          <div class="ql">${esc(qi.label)}</div>
+          <div class="qr">+${qi.exp}</div>
+        </div>`).join("")}
+      ${all?`<div class="banner gr" style="border-color:rgba(70,230,160,.5);background:rgba(70,230,160,.06);color:var(--green)">✓ Daily Quest complete. The System is satisfied.</div>`:""}
+    </div>
+
+    <div class="panel flat">
+      <div class="panel-title">Boss Challenge<span class="sub">PR ATTEMPT</span></div>
+      <p class="lead tiny">Log a personal record on any lift or hold. Bosses grant large EXP.</p>
+      <button class="btn full" onclick="bossPrompt()">⚔ Log a PR (+EXP)</button>
+    </div>
+
+    <div class="panel flat">
+      <div class="panel-title">Supplements<span class="sub">EVIDENCE-BASED</span></div>
+      <p class="lead tiny">Optional tools with real research behind them. Check what you took today.</p>
+      ${SUPPS.map(sp=>{
+        const on=(S.supps.checks[todayStr()]||[]).includes(sp.id);
+        return `<div class="quest ${on?'done':''}">
+          <div class="qx" onclick="toggleSupp('${sp.id}')">${on?'✓':''}</div>
+          <div><div class="ql">${sp.n}</div><div class="muted tiny" style="margin-top:2px">${sp.dose} · ${sp.why}</div></div>
+        </div>`;}).join("")}
+    </div>`;
+}
+function toggleQuest(id){
+  const qi=S.quests.items.find(x=>x.id===id); if(!qi) return;
+  qi.done=!qi.done;
+  if(qi.done){ const r=addExp(qi.exp,"quest"); markActivityToday(); handleLevels(r); }
+  save();
+  // all-clear bonus
+  if(S.quests.items.every(i=>i.done) && !S.quests.bonusGiven){
+    S.quests.bonusGiven=true;
+    const mult=S.skills.owned.includes("ss3")?1.3:1;
+    const r=addExp(80*mult,"quest-clear");
+    queueSys("DAILY QUEST CLEAR", `All objectives complete.<br>Bonus <b>+${r.gained} EXP</b>`);
+    handleLevels(r);
+  }
+  save(); renderQuests(); renderStatus();
+}
+function toggleSupp(id){
+  const t=todayStr(); S.supps.checks[t]=S.supps.checks[t]||[];
+  const arr=S.supps.checks[t]; const i=arr.indexOf(id);
+  if(i>=0) arr.splice(i,1); else arr.push(id);
+  save(); renderQuests();
+}
+function bossPrompt(){
+  const lift=prompt("Boss name (which lift / hold did you PR?)\ne.g. Deadlift 90kg, Pull-up x8, 30s L-sit");
+  if(!lift) return;
+  const r=addExp(120,"boss"); markActivityToday();
+  queueSys("BOSS DEFEATED", `<b>${esc(lift)}</b><br>A new personal record. +${r.gained} EXP`);
+  handleLevels(r); save();
+}
+
+/* ---- TRAIN ---- */
+let sessionDraft=null;
+function renderTrain(){
+  const el=document.getElementById("s-train");
+  const w=todaysWorkout();
+  const arc=currentArc();
+  if(w.rest){
+    el.innerHTML=`
+      <div class="panel">
+        <div class="panel-title">Today's Gate<span class="sub">CLOSED</span></div>
+        <p class="lead">No training scheduled today (<b class="gr">recovery</b>). You can still run an optional session, or do mobility + your Daily Quest.</p>
+        <button class="btn full mt" onclick="forceTrain()">Open an optional session anyway</button>
+        <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility instead</button>
+      </div>
+      ${arcCard(arc)}`;
+    return;
+  }
+  // build / restore draft
+  if(!sessionDraft || sessionDraft.dayKey!==w.day.key || sessionDraft.date!==todayStr()){
+    sessionDraft={date:todayStr(),dayKey:w.day.key,name:w.day.name,ex:w.exercises.map(e=>({
+      id:e.id, sets:Array.from({length:e.sets},()=>({reps:"",weight:"",done:false})), reps:e.reps
+    }))};
+  }
+  el.innerHTML=`
+    <div class="panel">
+      <div class="panel-title">Today's Gate<span class="sub">${w.day.key}</span></div>
+      <div class="name mono" style="font-size:16px;color:#eaf6ff">${w.day.name}</div>
+      <p class="lead tiny">Arc ${arc.n} · Week ${w.week}/24 · <span class="am">${w.dir.phase}</span> · target ${w.dir.rir}. ${arc.desc}</p>
+      <div class="directive ${w.dir.deload?'deload':''}"><span class="pip"></span>${w.dir.note}</div>
+      <div class="row tiny mono muted mt" style="gap:14px"><span>● Log each set</span><span>● Tap ✓ when done</span><span>● Finish for EXP</span></div>
+    </div>
+    ${sessionDraft.ex.map((e,i)=>exerciseCard(e,i)).join("")}
+    <div class="panel flat">
+      <button class="btn full" onclick="finishSession()">▣ Clear Gate — Finish & Claim EXP</button>
+      <p class="center muted tiny mono mt">Progressive overload: beat last time by a rep or small weight bump.</p>
+    </div>`;
+}
+function exerciseCard(e,idx){
+  const x=EX[e.id];
+  const tag=x.stat.toLowerCase();
+  const embedId=EMBED[e.id];
+  const lastBest=lastBestFor(e.id);
+  return `
+  <div class="ex">
+    <div class="hd">
+      <div class="grow">
+        <div class="nm">${idx+1}. ${x.n}</div>
+        <div class="meta">${x.cat} · target <b class="am">${e.reps}</b> · ${e.sets} sets ${lastBest?`· last: <span class="hi">${lastBest}</span>`:""}</div>
+      </div>
+      <span class="tag ${tag}">${x.stat}</span>
+    </div>
+    <div class="cues">${x.cues}</div>
+    <div class="setgrid"><div class="h">SET</div><div class="h">WEIGHT (kg)</div><div class="h">REPS</div><div class="h">RPE</div><div class="h">✓</div>
+      ${e.sets.map((s,si)=>`
+        <div class="si">${si+1}</div>
+        <input inputmode="decimal" value="${s.weight}" placeholder="–" onchange="setVal(${idx},${si},'weight',this.value)">
+        <input inputmode="numeric" value="${s.reps}" placeholder="–" onchange="setVal(${idx},${si},'reps',this.value)">
+        <input inputmode="numeric" value="${s.rpe||''}" placeholder="–" onchange="setVal(${idx},${si},'rpe',this.value)" style="width:46px">
+        <div class="setdone ${s.done?'on':''}" onclick="toggleSet(${idx},${si})">${s.done?'✓':''}</div>
+      `).join("")}
+    </div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <a class="vbtn" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.yt)}" target="_blank" rel="noopener"><span class="play"></span> Form video (YouTube)</a>
+      ${embedId?`<span class="vbtn" onclick="toggleEmbed('emb${idx}')"><span class="play"></span> Watch here</span>`:""}
+    </div>
+    ${embedId?`<div class="embed" id="emb${idx}"><iframe loading="lazy" allowfullscreen
+        src="https://www.youtube-nocookie.com/embed/${embedId}"></iframe></div>`:""}
+  </div>`;
+}
+function toggleEmbed(id){ const e=document.getElementById(id); if(e) e.classList.toggle("show"); }
+function setVal(ei,si,k,v){ sessionDraft.ex[ei].sets[si][k]=v; }
+function toggleSet(ei,si){
+  const s=sessionDraft.ex[ei].sets[si]; s.done=!s.done;
+  document.querySelectorAll("#s-train .setdone")[0]; renderTrain();
+}
+function forceTrain(){
+  // open a session even on rest day by temporarily faking a training day
+  sessionDraft=null;
+  const split=splitForDays(S.profile.days.length);
+  const day=split[S.program.seq % split.length];
+  const dir=weekDirective(currentWeek());
+  sessionDraft={date:todayStr(),dayKey:day.key,name:day.name,forced:true,ex:day.slots.map(sl=>{
+    const id=pickEx(sl,S.profile.equip);
+    return {id,reps:sl.r,sets:Array.from({length:adjSets(sl.s,dir.setDelta)},()=>({reps:"",weight:"",done:false}))};
+  })};
+  const el=document.getElementById("s-train");
+  el.innerHTML=`<div class="panel"><div class="panel-title">Optional Session<span class="sub">${day.key}</span></div>
+    <div class="name mono" style="font-size:16px">${day.name}</div>
+    <div class="directive ${dir.deload?'deload':''}"><span class="pip"></span>${dir.note}</div></div>
+    ${sessionDraft.ex.map((e,i)=>exerciseCard(e,i)).join("")}
+    <div class="panel flat"><button class="btn full" onclick="finishSession()">▣ Finish & Claim EXP</button></div>`;
+}
+function finishSession(){
+  if(!sessionDraft) return;
+  let setsDone=0, exp=0;
+  sessionDraft.ex.forEach(e=>{
+    const x=EX[e.id];
+    e.sets.forEach(s=>{ if(s.done){ setsDone++; exp += statExp(x.stat); } });
+  });
+  if(setsDone===0){ toast("Mark at least one set ✓ first"); return; }
+  exp += 40; // completion bonus
+  // conditioning bonus
+  if(sessionDraft.ex.some(e=>EX[e.id].cat==="Conditioning") && S.skills.owned.includes("bl1")) exp*=1.2;
+  const r=addExp(exp,"session");
+  S.sessions.push({
+    date:sessionDraft.date, dayKey:sessionDraft.dayKey, name:sessionDraft.name,
+    setsDone, exp:r.gained,
+    ex:sessionDraft.ex.map(e=>({id:e.id,sets:e.sets.filter(s=>s.done).map(s=>({w:+s.weight||0,reps:+s.reps||0,rpe:+s.rpe||0}))}))
+  });
+  if(!sessionDraft.forced) S.program.seq++;
+  markActivityToday();
+  sessionDraft=null;
+  save();
+  queueSys("GATE CLEARED", `<b>${setsDone}</b> sets logged.<br>+<b>${r.gained} EXP</b>`);
+  handleLevels(r);
+}
+function statExp(stat){ return {STR:14,AGI:13,VIT:11,SEN:10,INT:10}[stat]||10; }
+function lastBestFor(id){
+  for(let i=S.sessions.length-1;i>=0;i--){
+    const e=S.sessions[i].ex.find(x=>x.id===id);
+    if(e&&e.sets.length){ const best=e.sets.reduce((a,b)=> (b.w*100+b.reps)>(a.w*100+a.reps)?b:a);
+      return best.w?`${best.w}kg × ${best.reps}`:`${best.reps} reps`; }
+  }
+  return null;
+}
+function arcCard(arc){
+  return `<div class="panel flat"><div class="panel-title">Current Arc<span class="sub">WK ${currentWeek()}/24</span></div>
+    <div class="name mono hi" style="font-size:15px">${arc.n}</div>
+    <p class="lead tiny">${arc.desc}</p></div>`;
+}
+
+/* ---- STATS ---- */
+function renderStats(){
+  const el=document.getElementById("s-stats");
+  const wlog=S.metrics.weight;
+  const volBy=volumeByWeek();
+  el.innerHTML=`
+    <div class="panel">
+      <div class="panel-title">Nutrition Targets<span class="sub">${goalMode().toUpperCase()}</span></div>
+      <div class="ring-wrap">
+        ${calorieRing()}
+        <div class="grow">
+          <div class="kv"><span class="k">BMR</span><span class="v">${bmr()} kcal</span></div>
+          <div class="kv"><span class="k">TDEE</span><span class="v">${tdee()} kcal</span></div>
+          <div class="kv"><span class="k">Daily target</span><span class="v hi">${calorieTarget()} kcal</span></div>
+        </div>
+      </div>
+      <div class="macro">
+        <div class="m"><div class="v">${proteinTarget()}g</div><div class="k">Protein</div></div>
+        <div class="m"><div class="v">${carbTarget()}g</div><div class="k">Carbs</div></div>
+        <div class="m"><div class="v">${fatTarget()}g</div><div class="k">Fat</div></div>
+      </div>
+      <div class="grid2 mt">
+        <label class="fld" style="margin:0"><span>Log today's intake — kcal</span>
+          <input id="n_cal" inputmode="numeric" placeholder="e.g. 2600"></label>
+        <label class="fld" style="margin:0"><span>Protein (g)</span>
+          <input id="n_pro" inputmode="numeric" placeholder="e.g. 150"></label>
+      </div>
+      <button class="btn full mt" onclick="logNutrition()">＋ Save today's intake</button>
+      ${todayNutritionSummary()}
+      <label class="fld"><span>Override goal mode</span>
+        <select onchange="setGoal(this.value)">
+          <option value="">Use profile (${S.profile.goal})</option>
+          <option value="leanbulk" ${goalMode()==='leanbulk'?'selected':''}>Lean Build (+surplus)</option>
+          <option value="recomp" ${goalMode()==='recomp'?'selected':''}>Recomposition</option>
+          <option value="cut" ${goalMode()==='cut'?'selected':''}>Cut / definition</option>
+        </select></label>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Bodyweight<span class="sub">${wlog.length} entries</span></div>
+      ${wlog.length>=2? lineChart(wlog.map(w=>({x:w.date,y:w.kg})),"kg") :
+        `<p class="lead tiny">Log your weight a few times to see the trend. Aim for a slow climb on Lean Build (~0.25–0.5 kg/week).</p>`}
+      <button class="btn ghost full mt" onclick="logWeightPrompt()">＋ Log weight</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Training Volume<span class="sub">SETS / WEEK</span></div>
+      ${volBy.length? barChart(volBy) : `<p class="lead tiny">Finish a session to start tracking weekly volume.</p>`}
+    </div>
+
+    <div class="panel flat">
+      <div class="panel-title">Recent Gates</div>
+      ${S.sessions.slice(-6).reverse().map(s=>`
+        <div class="kv"><span class="k">${s.date} · ${s.name}</span><span class="v">${s.setsDone} sets · +${s.exp}</span></div>
+      `).join("")||`<p class="lead tiny">No sessions yet.</p>`}
+    </div>`;
+}
+function setGoal(v){ S.nutrition.goalOverride=v||null; save(); renderStats(); renderStatus(); }
+function logNutrition(){
+  const cal=+document.getElementById("n_cal").value||0;
+  const pro=+document.getElementById("n_pro").value||0;
+  if(!cal&&!pro){ toast("Enter calories or protein"); return; }
+  const t=todayStr();
+  const existing=S.nutrition.log.find(x=>x.date===t);
+  if(existing){ existing.cal=cal; existing.pro=pro; } else { S.nutrition.log.push({date:t,cal,pro}); }
+  const r=addExp(15,"nutrition"); markActivityToday(); save();
+  toast("Intake logged +15 EXP"); handleLevels(r); renderStats(); renderStatus();
+}
+function todayNutritionSummary(){
+  const t=todayStr(); const e=S.nutrition.log.find(x=>x.date===t);
+  if(!e) return "";
+  const cT=calorieTarget(), pT=proteinTarget();
+  const cd=e.cal-cT, pd=e.pro-pT;
+  return `<div class="kv mt"><span class="k">Today logged</span><span class="v">${e.cal} kcal · ${e.pro}g protein</span></div>
+    <div class="kv"><span class="k">vs target</span><span class="v ${Math.abs(cd)<150?'gr':'am'}">${cd>=0?'+':''}${cd} kcal · ${pd>=0?'+':''}${pd}g</span></div>`;
+}
+function logWeightPrompt(){
+  const v=prompt("Bodyweight today (kg):", latestWeight()??S.profile.weightKg);
+  if(!v) return; const kg=+v; if(!kg||kg<25||kg>300){ toast("Enter a valid weight"); return; }
+  const t=todayStr(); const ex=S.metrics.weight.find(w=>w.date===t);
+  if(ex) ex.kg=kg; else S.metrics.weight.push({date:t,kg});
+  S.metrics.weight.sort((a,b)=>a.date<b.date?-1:1);
+  S.profile.weightKg=kg; // keep BMR current
+  if(S.skills.owned.includes("dp2")) S.nutrition.targetsLocked=false;
+  const r=addExp(10,"weigh-in"); save(); toast("Weight logged +10 EXP");
+  handleLevels(r); render();
+}
+
+/* ---- SYSTEM (skills + settings + data) ---- */
+function renderSystem(){
+  const el=document.getElementById("s-system");
+  el.innerHTML=`
+    <div class="panel">
+      <div class="panel-title">Skill Tree<span class="sub">${S.rpg.skillPoints} SP</span></div>
+      <p class="lead tiny">Spend skill points (1 earned per level). Nodes grant EXP bonuses + unlock guidance. Higher branches need higher level.</p>
+      <div class="tree">
+        ${SKILLTREE.map(br=>`
+          <div class="branch">
+            <h3>${br.br}</h3><div class="bd">${br.desc}</div>
+            ${br.nodes.map(nd=>skillNode(nd)).join("")}
+          </div>`).join("")}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Data — Backup & Restore<span class="sub">REDUNDANCY</span></div>
+      <p class="lead tiny">Your progress is saved on this device automatically. Export a backup file regularly so a cleared cache can't wipe your climb.</p>
+      <div class="grid2">
+        <button class="btn" onclick="exportData()">⭳ Export backup</button>
+        <button class="btn" onclick="document.getElementById('importfile').click()">⭱ Import backup</button>
+      </div>
+      ${!storageOK?`<div class="banner">⚠ This preview can't auto-save. On your phone's browser it will. <b>Export regularly</b> to be safe.</div>`:""}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Settings</div>
+      <label class="fld"><span>System accent</span>
+        <select onchange="setAccent(this.value)">
+          <option value="cyan" ${S.settings.accent==='cyan'?'selected':''}>System Cyan (default)</option>
+          <option value="violet" ${S.settings.accent==='violet'?'selected':''}>Monarch Violet</option>
+          <option value="crimson" ${S.settings.accent==='crimson'?'selected':''}>Penalty Crimson</option>
+        </select></label>
+      <button class="btn ghost full mt" onclick="editProfile()">Edit profile / schedule</button>
+      <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button>
+    </div>
+
+    <div class="panel flat">
+      <div class="panel-title">About the program</div>
+      <p class="lead tiny">24-week climb across 3 Arcs, built for a lean beginner aiming for a strong, mobile, climber-style physique. Compound lifts + calisthenic progressions + mobility + conditioning, with progressive overload. Nutrition uses the Mifflin–St Jeor equation for BMR and ~1.9 g/kg protein. Every movement links to a current YouTube form demo. Not medical advice.</p>
+    </div>`;
+}
+function skillNode(nd){
+  const owned=S.skills.owned.includes(nd.id);
+  const meetsLv=S.rpg.level>=nd.lv;
+  const canBuy=!owned && meetsLv && S.rpg.skillPoints>=nd.cost;
+  const cls=owned?"owned":(canBuy?"avail":"locked");
+  return `<div class="node ${cls}">
+    <div class="dot"></div>
+    <div class="grow"><div class="nn">${nd.n}</div><div class="nd">${nd.d}</div>
+      <div class="nreq">REQ Lv ${nd.lv} · ${nd.cost} SP ${owned?'· OWNED':''}</div></div>
+    ${owned?'':`<button class="btn sm nbuy" ${canBuy?'':'disabled'} onclick="buySkill('${nd.id}',${nd.cost})">Unlock</button>`}
+  </div>`;
+}
+function buySkill(id,cost){
+  if(S.skills.owned.includes(id)||S.rpg.skillPoints<cost) return;
+  S.skills.owned.push(id); S.rpg.skillPoints-=cost; save();
+  const nd=SKILLTREE.flatMap(b=>b.nodes).find(n=>n.id===id);
+  queueSys("SKILL ACQUIRED",`<b>${nd.n}</b><br>${nd.d}`);
+}
+function setAccent(v){ S.settings.accent=v; save(); document.documentElement.setAttribute("data-accent",v); }
+
+/* ============================================================ CHARTS (hand-rolled SVG) ====================================== */
+function lineChart(pts,unit){
+  const W=480,H=150,pad=28;
+  const xs=pts.map((_,i)=>i), ys=pts.map(p=>p.y);
+  const minY=Math.min(...ys), maxY=Math.max(...ys), rng=(maxY-minY)||1;
+  const X=i=> pad + (i/(pts.length-1||1))*(W-pad*2);
+  const Y=v=> H-pad - ((v-minY)/rng)*(H-pad*2);
+  const d=pts.map((p,i)=>`${i?'L':'M'}${X(i).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(" ");
+  const area=`${d} L${X(pts.length-1)} ${H-pad} L${pad} ${H-pad} Z`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <path d="${area}" fill="rgba(82,216,255,.10)"/>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" style="filter:drop-shadow(0 0 4px var(--accent))"/>
+    ${pts.map((p,i)=>`<circle cx="${X(i)}" cy="${Y(p.y)}" r="2.5" fill="var(--accent)"/>`).join("")}
+    <text x="${pad}" y="14">${maxY.toFixed(1)} ${unit}</text>
+    <text x="${pad}" y="${H-6}">${minY.toFixed(1)} ${unit}</text>
+    <text x="${W-pad}" y="${H-6}" text-anchor="end">${pts[pts.length-1].x}</text>
+  </svg>`;
+}
+function barChart(arr){ // [{label,val}]
+  const W=480,H=150,pad=24; const max=Math.max(...arr.map(a=>a.val),1);
+  const bw=(W-pad*2)/arr.length*0.62, gap=(W-pad*2)/arr.length;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    ${arr.map((a,i)=>{const h=(a.val/max)*(H-pad*2); const x=pad+i*gap+(gap-bw)/2; const y=H-pad-h;
+      return `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="var(--accent)" opacity=".85"/>
+        <text x="${x+bw/2}" y="${H-8}" text-anchor="middle">${a.label}</text>
+        <text x="${x+bw/2}" y="${y-3}" text-anchor="middle">${a.val}</text>`;}).join("")}
+  </svg>`;
+}
+function volumeByWeek(){
+  const map={};
+  S.sessions.forEach(s=>{ const wk=weekKey(s.date); map[wk]=(map[wk]||0)+s.setsDone; });
+  return Object.keys(map).sort().slice(-8).map(k=>({label:k.split("-W")[1]?("W"+k.split("-W")[1]):k,val:map[k]}));
+}
+function weekKey(dateStr){
+  const d=new Date(dateStr+"T00:00:00"); const onejan=new Date(d.getFullYear(),0,1);
+  const wk=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear()+"-W"+wk;
+}
+function calorieRing(){
+  const t=todayStr(); const e=S.nutrition.log.find(x=>x.date===t);
+  const target=calorieTarget(); const have=e?e.cal:0;
+  const pct=Math.min(1, have/target); const R=40,C=2*Math.PI*R;
+  return `<svg class="ring" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="${R}" fill="none" stroke="#10203a" stroke-width="9"/>
+    <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--accent)" stroke-width="9"
+      stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" stroke-linecap="round"
+      transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 4px var(--accent));transition:stroke-dashoffset .6s"/>
+    <text class="big" x="50" y="50" text-anchor="middle">${have}</text>
+    <text class="sm" x="50" y="63" text-anchor="middle">/ ${target}</text>
+  </svg>`;
+}
+
+/* ============================================================ DATA I/O ====================================================== */
+function exportData(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download=`ascension-backup-${todayStr()}.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast("Backup downloaded");
+}
+document.getElementById("importfile").addEventListener("change",function(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{
+      const data=JSON.parse(rd.result);
+      if(!data || !data.rpg){ toast("Not a valid backup"); return; }
+      S=Object.assign(defaultState(),data); save();
+      queueSys("DATA RESTORED","Backup loaded successfully.<br>Your climb continues.");
+      bootUI();
+    }catch(e){ toast("Could not read file"); }
+    ev.target.value="";
+  };
+  rd.readAsText(f);
+});
+function resetAll(){
+  if(!confirm("Erase ALL progress on this device? Export a backup first if unsure.")) return;
+  if(!confirm("This cannot be undone. Reset everything?")) return;
+  S=defaultState(); save(); location.reload();
+}
+function editProfile(){
+  // reopen onboarding prefilled
+  document.getElementById("main").style.display="none";
+  document.getElementById("nav").style.display="none";
+  const ob=document.getElementById("onboard"); ob.style.display="block";
+  document.getElementById("ob_name").value=S.profile.name||"";
+  document.getElementById("ob_sex").value=S.profile.sex;
+  document.getElementById("ob_age").value=S.profile.age;
+  document.getElementById("ob_h").value=S.profile.heightCm;
+  document.getElementById("ob_w").value=S.profile.weightKg;
+  document.getElementById("ob_act").value=S.profile.activity;
+  setChips("ob_equip",[S.profile.equip]);
+  setChips("ob_days",S.profile.days.map(String));
+  setChips("ob_goal",[S.profile.goal]);
+  window.scrollTo(0,0);
+}
+
+/* ============================================================ NAV / BOOT ==================================================== */
+function go(t){ activeTab=t; bootUI(); }
+function bootUI(){
+  document.getElementById("onboard").style.display="none";
+  document.getElementById("main").style.display="block";
+  document.getElementById("nav").style.display="grid";
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const scr=document.getElementById("s-"+activeTab);
+  scr.classList.add("active");
+  document.querySelectorAll(".nav button").forEach((b,i)=>{
+    const on=b.dataset.t===activeTab; b.classList.toggle("active",on);
+    if(on) document.getElementById("navmark").style.left=(i*20)+"%";
+  });
+  render();
+  // one-shot entrance animation (won't replay on in-screen re-renders)
+  scr.classList.remove("entering"); void scr.offsetWidth; scr.classList.add("entering");
+  setTimeout(()=>scr.classList.remove("entering"), 700);
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".nav button").forEach(b=> b.onclick=()=>go(b.dataset.t));
+
+/* ---- chips helpers ---- */
+function chipGroup(id,multi){
+  const wrap=document.getElementById(id);
+  wrap.querySelectorAll(".chip").forEach(c=>{
+    c.onclick=()=>{
+      if(multi){ c.setAttribute("aria-pressed", c.getAttribute("aria-pressed")==="true"?"false":"true"); }
+      else { wrap.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false")); c.setAttribute("aria-pressed","true"); }
+    };
+  });
+}
+function getChips(id){ return [...document.getElementById(id).querySelectorAll('.chip[aria-pressed="true"]')].map(c=>c.dataset.v); }
+function setChips(id,vals){ document.getElementById(id).querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed", vals.includes(c.dataset.v)?"true":"false")); }
+chipGroup("ob_equip",false); chipGroup("ob_days",true); chipGroup("ob_goal",false);
+
+document.getElementById("ob_start").onclick=()=>{
+  const name=document.getElementById("ob_name").value.trim();
+  const age=+document.getElementById("ob_age").value;
+  const h=+document.getElementById("ob_h").value;
+  const w=+document.getElementById("ob_w").value;
+  const days=getChips("ob_days").map(Number).sort();
+  const equip=getChips("ob_equip")[0]||"gym";
+  const goal=getChips("ob_goal")[0]||"leanbulk";
+  if(!name){ toast("Enter a hunter name"); return; }
+  if(!age||!h||!w){ toast("Fill age, height, weight"); return; }
+  if(!days.length){ toast("Pick at least 1 training day"); return; }
+  const bmrHigh = (10*w+6.25*h-5*age) > 1650; // flag a high baseline metabolism
+  S.profile={ name, sex:document.getElementById("ob_sex").value, age, heightCm:h, weightKg:w,
+    activity:+document.getElementById("ob_act").value, equip, days, goal, bmrHigh, created:todayStr() };
+  if(!S.metrics.weight.length) S.metrics.weight.push({date:todayStr(),kg:w});
+  if(!S.program.startDate) S.program.startDate=todayStr();
+  ensureDailyQuest(); save();
+  activeTab="status"; bootUI();
+  queueSys("ARISE", `Welcome, <b>${esc(name)}</b>.<br>You are now an <b>E-Rank</b> Player.<br>Reach Level 10 to rank up. The climb to <span class="vi">Monarch</span> begins.`);
+};
+
+function esc(s){ return (s+"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function latestWeight(){ const w=S.metrics.weight; return w.length?w[w.length-1].kg:null; }
+function lastNSessions(n){ const t=new Date(); const out=[]; for(let i=0;i<n;i++){ const d=todayStr(new Date(t-86400000*i)); if(S.sessions.some(s=>s.date===d)) out.push(d);} return out; }
+
+/* ============================================================ INIT ========================================================== */
+function startApp(){
+  load();
+  if(S.profile){ bootUI(); }
+  else { document.getElementById("onboard").style.display="block"; }
+}
+
+/* splash / boot sequence, then reveal app */
+(function boot(){
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const term=document.getElementById("bootterm");
+  const lines=[
+    'INITIALIZING SYSTEM<span class="ok">OK</span>',
+    'LOADING PLAYER VESSEL<span class="ok">OK</span>',
+    'CALIBRATING GATES<span class="ok">OK</span>',
+    'SYSTEM ONLINE<span class="ok">READY</span>'
+  ];
+  function hide(){
+    const b=document.getElementById("boot");
+    b.classList.add("hide");
+    setTimeout(()=>{ b.style.display="none"; }, 520);
+  }
+  if(reduce){ startApp(); hide(); return; }
+  // type out lines
+  lines.forEach((html,i)=>{
+    const ln=document.createElement("div"); ln.className="ln"; ln.innerHTML=html; term.appendChild(ln);
+    setTimeout(()=>ln.classList.add("in"), 200 + i*330);
+  });
+  // start app under the splash so it's ready when curtain lifts
+  setTimeout(startApp, 300);
+  setTimeout(hide, 1850);
+})();
+
+/* register service worker (enables installable PWA + offline when hosted; silently no-ops on file://) */
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+}
+</script>
+</body>
+</html>
