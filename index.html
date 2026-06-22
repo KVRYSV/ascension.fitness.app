@@ -449,7 +449,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
   box-shadow:0 0 18px rgb(var(--ac) / .65), 0 8px 20px rgb(0 0 0 / .55), inset 0 0 12px rgb(255 255 255 / .12); }
 .nav button.navfocus .ic svg{ width:22px; height:22px; transform:rotate(-45deg); stroke:#fff; stroke-width:1.6; fill:none; }
 .nav button.navfocus.active .ic{ transform:rotate(45deg) scale(1.05); filter:none; box-shadow:0 0 24px rgb(var(--ac) / .85), 0 8px 20px rgb(0 0 0 / .55); }
-.nav button.navfocus span:not(.ic){ margin-top:16px; }
+.nav button.navfocus span:not(.ic){ margin-top:22px; }
 
 /* B1/B2 — big level + circular EXP ring */
 .lvring{ position:relative; width:208px; height:208px; margin:8px auto 4px; }
@@ -593,6 +593,8 @@ html[data-bars="minimal"] .resttimer .rt-bar{ height:3px; }
   padding:13px 15px; font-family:var(--ui); font-size:12.5px; line-height:1.55; color:var(--ink-hi);
   box-shadow:inset 0 0 20px rgb(var(--ac) / .07); clip-path:var(--clip-s); }
 .creditbox .sig{ display:block; font-family:var(--mono); font-size:10px; letter-spacing:.28em; color:var(--accent); margin-bottom:6px; }
+.histday.pr{ border-left:3px solid var(--accent); background:rgb(var(--ac) / .06); }
+.histday.pr .hd span:first-child{ color:var(--accent); }
 </style>
 </head>
 <body>
@@ -1049,7 +1051,7 @@ function defaultState(){
     skills:{owned:[]}, program:{startDate:todayStr(),seq:0,weeks:24}, sessions:[],
     quests:{date:null,items:[],bonusGiven:false}, streak:{current:0,longest:0,last:null},
     metrics:{weight:[]}, nutrition:{log:[],goalOverride:null}, supps:{checks:{}},
-    records:{pr:{}}, log:{exp:[]}, skips:[],
+    records:{pr:{},prLog:[]}, log:{exp:[]}, skips:[],
     settings:{accent:"cyan",sound:true,barStyle:"glow",videoOverrides:{},units:"imperial"}, draft:null
   };
 }
@@ -1585,11 +1587,26 @@ function toggleSupp(id){
   if(i>=0) arr.splice(i,1); else arr.push(id);
   save(); renderQuests(); decorPanels();
 }
+function parsePR(text){ const t=String(text||"").trim(); let w=0,reps=0,hold=0;
+  const wm=t.match(/(\d+(?:\.\d+)?)\s*(?:lbs?|kgs?|#)\b/i); if(wm) w=parseFloat(wm[1]);
+  const hm=t.match(/(\d+(?:\.\d+)?)\s*s(?:ec|econds?)?\b/i); if(hm) hold=parseFloat(hm[1]);
+  const rm=t.match(/[x×]\s*(\d+)/i)||t.match(/(\d+)\s*reps?\b/i); if(rm) reps=parseInt(rm[1],10);
+  let name=t.replace(/(\d+(?:\.\d+)?)\s*(?:lbs?|kgs?|#|sec|seconds?|reps?)\b/ig," ").replace(/[x×]\s*\d+/ig," ").replace(/\b\d+(?:\.\d+)?\s*s\b/ig," ").replace(/\b\d+(?:\.\d+)?\b/g," ").replace(/\s+/g," ").trim();
+  if(!name) name=t||"Personal Record";
+  return {name,w,reps,hold}; }
+function prValShort(p){ return p.w>0?`${p.w} ${unitW()} × ${p.reps||1}`:(p.hold>0?`${p.hold}s hold`:`${p.reps||0} reps`); }
 async function bossPrompt(){
-  const lift=await sysPrompt({big:"BOSS CHALLENGE",msg:`Which lift or hold did you PR?<br><span class="muted tiny">e.g. Deadlift 200 lb · Pull-up ×8 · 30s L-sit</span>`,placeholder:"Deadlift 200 lb ×3"});
+  const lift=await sysPrompt({big:"PERSONAL RECORD",msg:`Log a lift or hold you just set a record on.<br><span class="muted tiny">e.g. Deadlift 200 lb ×3 · Pull-up ×8 · L-sit 30s</span>`,placeholder:"Deadlift 200 lb ×3"});
   if(!lift) return;
-  const r=addExp(120,"boss"); markActivityToday();
-  notify("BOSS DEFEATED",`<b>${esc(lift)}</b><br>A new personal record. +${r.gained} EXP`); handleLevels(r); save();
+  const p=parsePR(lift), e=(p.w>0&&p.reps>0)?e1rm(p.w,p.reps):0;
+  let slug="pr_"+p.name.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"").slice(0,24); if(slug==="pr_") slug="pr_record";
+  S.records=S.records||{pr:{}}; S.records.pr=S.records.pr||{}; S.records.prLog=S.records.prLog||[];
+  const prev=S.records.pr[slug], better=!prev||e>(prev.e1rm||0)||p.w>(prev.w||0)||p.reps>(prev.reps||0)||p.hold>(prev.hold||0);
+  if(better) S.records.pr[slug]={n:p.name,w:p.w,reps:p.reps,hold:p.hold,e1rm:e,date:todayStr()};
+  S.records.prLog.push({date:todayStr(),name:p.name,w:p.w,reps:p.reps,hold:p.hold});
+  if(S.records.prLog.length>120) S.records.prLog=S.records.prLog.slice(-120);
+  const r=addExp(120,"pr"); markActivityToday();
+  notify("RECORD SET",`<b>${esc(p.name)}</b> — ${prValShort(p)}<br>${better?'New personal best banked.':'Logged.'} +${r.gained} EXP`); handleLevels(r); save();
 }
 
 /* ---- TRAIN (in-place set logging — bug #2 fix; steppers — feature #2) ---- */
@@ -2297,12 +2314,16 @@ function openProfile(){
   const attrHTML=["STR","AGI","VIT","SEN","INT"].map(k=>{ const d=eff[k]-base[k]; const mm=d>0?`<div class="mm up">+${d}</div>`:(d<0?`<div class="mm dn">${d}</div>`:`<div class="mm"></div>`);
     return `<div class="prcell"><div class="k">${k}</div><div class="v">${eff[k]}</div>${mm}</div>`; }).join("");
   const pr=(S.records&&S.records.pr)||{}, prKeys=Object.keys(pr).sort((a,b)=>(pr[b].e1rm||0)-(pr[a].e1rm||0));
-  const prHTML=prKeys.length?prKeys.map(id=>{ const r=pr[id], nm=(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):`${r.reps} reps/hold`; return `<div class="kv"><span class="k">${nm}</span><span class="v">${val}</span></div>`; }).join(""):`<p class="lead tiny">Log sets in the Gate to set personal records.</p>`;
+  const prHTML=prKeys.length?prKeys.map(id=>{ const r=pr[id], nm=r.n||(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):(r.hold>0?`${r.hold}s hold`:`${r.reps||0} reps`); return `<div class="kv"><span class="k">${nm}</span><span class="v">${val}</span></div>`; }).join(""):`<p class="lead tiny">Log sets in the Gate to set personal records.</p>`;
   const expW=expByDayWeek(), expSpark=barMini(expW.map(e=>e.val));
   const cals=caloriesByDayWeek(), calHTML=cals.map(c=>`<div class="kv"><span class="k">${c.label} · ${c.date.slice(5)}</span><span class="v">${c.cal?c.cal+' kcal · '+c.pro+'g P':'—'}</span></div>`).join("");
   const missed=missedCount(28), missList=missedListRecent(28);
-  const hist=S.sessions.slice(-14).reverse();
-  const histHTML=hist.length?hist.map(s=>`<div class="histday"><div class="hd"><span>${s.date.slice(5)} · ${s.name}${s.boss?' · BOSS':''}</span><span>${s.setsDone} sets · +${s.exp} EXP</span></div><div class="hx">${(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||e.id; const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return `<b>${nm}</b> ${e.sets.length}×${top.w?` ${top.w}lb`:''}`; }).join(" · ")||"—"}</div></div>`).join(""):`<p class="lead tiny">No Gate history yet.</p>`;
+  const prLog=(S.records&&S.records.prLog)||[];
+  const timeline=S.sessions.map(s=>({t:"s",date:s.date,s})).concat(prLog.map(p=>({t:"p",date:p.date,p}))).sort((a,b)=>a.date<b.date?1:(a.date>b.date?-1:0)).slice(0,16);
+  const histHTML=timeline.length?timeline.map(it=> it.t==="s"
+    ? `<div class="histday"><div class="hd"><span>${it.s.date.slice(5)} · ${it.s.name}${it.s.boss?' · BOSS':''}</span><span>${it.s.setsDone} sets · +${it.s.exp} EXP</span></div><div class="hx">${(it.s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||e.id; const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return `<b>${nm}</b> ${e.sets.length}×${top.w?` ${top.w}${unitW()}`:''}`; }).join(" · ")||"—"}</div></div>`
+    : `<div class="histday pr"><div class="hd"><span>${it.p.date.slice(5)} · ◆ PR</span><span>${prValShort(it.p)}</span></div><div class="hx"><b>${esc(it.p.name)}</b></div></div>`
+  ).join(""):`<p class="lead tiny">No Gate history yet.</p>`;
   const arc=currentArc(), wk=currentWeek(), weeks=S.program.weeks||24, totalScore=expGainedTotal(), weekScore=expGainedWeek(), weekProd=sevenDays().reduce((a,d)=>a+d.score,0);
   document.getElementById("profileBody").innerHTML=`
     <div class="panel"><div class="rankhuge"><span class="smr">HUNTER RANK</span>${rank==='MONARCH'?'M':rank}</div>
