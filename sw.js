@@ -1,6 +1,6 @@
 /* ASCENSION service worker — offline-first cache.
    Bump CACHE when you change files to force an update. */
-const CACHE = "ascension-v1";
+const CACHE = "ascension-v2";
 const ASSETS = [
   "./",
   "./index.html",
