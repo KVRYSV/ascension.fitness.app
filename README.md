@@ -1,5 +1,5 @@
-# ascension.fitness.app
-personal use fitness app vibecoded using claude.
+# ASCENSION fitness
+Personal use fitness app vibecoded and developed using claude. Uses HTML for full deployment via PWA. Dependencies and cache is all local. Runs on browser as well.
 
 ## v5.4 polish pass (peer-feedback round)
 - **Attributes are SP-bound again.** The ▴ / ▾ arrows spend and refund ability points earned per Gate; arrows **grey out** when you have no SP (▴) or are back at base 10 (▾). Unlimited editing now lives only in the Settings → Admin panel. Tapping a stat brings back its **full explanation**, and attributes now **affect the workout** — a per-exercise System tip scales load jumps, bonus reps, rest, or tempo to the governing stat, and session EXP scales slightly with it.
