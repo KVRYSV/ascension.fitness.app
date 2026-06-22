@@ -2,29 +2,9 @@
 personal use fitness app vibecoded using claude.
 
 ______________________________________________________________________________________________________
-
-edit 6/21/26 
+ 
 ASCENSION — v2 update (splash, glass UI, sound, muscle map, rest timer)
 =======================================================================
-
-WHAT CHANGED IN THE REPO
-  Replace these two files in your GitHub repo with the ones here:
-    - index.html   (the whole updated app, sounds embedded inside it)
-    - sw.js        (cache bumped to ascension-v2 so the update actually loads)
-  Everything else (manifest.webmanifest, icons/, .well-known/assetlinks.json,
-  .nojekyll) is UNCHANGED — leave it as-is.
-
-WHY sw.js MATTERS
-  Your installed app caches itself via the service worker. If you only replace
-  index.html, the old version keeps loading from cache. Bumping the cache name
-  (done here: ascension-v2) forces the new version to install on next launch
-  with internet. After updating, open the app online once, then fully close and
-  reopen it — you may need to open it twice for the new cache to take over.
-
-NO REBUILD NEEDED
-  You do NOT need to re-run PWABuilder or reinstall the APK. The APK is a thin
-  shell that loads your hosted site — updating the repo updates the app. (Only
-  re-run PWABuilder if you change the manifest, package name, or host URL.)
 
 NEW IN THIS VERSION
   - Longer animated boot/splash (~4s) with system readout
