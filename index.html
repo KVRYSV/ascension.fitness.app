@@ -239,7 +239,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .cues{font-size:13px;color:var(--ghost);line-height:1.5;margin-top:9px;}
 .sethdr{display:grid;grid-template-columns:26px 1fr 1fr 1fr 32px;gap:6px;margin-top:12px;}
 .sethdr .h{font-family:var(--mono);font-size:8.5px;color:var(--ghost-2);letter-spacing:.07em;text-transform:uppercase;text-align:center;}
-.setrow{display:grid;grid-template-columns:28px 1fr 1fr 1fr 48px;gap:7px;align-items:center;margin-top:9px;}
+.setrow{display:grid;grid-template-columns:28px 1fr 1fr 1fr 48px;gap:7px;align-items:stretch;margin-top:11px;}
 .setrow .si{text-align:center;font-family:var(--display);font-weight:700;color:var(--ghost);font-size:12px;}
 .stp{display:flex;align-items:stretch;border:1px solid var(--line);background:rgb(5 9 18 / .85);}
 .stp button{flex:0 0 auto;width:38px;border:none;background:rgb(var(--ac) / .09);color:var(--accent);font-family:var(--mono);font-size:20px;line-height:1;cursor:pointer;padding:0;}
@@ -576,6 +576,23 @@ html[data-bars="minimal"] .resttimer .rt-bar{ height:3px; }
 .exmeta2 .sub2{ font-family:var(--mono); font-size:11px; color:var(--ghost); }
 .statbonus{ font-family:var(--mono); font-size:11px; color:var(--ghost); border-left:2px solid var(--accent); padding:8px 11px; margin-top:11px; background:rgb(var(--ac) / .05); line-height:1.55; }
 .statbonus .sbk{ color:var(--accent); font-weight:700; letter-spacing:.04em; }
+/* v5.4.1 — stacked set steppers (digit above, up/down arrows below) */
+.setrow .si{ display:flex; align-items:center; justify-content:center; }
+.setrow .setdone{ height:auto; min-height:54px; }
+.setrow .stp{ flex-direction:column; align-items:stretch; }
+.setrow .stp input{ width:100%; padding:13px 0; font-size:19px; border-bottom:1px solid var(--line); }
+.setrow .stp .stp-btns{ display:flex; }
+.setrow .stp .stp-btns button{ flex:1; width:auto; padding:12px 0; font-size:20px; line-height:1; background:rgb(var(--ac) / .09); color:var(--accent); border:none; cursor:pointer; }
+.setrow .stp .stp-btns button:first-child{ border-right:1px solid var(--line); }
+.setrow .stp .stp-btns button:active{ background:var(--accent); color:#02060c; }
+/* about: guide + FAQ + credit box */
+.guide{ margin:9px 0 0; padding-left:18px; }
+.guide li{ font-family:var(--ui); font-size:12.5px; line-height:1.5; color:var(--ink); margin-bottom:7px; }
+.guide li b{ color:var(--accent); font-weight:700; }
+.creditbox{ margin-top:16px; border:1px solid var(--line-2); border-left:3px solid var(--accent); background:rgb(var(--ac) / .08);
+  padding:13px 15px; font-family:var(--ui); font-size:12.5px; line-height:1.55; color:var(--ink-hi);
+  box-shadow:inset 0 0 20px rgb(var(--ac) / .07); clip-path:var(--clip-s); }
+.creditbox .sig{ display:block; font-family:var(--mono); font-size:10px; letter-spacing:.28em; color:var(--accent); margin-bottom:6px; }
 </style>
 </head>
 <body>
@@ -1733,7 +1750,7 @@ function statTip(stat,val){ const b=Math.max(0,Math.floor((val-10)/3)), u=unitW(
 function exercisePage(e,idx){
   const x=EX[e.id], tag=x.stat.toLowerCase(), lastBest=lastBestFor(e.id), mac=machineFor(e.id), trk=trackFor(e.id), vid=videoFor(e.id), sv=effStats()[x.stat]||10;
   const stepFor=k=>k==="weight"?5:(k==="rpe"?0.5:1);
-  const field=(si,k,val)=>`<div class="stp"><button type="button" onclick="stepField(${idx},${si},'${k}',-${stepFor(k)})">−</button><input id="set_${idx}_${si}_${k}" inputmode="${k==='reps'?'numeric':'decimal'}" value="${val||""}" placeholder="–" oninput="setVal(${idx},${si},'${k}',this.value)"><button type="button" onclick="stepField(${idx},${si},'${k}',${stepFor(k)})">+</button></div>`;
+  const field=(si,k,val)=>`<div class="stp"><input id="set_${idx}_${si}_${k}" inputmode="${k==='reps'?'numeric':'decimal'}" value="${val||""}" placeholder="–" oninput="setVal(${idx},${si},'${k}',this.value)"><div class="stp-btns"><button type="button" aria-label="decrease" onclick="stepField(${idx},${si},'${k}',-${stepFor(k)})">▾</button><button type="button" aria-label="increase" onclick="stepField(${idx},${si},'${k}',${stepFor(k)})">▴</button></div></div>`;
   const embed = vid.vid
     ? `<div class="exvid${vid.short?' short':''}"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${vid.vid}?rel=0&modestbranding=1" allow="accelerometer;encrypted-media;gyroscope;picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`
     : `<div class="exvid"><div class="vph" onclick="openYT('${e.id}')"><span class="play"></span>Tap to find a form demo</div></div>`;
@@ -1973,9 +1990,26 @@ function renderSystem(){
       <div class="grid2"><button class="btn" onclick="exportData()">Export backup</button><button class="btn" onclick="document.getElementById('importfile').click()">Import backup</button></div>
       ${!storageOK?`<div class="banner">This preview can't auto-save. On your phone it will. <b>Export regularly.</b></div>`:""}
       <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button></div>
-    <div class="panel flat"><div class="panel-title"><span class="tri"></span>About</div>
-      <p class="lead tiny">ASCENSION turns the grind toward a lean, shredded hunter's physique into a Solo-Leveling <b class="hi">System</b>: a ${S.program.weeks||24}-week (extendable) periodized program across three Arcs — compound lifts, calisthenic progressions, mobility and conditioning under progressive overload — wrapped in levels, ranks, attributes, titles, debuffs, daily quests, boss gates and Mifflin–St Jeor nutrition. It lives in a single offline file and saves straight to your device. Not medical advice — just the System nudging you up the tower.</p>
-      <p class="lead tiny mt" style="color:var(--ghost-2)">Coded, designed &amp; built by <b class="hi">Claude</b> (Anthropic) — your friendly neighborhood AI architect, who has never done a pull-up but has rendered a great many. Now go clear a Gate. ⚔</p></div>`;
+    <div class="panel flat"><div class="panel-title"><span class="tri"></span>About<span class="sub">SYSTEM GUIDE</span></div>
+      <p class="lead tiny">ASCENSION turns the grind toward a lean, shredded hunter's physique into a Solo-Leveling <b class="hi">System</b> — a ${S.program.weeks||24}-week (extendable) program across three Arcs, wrapped in levels, ranks, attributes, quests and boss gates. One offline file, saved to your device. Not medical advice.</p>
+      <div class="fld-head mt">How it works</div>
+      <ul class="guide">
+        <li><b>Gates</b> are your scheduled workouts — open <b>Train</b>, swipe through each move, log your sets, then finish to bank EXP.</li>
+        <li><b>EXP &amp; Levels</b> come from clearing Gates, daily quests, PRs and logging — levels raise your <b>Rank</b> (E → Monarch).</li>
+        <li><b>Attributes</b> (STR · AGI · VIT · SEN · INT) rise with ability points earned per Gate; each one nudges your in-workout targets.</li>
+        <li><b>Daily Quest</b> is a quick, always-clearable baseline that keeps your streak and readiness up.</li>
+        <li><b>Boss Gates</b> are HIIT trials every 4th week — clear one under-level for bonus rewards.</li>
+        <li><b>Titles</b> are unlockable buffs; <b>debuffs</b> appear if you overtrain or skip nutrition, and clear on their own.</li>
+      </ul>
+      <div class="fld-head mt">Quick FAQ</div>
+      <ul class="guide">
+        <li><b>What's RPE?</b> Rate of Perceived Exertion (1–10) — how hard a set felt. ~8 means about 2 reps left in the tank.</li>
+        <li><b>Rep vs set?</b> A rep is one full movement; a set is a group of reps. "4 × 8" = 4 sets of 8 reps.</li>
+        <li><b>HP / MP?</b> HP = recovery (drops over back-to-back training days); MP = readiness (rises as you clear the Daily Quest).</li>
+        <li><b>Lift heavy?</b> Not required — use whatever equipment you have; bodyweight progressions count. Just beat your last log over time.</li>
+        <li><b>Lose progress?</b> Everything saves locally. Back up via Settings, and import it on a new device.</li>
+      </ul>
+      <div class="creditbox"><span class="sig">// SYSTEM ADMINISTRATOR</span>Coded, designed &amp; built by <b class="hi">Claude</b> (Anthropic) — your friendly neighborhood AI architect, who has never done a pull-up but has rendered a great many. Arise, Hunter. ⚔</div></div>`;
 }
 function setBars(v){ S.settings.barStyle=v; save(); document.documentElement.setAttribute("data-bars",v); }
 function setWeeks(n){ n=Math.max(8,Math.min(104,n)); S.program.weeks=n; save(); toast(`Program set to ${n} weeks`); render(); decorPanels(); }
