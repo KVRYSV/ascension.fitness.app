@@ -1,8 +1,26 @@
 # ascension.fitness.app
 personal use fitness app vibecoded using claude.
 
-v5.3 polish pass
+## v5.4 polish pass (peer-feedback round)
 
+Attributes are SP-bound again. The ▴ / ▾ arrows spend and refund ability points earned per Gate; arrows grey out when you have no SP (▴) or are back at base 10 (▾). Unlimited editing now lives only in the Settings → Admin panel. Tapping a stat brings back its full explanation, and attributes now affect the workout — a per-exercise System tip scales load jumps, bonus reps, rest, or tempo to the governing stat, and session EXP scales slightly with it.
+Hunter profile cleanup. Removed the rank-ladder text line and the cropped header glow; the level number is the EXP-to-next bar.
+Real transparency. Backdrop blur cut ~40% across panels, nav, modals and the profile screen so the live background reads through instead of fogging to opaque.
+Edgier nav. Status button is a smaller, sharp-cornered diamond with a thin white dragon-eye icon; the "Status" label sits lower; the floating bar keeps its glowing polygonal edge.
+Crimson is black + red. Deep-red secondary + warm-red ink ramp; the modal/prompt no longer reads blue or purple on any theme.
+YouTube Shorts embeds now render vertically (9:16) without spilling sideways; regular clips stay 16:9.
+Bigger, finger-friendly inputs — larger steppers, weight/rep fields and check buttons; the exercise name and sets × reps target are now large and obvious.
+Cohesive glyphs — the 🛠 machine emoji is now ⋈, the 🔒 locked-title marker is ∅.
+Reset all progress is a red-striped warning button; the Admin "NO PASSWORD" label is gone.
+Imperial / Metric toggle in Settings (lb·ft/in ⇄ kg·cm) across the body card, charts, PRs and the weight log.
+Low Health / Mana Exhaustion debuffs: recovery now drops with consecutive training days — low HP subtracts VIT, low MP (untouched Daily Quest) subtracts AGI, both clearing as the bars recover.
+Skip a training day with a confirm prompt — confirm (no status debuff) / cancel — no missed-day penalty.
+My own mark. New app logo + boot sigil: an inverted-V chevron with a dragon eye, accent-coloured on black; PWA icons regenerated to match.
+New background — replaced the laggy perspective grid + node-network + breathing glow with a cheap flowing PlayStation-style wave field (no O(n²), no shadow-blur, no breathing).
+Hidden scrollbars app-wide; gentler one-card-per-swipe in the Train deck.
+Regimen reviewed — 41 exercises, balanced across all muscle groups + mobility + conditioning; no gaps, left as-is.
+
+## v5.3 polish pass
 
 Stats start on your real start date. Week count and every derived stat (missed days, debuffs, nutrition flags) track from the program start, so starting today never hands you phantom penalties. Settings now shows start date + estimated end and lets you set the start date.
 More glass. Floating nav and panels are ~20% more transparent with stronger bokeh blur, so the live background reads through every window.
