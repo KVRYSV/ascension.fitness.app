@@ -425,6 +425,146 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
   .draw{stroke-dashoffset:0!important;} .bargrow{transform:scaleY(1)!important;} .fade,.node-dot{opacity:1!important;}
 }
 
+
+/* ============================ v5 additions ============================ */
+/* A1 — full-bleed header */
+.topbar{ margin:0 -14px; padding-left:20px; padding-right:18px; }
+
+/* A2 — levitating frosted nav + A3 centred STATUS focus button */
+.nav{ left:50%; right:auto; transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom)); width:min(94%,470px);
+  border:1px solid var(--line-2); border-top:1px solid var(--line-2); border-radius:24px;
+  padding:9px 6px; background:linear-gradient(180deg, rgb(13 22 42 / .72), rgb(6 10 20 / .84));
+  backdrop-filter:blur(28px) saturate(1.6); -webkit-backdrop-filter:blur(28px) saturate(1.6);
+  box-shadow:0 18px 52px rgb(0 0 0 / .62), 0 0 26px rgb(var(--ac) / .18), inset 0 1px 0 rgb(255 255 255 / .09);
+  overflow:visible; align-items:center; }
+.nav .marker{ display:none; }
+.nav button.navfocus{ color:var(--accent); }
+.nav button.navfocus .ic{ width:56px; height:56px; margin-top:-30px; border-radius:50%;
+  background:linear-gradient(160deg, var(--accent), rgb(var(--ac) / .55)); color:#02060c;
+  border:2px solid rgb(255 255 255 / .28); display:grid; place-items:center;
+  box-shadow:0 0 24px rgb(var(--ac) / .75), 0 10px 24px rgb(0 0 0 / .55), inset 0 2px 0 rgb(255 255 255 / .4); }
+.nav button.navfocus .ic svg{ width:27px; height:27px; stroke:#02060c; stroke-width:2; }
+.nav button.navfocus.active .ic{ transform:scale(1.04); filter:none; }
+.nav button.navfocus span:not(.ic){ margin-top:4px; }
+
+/* B1/B2 — big level + circular EXP ring */
+.lvring{ position:relative; width:208px; height:208px; margin:8px auto 4px; }
+.lvring svg{ width:100%; height:100%; transform:rotate(-90deg); display:block; }
+.lvring .lr-track{ stroke:#0f1d34; }
+.lvring .lr-val{ stroke:var(--accent); stroke-linecap:round; filter:drop-shadow(0 0 7px var(--accent));
+  transition:stroke-dashoffset 1.05s cubic-bezier(.25,.6,.25,1); }
+.lvring .lr-mid{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.lvring .lr-rank{ font-family:var(--mono); font-size:12px; letter-spacing:.34em; color:var(--accent); text-shadow:0 0 12px var(--accent); }
+.lvring .lr-lv{ font-family:var(--display); font-weight:900; font-size:82px; line-height:.82; color:#fff; text-shadow:0 0 28px var(--accent); }
+.lvring .lr-lvlabel{ font-family:var(--mono); font-size:10px; letter-spacing:.36em; color:var(--ghost); margin-top:3px; }
+.lvring .lr-exp{ font-family:var(--mono); font-size:10px; color:var(--ghost-2); margin-top:7px; letter-spacing:.1em; }
+
+/* B3 — stat cells with +/- arrows */
+.statx{ border:1px solid var(--line); background:rgb(var(--ac) / .04); padding:9px 3px 8px; text-align:center; position:relative; }
+.statx .k{ font-family:var(--mono); font-size:9.5px; letter-spacing:.07em; color:var(--ghost); }
+.statx .v{ font-family:var(--display); font-weight:700; font-size:21px; color:#fff; text-shadow:0 0 10px var(--accent); line-height:1; margin:3px 0 1px; }
+.statx .mod{ font-family:var(--mono); font-size:8.5px; height:11px; line-height:11px; }
+.statx .mod.up{ color:var(--green); } .statx .mod.dn{ color:var(--hp); }
+.statx .arrows{ display:flex; gap:4px; justify-content:center; margin-top:5px; }
+.statx .arrows button{ flex:1; border:1px solid var(--line); background:rgb(5 9 18 / .6); color:var(--accent);
+  font-family:var(--mono); font-size:13px; line-height:1; padding:5px 0; cursor:pointer; }
+.statx .arrows button:active{ background:var(--accent); color:#02060c; }
+
+/* B5 — 7-day strip */
+.weekstrip{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:2px; }
+.daycell{ border:1px solid var(--line); background:rgb(var(--ac) / .03); padding:8px 1px 7px; text-align:center; cursor:pointer; transition:.14s; }
+.daycell:active{ transform:scale(.92); }
+.daycell .dn{ font-family:var(--mono); font-size:8px; letter-spacing:.04em; color:var(--ghost); }
+.daycell .dd{ width:19px; height:19px; margin:6px auto 0; border-radius:50%; border:1px solid var(--line-2); display:grid; place-items:center; font-size:10px; color:var(--ghost-2); }
+.daycell.done .dd{ background:var(--green); border-color:var(--green); color:#02120a; box-shadow:0 0 8px var(--green); }
+.daycell.missed .dd{ border-color:var(--hp); color:var(--hp); }
+.daycell.today{ border-color:var(--accent); box-shadow:0 0 10px rgb(var(--ac) / .25); }
+
+/* titles + debuffs */
+.tslot{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.title-chip{ font-family:var(--mono); font-size:11px; letter-spacing:.03em; padding:8px 11px; border:1px solid var(--line-2);
+  color:var(--accent); background:var(--soft); cursor:pointer; display:flex; gap:8px; align-items:center; }
+.title-chip.eq{ border-color:var(--accent); box-shadow:0 0 13px rgb(var(--ac) / .3); }
+.title-chip.locked{ opacity:.4; border-style:dashed; color:var(--ghost); cursor:default; }
+.title-chip .tm{ font-size:9px; color:var(--ghost); } .title-chip.eq .tm{ color:var(--green); }
+.debuff{ display:flex; gap:10px; align-items:flex-start; border:1px solid rgb(255 84 104 / .4); background:rgb(255 84 104 / .07); padding:9px 11px; margin-top:8px; }
+.debuff .dbico{ color:var(--hp); font-family:var(--display); font-weight:700; font-size:16px; }
+.debuff .nm{ font-family:var(--ui); font-weight:700; color:#ffd0d6; letter-spacing:.01em; }
+.debuff .ds{ font-size:12px; color:var(--ghost); margin-top:2px; line-height:1.4; }
+.debuff .dm{ margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--hp); white-space:nowrap; }
+
+/* C — profile full-screen */
+.profile-screen{ position:fixed; inset:0; z-index:180; display:none; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  background:radial-gradient(120% 80% at 50% -6%, rgb(var(--ac) / .14), transparent 55%), rgb(4 6 13 / .975);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+.profile-screen.show{ display:block; animation:screenIn .3s cubic-bezier(.2,.85,.2,1); }
+.papp{ max-width:560px; margin:0 auto; padding:calc(15px + env(safe-area-inset-top)) 14px calc(44px + env(safe-area-inset-bottom)); }
+.phead{ display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:3;
+  padding:8px 0 10px; background:linear-gradient(180deg, rgb(4 6 13 / .9) 60%, transparent); }
+.phead .pttl{ font-family:var(--mono); font-size:12px; letter-spacing:.26em; color:var(--accent); text-shadow:0 0 10px var(--accent); }
+.pclose{ font-family:var(--mono); font-size:12px; color:var(--ghost); border:1px solid var(--line-2); background:var(--soft); padding:9px 14px; cursor:pointer; }
+.pclose:active{ transform:scale(.94); }
+.rankhuge{ font-family:var(--display); font-weight:900; font-size:118px; line-height:.82; text-align:center; color:#fff;
+  text-shadow:0 0 42px var(--accent),0 0 90px rgb(var(--ac) / .45); letter-spacing:.03em; margin:2px 0; }
+.rankhuge .smr{ font-family:var(--mono); font-size:12px; letter-spacing:.34em; color:var(--accent); display:block; text-shadow:0 0 10px var(--accent); }
+.rankrow{ display:flex; justify-content:center; gap:4px; margin-top:6px; flex-wrap:wrap; }
+.prgrid{ display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin-top:4px; }
+.prcell{ border:1px solid var(--line); background:rgb(var(--ac) / .04); padding:9px 2px 8px; text-align:center; }
+.prcell .k{ font-family:var(--mono); font-size:9px; color:var(--ghost); }
+.prcell .v{ font-family:var(--display); font-weight:700; font-size:19px; color:#fff; text-shadow:0 0 8px var(--accent); }
+.prcell .mm{ font-family:var(--mono); font-size:8px; height:10px; }
+.prcell .mm.up{ color:var(--green); } .prcell .mm.dn{ color:var(--hp); }
+.histday{ border:1px solid var(--line); background:rgb(9 15 28 / .5); padding:10px 12px; margin-top:8px; }
+.histday .hd{ display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:.05em; }
+.histday .hx{ font-size:12px; color:var(--ghost); margin-top:6px; line-height:1.55; }
+.histday .hx b{ color:var(--ink-hi); }
+
+/* D — train horizontal scroll + media */
+.trainbar{ position:sticky; top:calc(env(safe-area-inset-top) + 0px); z-index:30; height:4px; background:rgb(8 14 26 / .7); margin:0 -14px; }
+.trainbar>i{ display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),#dffcff); box-shadow:0 0 10px var(--accent); transition:width .45s cubic-bezier(.2,.8,.2,1); }
+.hscroll{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; margin:0 -14px; scrollbar-width:none; }
+.hscroll::-webkit-scrollbar{ display:none; }
+.hpage{ flex:0 0 100%; width:100%; scroll-snap-align:center; padding:6px 14px 4px; box-sizing:border-box; }
+.pageflag{ font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--ghost); text-align:center; margin:2px 0 6px; }
+.hdots{ display:flex; gap:6px; justify-content:center; margin:8px 0 2px; flex-wrap:wrap; }
+.hdots i{ width:7px; height:7px; border-radius:50%; background:var(--line-2); transition:.2s; cursor:pointer; }
+.hdots i.on{ background:var(--accent); box-shadow:0 0 8px var(--accent); transform:scale(1.25); }
+.hdots i.done{ background:var(--green); }
+.exvid{ width:100%; aspect-ratio:16/9; border:1px solid var(--line-2); background:#000; margin-top:11px; overflow:hidden; }
+.exvid iframe{ width:100%; height:100%; border:0; display:block; }
+.exvid .vph{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:var(--ghost); font-family:var(--mono); font-size:11px; cursor:pointer; }
+.machine{ display:flex; gap:8px; flex-wrap:wrap; margin-top:11px; }
+.mchip{ font-family:var(--mono); font-size:10px; letter-spacing:.03em; padding:7px 10px; border:1px solid var(--line-2); color:var(--accent); background:var(--soft); }
+.mchip.free{ color:var(--ghost); border-color:var(--line); }
+.track{ display:flex; gap:10px; align-items:center; border:1px solid var(--line); background:rgb(var(--ac) / .04); padding:10px 12px; margin-top:11px; }
+.track .mu{ width:0;height:0;border-left:10px solid var(--accent);border-top:6px solid transparent;border-bottom:6px solid transparent;flex:0 0 auto; }
+.track .tt{ font-family:var(--ui); font-weight:600; color:var(--ink); letter-spacing:.01em; }
+.track .ta{ font-family:var(--mono); font-size:11px; color:var(--ghost); margin-top:1px; }
+.ytbtn{ display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:#02060c; background:var(--accent); border:none; padding:11px 13px; cursor:pointer; margin-top:11px; text-decoration:none; }
+.ytbtn:active{ transform:translateY(1px); }
+.ytbtn.ghost{ background:transparent; color:var(--accent); border:1px solid var(--line-2); }
+.bossbanner{ border:1px solid rgb(255 84 104 / .55); background:linear-gradient(120deg, rgb(255 84 104 / .14), transparent);
+  padding:12px 14px; box-shadow:0 0 22px rgb(255 84 104 / .18); }
+.bossbanner .bt{ font-family:var(--display); font-weight:900; font-size:16px; color:#ffd0d6; letter-spacing:.04em; text-shadow:0 0 14px rgb(255 84 104 / .6); }
+
+/* F4 — bar styles */
+html[data-bars="solid"] .bar>i{ box-shadow:none; }
+html[data-bars="striped"] .bar>i{ background:repeating-linear-gradient(45deg, var(--accent) 0 8px, rgb(var(--ac) / .5) 8px 16px); box-shadow:0 0 8px rgb(var(--ac)/.4); }
+html[data-bars="minimal"] .bar{ height:6px; } html[data-bars="minimal"] .bar>i{ box-shadow:none; }
+html[data-bars="minimal"] .resttimer .rt-bar{ height:3px; }
+
+.play{ width:0;height:0;border-left:9px solid var(--accent);border-top:6px solid transparent;border-bottom:6px solid transparent;display:inline-block; }
+.ytbtn .play{ border-left-color:#02060c; }
+.exvid .vph .play{ border-left-width:12px;border-top-width:8px;border-bottom-width:8px; }
+.vlist{ max-height:46vh; overflow:auto; margin-top:9px; -webkit-overflow-scrolling:touch; }
+.vrow{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); background:rgb(var(--ac) / .03); padding:8px 10px; margin-top:6px; }
+.vrow .vn{ font-family:var(--ui); font-weight:600; color:var(--text-hi); font-size:13px; }
+.vrow .vmeta{ font-family:var(--mono); font-size:10px; color:var(--ghost); margin-top:1px; }
+.vtag{ font-family:var(--mono); font-size:8.5px; letter-spacing:.06em; padding:3px 6px; border:1px solid var(--line-2); white-space:nowrap; }
+.vtag.ov{ color:var(--green); border-color:var(--green); } .vtag.em{ color:var(--accent); } .vtag.se{ color:var(--ghost); }
+.adminrow{ display:flex; justify-content:space-between; align-items:center; gap:8px; border:1px solid var(--line); padding:8px 10px; margin-top:7px; font-family:var(--mono); font-size:12px; color:var(--text-hi); }
+.adminrow b{ color:#fff; } .adminrow>div{ display:flex; gap:5px; flex:0 0 auto; }
 </style>
 </head>
 <body>
@@ -513,7 +653,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 <div id="main" class="app" style="display:none;">
   <div class="topbar">
     <div class="brand">ASCENSION<small id="tb_name">PLAYER</small></div>
-    <div class="rankpill" id="tb_pill"><span id="tb_rank">E</span>·RANK <span class="sep">|</span> Lv <b id="tb_lv">1</b></div>
+    <div class="rankpill" id="tb_pill" onclick="openProfile()"><span id="tb_rank">E</span>·RANK <span class="sep">|</span> Lv <b id="tb_lv">1</b></div>
   </div>
   <section class="screen active" id="s-status"></section>
   <section class="screen" id="s-quests"></section>
@@ -525,11 +665,11 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 <!-- ============ BOTTOM NAV (SVG icons — no font glyphs) ============ -->
 <nav class="nav" id="nav" style="display:none;">
   <div class="marker" id="navmark"></div>
-  <button data-t="status"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3 21 8v8l-9 5-9-5V8z"/><path d="M12 8 16 10.5v3L12 16l-4-2.5v-3z"/></svg></span>Status</button>
   <button data-t="quests"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg></span>Quests</button>
   <button data-t="train"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg></span>Train</button>
-  <button data-t="stats"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stats</button>
-  <button data-t="system"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span>System</button>
+  <button data-t="status" class="navfocus"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3 21 8v8l-9 5-9-5V8z"/><path d="M12 8 16 10.5v3L12 16l-4-2.5v-3z"/></svg></span>Status</button>
+  <button data-t="stats"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Data</button>
+  <button data-t="system"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span>Settings</button>
 </nav>
 
 <!-- ============ MODAL ENGINE (notifications + detail + confirm + prompt) ============ -->
@@ -541,6 +681,13 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
     <div class="wmsg" id="w_body"></div>
     <div class="winput" id="w_input" style="display:none;"></div>
     <div class="wactions" id="w_actions"></div>
+  </div>
+</div>
+
+<div class="profile-screen" id="profile">
+  <div class="papp">
+    <div class="phead"><span class="pttl">[ HUNTER PROFILE ]</span><button class="pclose" onclick="closeProfile()">Close ✕</button></div>
+    <div id="profileBody"></div>
   </div>
 </div>
 
@@ -774,6 +921,88 @@ const STAT_INFO={
   INT:{name:"Intellect",color:"#ffd27a",gov:"Programming knowledge and nutrition precision.",effect:"The System's planning. Sharper adherence and smarter progression."},
 };
 
+
+/* ============================================================ TITLES / DEBUFFS / MACHINES / TRACKS ========================= */
+const TITLES=[
+  {id:"t_dumbbell",n:"Dumbbell Slayer",d:"+2 STR — the iron knows your name.",mods:{STR:2},how:"Clear 5 Gates",test:s=>realSessions(s).length>=5},
+  {id:"t_ironwill",n:"Iron Will",d:"+1 STR · +1 VIT — forged by routine.",mods:{STR:1,VIT:1},how:"Reach a 7-day streak",test:s=>s.streak.longest>=7},
+  {id:"t_shadow",n:"Shadow Dancer",d:"+3 AGI — weightless, precise.",mods:{AGI:3},how:"Own Straight-Arm Strength, or 10 core/skill sessions",test:s=>s.skills.owned.includes("ss2")||countCat(s,"Core")>=10},
+  {id:"t_ascetic",n:"Ascetic",d:"+2 INT · +1 SEN — the disciplined mind.",mods:{INT:2,SEN:1},how:"Log nutrition on 7 days",test:s=>nutritionDays(s)>=7},
+  {id:"t_unbroken",n:"Unbroken",d:"+2 VIT — you do not stop.",mods:{VIT:2},how:"Reach a 14-day streak",test:s=>s.streak.longest>=14},
+  {id:"t_feather",n:"Featherweight",d:"+2 AGI · +1 VIT — engine that won't quit.",mods:{AGI:2,VIT:1},how:"10 conditioning sessions",test:s=>countCat(s,"Conditioning")>=10},
+  {id:"t_berserker",n:"Berserker",d:"+3 STR · −1 SEN — all-out aggression.",mods:{STR:3,SEN:-1},how:"Clear 20 Gates",test:s=>realSessions(s).length>=20},
+  {id:"t_demon",n:"Demon Lord",d:"+2 STR · +2 AGI — martial dominion.",mods:{STR:2,AGI:2},how:"Reach Level 20",test:s=>s.rpg.level>=20},
+  {id:"t_gate",n:"Gatekeeper",d:"+1 to every attribute.",mods:{STR:1,AGI:1,VIT:1,SEN:1,INT:1},how:"Reach Level 35 (B-Rank)",test:s=>s.rpg.level>=35},
+  {id:"t_boss",n:"Giant Slayer",d:"+2 STR · +1 VIT — felled a Boss under-level.",mods:{STR:2,VIT:1},how:"Beat a Boss below its recommended level",test:s=>!!s.rpg.giantSlayer},
+  {id:"t_monarch",n:"Shadow Monarch",d:"+3 to every attribute — sovereign of the climb.",mods:{STR:3,AGI:3,VIT:3,SEN:3,INT:3},how:"Reach Level 90 (Monarch)",test:s=>s.rpg.level>=90},
+];
+const MAX_TITLES=3;
+function realSessions(s){ return (s.sessions||[]).filter(x=>!x.forced); }
+function countCat(s,cat){ let n=0; (s.sessions||[]).forEach(se=>{ if((se.ex||[]).some(e=>EX[e.id]&&EX[e.id].cat===cat)) n++; }); return n; }
+function nutritionDays(s){ return (s.nutrition&&s.nutrition.log?s.nutrition.log:[]).length; }
+function checkTitleUnlocks(){
+  const t=S.rpg.titles=S.rpg.titles||{owned:[],equipped:[]};
+  TITLES.forEach(def=>{ try{ if(def.test(S)&&!t.owned.includes(def.id)){ t.owned.push(def.id);
+    if(typeof notify==="function") notify("TITLE UNLOCKED",`<b>${def.n}</b><br>${def.d}<br><span class="muted tiny">Equip it from your Profile (tap the level badge).</span>`); } }catch(e){} });
+}
+function titleMods(){ const eq=(S.rpg.titles&&S.rpg.titles.equipped)||[]; const m={STR:0,AGI:0,VIT:0,SEN:0,INT:0};
+  eq.forEach(id=>{ const def=TITLES.find(t=>t.id===id); if(def) for(const k in def.mods) m[k]+=def.mods[k]; }); return m; }
+
+/* debuffs — derived from misses / poor adherence */
+function daysSinceLastSession(){ const r=realSessions(S); if(!r.length) return null;
+  const last=r[r.length-1].date; return Math.floor((new Date(todayStr()+"T00:00:00")-new Date(last+"T00:00:00"))/86400000); }
+function scheduledDatesBetween(startStr,endStr){ const out=[]; if(!S.profile) return out;
+  let d=new Date(startStr+"T00:00:00"), end=new Date(endStr+"T00:00:00");
+  while(d<=end){ if(S.profile.days.includes(d.getDay())) out.push(todayStr(d)); d=new Date(d.getTime()+86400000); } return out; }
+function missedCount(daysBack){ const end=todayStr(new Date(Date.now()-86400000)), start=todayStr(new Date(Date.now()-86400000*daysBack));
+  let miss=0; scheduledDatesBetween(start,end).forEach(dt=>{ if(!S.sessions.some(s=>s.date===dt&&!s.forced)) miss++; }); return miss; }
+function nutritionFlag(){ let over=0,under=0,unlogged=0; const ct=S.profile?calorieTarget():2500;
+  for(let i=0;i<7;i++){ const dt=todayStr(new Date(Date.now()-86400000*i)); const n=S.nutrition.log.find(x=>x.date===dt);
+    if(!n){ unlogged++; continue; } if(n.cal>ct*1.3) over++; else if(n.cal>0&&n.cal<ct*0.6) under++; }
+  return {over:over>=2,under:under>=2,unlogged}; }
+function activeDebuffs(){
+  const out=[], since=daysSinceLastSession(), missed=missedCount(14), nf=nutritionFlag();
+  if(since!==null&&since>=7) out.push({id:"atrophy",n:"Muscle Atrophy",d:`${since} days without a Gate — strength fading.`,mods:{STR:-3,AGI:-2}});
+  else if(missed>=2) out.push({id:"weak",n:"Weakness",d:`${missed} scheduled Gates missed in 14 days.`,mods:{STR:-2}});
+  if(since!==null&&since>=3&&since<7) out.push({id:"tired",n:"Sluggish",d:`${since} days idle — readiness dropping.`,mods:{SEN:-1,AGI:-1}});
+  if(nf.over) out.push({id:"poison",n:"Poisoned",d:"Calories well over target on recent days.",mods:{VIT:-2}});
+  else if(nf.under) out.push({id:"starve",n:"Famished",d:"Under-fuelling — calories well under target.",mods:{VIT:-1,STR:-1}});
+  if(nf.unlogged>=3) out.push({id:"unfed",n:"Unaccounted",d:"Nutrition unlogged on several recent days.",mods:{INT:-1}});
+  return out;
+}
+function debuffMods(){ const m={STR:0,AGI:0,VIT:0,SEN:0,INT:0}; activeDebuffs().forEach(db=>{ for(const k in db.mods) m[k]+=db.mods[k]; }); return m; }
+function effStats(){ const b=S.rpg.stats, tm=titleMods(), dm=debuffMods(), o={};
+  ["STR","AGI","VIT","SEN","INT"].forEach(k=>{ o[k]=Math.max(1,(b[k]||0)+tm[k]+dm[k]); }); return o; }
+function statDelta(k){ return titleMods()[k]+debuffMods()[k]; }
+
+/* PRs */
+function e1rm(w,reps){ return w>0?Math.round(w*(1+reps/30)):0; }
+function updatePRs(exArr){ S.records=S.records||{pr:{}}; const pr=S.records.pr=S.records.pr||{};
+  exArr.forEach(e=>{ (e.sets||[]).forEach(s=>{ const est=e1rm(s.w,s.reps); const cur=pr[e.id];
+    const better = s.w>0 ? (!cur||est>(cur.e1rm||0)) : (!cur||(s.reps>(cur.reps||0)&&!cur.w));
+    if(better && (s.w>0||s.reps>0)) pr[e.id]={w:s.w,reps:s.reps,e1rm:est,date:todayStr()}; }); }); }
+
+/* EXP + calories aggregates for profile */
+function expGainedTotal(){ return S.rpg.totalExp||0; }
+function expGainedWeek(){ const start=todayStr(new Date(Date.now()-86400000*6)); return (S.log.exp||[]).filter(e=>e.d>=start).reduce((a,e)=>a+e.a,0); }
+function expByDayWeek(){ const out=[]; for(let i=6;i>=0;i--){ const dt=todayStr(new Date(Date.now()-86400000*i));
+  const a=(S.log.exp||[]).filter(e=>e.d===dt).reduce((x,e)=>x+e.a,0); out.push({date:dt,label:DAYNAMES[new Date(dt+"T00:00:00").getDay()][0],val:a}); } return out; }
+function caloriesByDayWeek(){ const out=[]; for(let i=6;i>=0;i--){ const dt=todayStr(new Date(Date.now()-86400000*i));
+  const n=S.nutrition.log.find(x=>x.date===dt); out.push({date:dt,label:DAYNAMES[new Date(dt+"T00:00:00").getDay()][0],cal:n?n.cal:0,pro:n?n.pro:0}); } return out; }
+function workoutsOn(date){ return S.sessions.filter(s=>s.date===date); }
+function sevenDays(){ const out=[]; for(let i=6;i>=0;i--){ const dt=todayStr(new Date(Date.now()-86400000*i));
+  const ses=workoutsOn(dt), trained=ses.length>0, dow=new Date(dt+"T00:00:00").getDay();
+  const sched=S.profile&&S.profile.days.includes(dow), missed=sched&&!trained&&dt<todayStr();
+  out.push({date:dt,dow:DAYNAMES[dow][0],trained,sched,missed,sessions:ses,score:dayScore(dt),today:dt===todayStr()}); } return out; }
+
+/* boss fights */
+function bossRecLevel(wk){ return Math.round((wk||currentWeek())*1.8)+6; }
+function isBossToday(){ if(!S.profile) return false; const wk=currentWeek();
+  return isTrainingDay(new Date()) && wk%4===0 && !(S.rpg.bossesBeaten||[]).includes(wk) && !sessionLoggedToday(); }
+function bossWorkout(){ const slots=[{id:"burpee",s:4,r:"30s max"},{id:"jumprope",s:4,r:"45s hard"},{id:"pushup",s:4,r:"AMRAP"},{id:"goblet",s:3,r:"15 fast"},{id:"intervals",s:3,r:"20s sprint / 40s walk"}];
+  const ex=slots.filter(sl=>EX[sl.id]).map(sl=>({id:sl.id,reps:sl.r,sets:Array.from({length:sl.s},()=>({weight:"",reps:"",rpe:"",done:false}))}));
+  return {key:"BOSS",name:"Boss Gate — HIIT Trial",boss:true,rec:bossRecLevel(),ex}; }
+
 /* ============================================================ STATE ========================================================= */
 const KEY="ascension_save_v3";
 const OLD_KEY="ascension_save_v1";
@@ -782,12 +1011,14 @@ const REDUCE = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motio
 
 function defaultState(){
   return {
-    version:3, profile:null,
-    rpg:{level:1,exp:0,stats:{STR:10,AGI:10,VIT:10,SEN:10,INT:10},statPoints:0,skillPoints:0},
-    skills:{owned:[]}, program:{startDate:todayStr(),seq:0}, sessions:[],
+    version:4, profile:null,
+    rpg:{level:1,exp:0,totalExp:0,stats:{STR:10,AGI:10,VIT:10,SEN:10,INT:10},statPoints:0,skillPoints:0,
+         titles:{owned:[],equipped:[]},bossesBeaten:[],giantSlayer:false},
+    skills:{owned:[]}, program:{startDate:todayStr(),seq:0,weeks:24}, sessions:[],
     quests:{date:null,items:[],bonusGiven:false}, streak:{current:0,longest:0,last:null},
     metrics:{weight:[]}, nutrition:{log:[],goalOverride:null}, supps:{checks:{}},
-    settings:{accent:"cyan",sound:true}, draft:null
+    records:{pr:{}}, log:{exp:[]},
+    settings:{accent:"cyan",sound:true,barStyle:"glow",videoOverrides:{}}, draft:null
   };
 }
 function todayStr(d){ d=d||new Date(); return d.toISOString().slice(0,10); }
@@ -835,11 +1066,13 @@ function expMult(){
 }
 function addExp(amount,reason){
   amount=Math.round(amount*expMult());
-  S.rpg.exp+=amount;
+  S.rpg.exp+=amount; S.rpg.totalExp=(S.rpg.totalExp||0)+amount;
+  (S.log.exp=S.log.exp||[]).push({d:todayStr(),a:amount,r:reason||""}); if(S.log.exp.length>240) S.log.exp=S.log.exp.slice(-240);
   let leveled=[];
   while(S.rpg.exp>=expToNext(S.rpg.level)){
     S.rpg.exp-=expToNext(S.rpg.level); S.rpg.level++; S.rpg.statPoints+=3; S.rpg.skillPoints+=1; leveled.push(S.rpg.level);
   }
+  if(leveled.length) checkTitleUnlocks();
   save();
   return {gained:amount,leveled};
 }
@@ -849,9 +1082,9 @@ function pickEx(slot,equip){ for(const id of slot.ids){ if(EX[id] && EX[id].eq.i
 function currentWeek(){
   const start=new Date(S.program.startDate+"T00:00:00");
   const diff=Math.floor((Date.now()-start.getTime())/86400000);
-  return Math.max(1, Math.min(24, Math.floor(diff/7)+1));
+  return Math.max(1, Math.min((S.program.weeks||24), Math.floor(diff/7)+1));
 }
-function currentArc(){ const w=currentWeek(); return ARCS.find(a=>w>=a.wk[0]&&w<=a.wk[1])||ARCS[0]; }
+function currentArc(){ const w=Math.min(24,currentWeek()); return ARCS.find(a=>w>=a.wk[0]&&w<=a.wk[1])||ARCS[ARCS.length-1]; }
 function weekDirective(week){
   const pos=((week-1)%8)+1;
   if(pos===8) return {phase:"Deload",deload:true,setDelta:-1,rir:"3–4 RIR",note:"Recovery week. Cut a set, drop load ~20–30%, keep 3–4 reps in reserve. Prioritise sleep + mobility — this is where adaptation locks in."};
@@ -1114,6 +1347,7 @@ function render(){
   document.getElementById("tb_rank").textContent=rankFor(S.rpg.level);
   document.getElementById("tb_lv").textContent=S.rpg.level;
   document.documentElement.setAttribute("data-accent",S.settings.accent||"cyan");
+  document.documentElement.setAttribute("data-bars",S.settings.barStyle||"glow");
   renderStatus(); renderQuests(); renderTrain(); renderStats(); renderSystem();
   decorPanels();
 }
@@ -1121,55 +1355,88 @@ function render(){
 /* ---- STATUS (interactive: every element drills into a window) ---- */
 function recoveryPct(){ const recent=lastNSessions(3); const base=100-recent.length*8; return Math.max(40,Math.min(100,base+(isTrainingDay(new Date())?0:15))); }
 function readinessPct(){ ensureDailyQuest(); const q=S.quests.items,done=q.filter(i=>i.done).length; return Math.max(25,Math.round(40+done/q.length*60)); }
-function hpMax(){ return 80+S.rpg.stats.VIT*4; }
-function mpMax(){ return 60+S.rpg.stats.SEN*3; }
+function hpMax(){ return 80+effStats().VIT*4; }
+function mpMax(){ return 60+effStats().SEN*3; }
 
+function levelRing(have,need,lv,rank){
+  const R=92, C=2*Math.PI*R, pct=Math.min(1,need>0?have/need:0), off=C*(1-pct);
+  return `<div class="lvring"><svg viewBox="0 0 208 208">
+    <circle class="lr-track" cx="104" cy="104" r="${R}" fill="none" stroke-width="7"/>
+    <circle class="lr-val" cx="104" cy="104" r="${R}" fill="none" stroke-width="7" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" data-off="${off.toFixed(1)}"/></svg>
+    <div class="lr-mid"><div class="lr-rank">${rank}-RANK</div><div class="lr-lv" id="lvnum">${lv}</div><div class="lr-lvlabel">LEVEL</div><div class="lr-exp">${have} / ${need} EXP</div></div></div>`;
+}
+function statArrowCell(k,v){ const d=statDelta(k);
+  const mod=d>0?`<div class="mod up">+${d}</div>`:(d<0?`<div class="mod dn">${d}</div>`:`<div class="mod"></div>`);
+  return `<div class="statx"><div class="k">${k}</div><div class="v" onclick="openStatDetail('${k}')">${v}</div>${mod}
+    <div class="arrows"><button onclick="adjustStat('${k}',-1)">▾</button><button onclick="adjustStat('${k}',1)">▴</button></div></div>`;
+}
+function adjustStat(k,delta){ const b=S.rpg.stats; b[k]=Math.max(1,(b[k]||0)+delta); save(); checkTitleUnlocks(); if(typeof playSfx==="function")playSfx("tap"); renderStatus(); decorPanels(); }
+function currentDir(){ return weekDirective(currentWeek()); }
 function renderStatus(){
-  const lv=S.rpg.level, need=expToNext(lv), have=S.rpg.exp, rank=rankFor(lv), st=S.rpg.stats, alloc=S.rpg.statPoints>0;
-  const arc=currentArc(), wk=currentWeek(), ci=rankIndex(lv);
+  const lv=S.rpg.level, need=expToNext(lv), have=S.rpg.exp, rank=rankFor(lv), eff=effStats();
+  const arc=currentArc(), wk=currentWeek(), weeks=S.program.weeks||24, ci=rankIndex(lv), dir=currentDir();
   const ladder=RANKS.map((r,i)=>`<div class="rk ${i<ci?'done':''} ${i===ci?'cur':''}">${r[0]==='MONARCH'?'MON':r[0]}<span class="tk">Lv ${r[1]}</span></div>`).join("");
+  const days=sevenDays(), debuffs=activeDebuffs(), eqT=(S.rpg.titles&&S.rpg.titles.equipped)||[];
   document.getElementById("s-status").innerHTML=`
     <div class="panel status">
       <div class="panel-title"><span class="tri"></span>Player Status<span class="sub">${rank}-RANK</span></div>
-      <div class="name">${esc(S.profile.name||"Player")}</div>
-      <div class="class">${CLASS_BY_RANK[rank]}</div>
-      <div class="lvrow"><span class="lv">LEVEL</span><span class="lvnum" id="lvnum">${lv}</span>
-        <span class="muted mono tiny" style="margin-left:auto">Week ${wk}/24 · Arc ${arc.n.split(" ")[0]}</span></div>
-
-      <div class="bar-label" onclick="openBarDetail('exp')"><span>EXP</span><b>${have} / ${need}</b></div>
-      <div class="bar" onclick="openBarDetail('exp')"><i style="width:${Math.min(100,have/need*100)}%"></i></div>
+      <div class="name center">${esc(S.profile.name||"Player")}</div>
+      <div class="class center">${CLASS_BY_RANK[rank]}${eqT.length?` · <span class="hi">${eqT.map(id=>{const t=TITLES.find(x=>x.id===id);return t?t.n:"";}).filter(Boolean).join(" · ")}</span>`:""}</div>
+      ${levelRing(have,need,lv,rank)}
+      <div class="row spread tiny mono muted" style="margin-top:2px"><span>Week ${wk}/${weeks}</span><span>Arc ${arc.n.split(" ")[0]}</span><span class="hi" onclick="openProfile()" style="cursor:pointer">Profile →</span></div>
+      <div class="ladder">${ladder}</div>
       <div class="bar-label" onclick="openBarDetail('hp')"><span>HP — recovery</span><b>${hpMax()}</b></div>
       <div class="bar hp" onclick="openBarDetail('hp')"><i style="width:${recoveryPct()}%"></i></div>
       <div class="bar-label" onclick="openBarDetail('mp')"><span>MP — readiness</span><b>${mpMax()}</b></div>
       <div class="bar mp" onclick="openBarDetail('mp')"><i style="width:${readinessPct()}%"></i></div>
-
-      <div class="ladder">${ladder}</div>
-
-      <div class="stats">
-        ${["STR","AGI","VIT","SEN","INT"].map(k=>statCell(k,st[k],alloc)).join("")}
-      </div>
-      <div class="pointsleft ${alloc?'show':''}">▲ ${S.rpg.statPoints} ABILITY POINTS — tap a stat to allocate</div>
+      ${debuffs.length?`<div class="row tiny mono" style="margin-top:12px;gap:7px;flex-wrap:wrap">${debuffs.map(d=>`<span style="border:1px solid rgb(255 84 104 / .4);color:var(--hp);padding:4px 8px">⚠ ${d.n}</span>`).join("")}<span class="muted" style="cursor:pointer;align-self:center" onclick="openProfile()">details →</span></div>`:""}
     </div>
 
     <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>Today<span class="sub">${DAYNAMES[new Date().getDay()]}</span></div>
+      <div class="panel-title"><span class="tri"></span>This Week<span class="sub">TAP A DAY</span></div>
+      <div class="weekstrip">${days.map(d=>`<div class="daycell ${d.trained?'done':''} ${d.missed?'missed':''} ${d.today?'today':''}" onclick="openDayDetail('${d.date}')"><div class="dn">${d.dow}</div><div class="dd">${d.trained?'✓':(d.missed?'✕':'')}</div></div>`).join("")}</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="tri"></span>Attributes<span class="sub">${S.rpg.statPoints>0?S.rpg.statPoints+' SP BANKED':'TUNE FREELY'}</span></div>
+      <div class="stats">${["STR","AGI","VIT","SEN","INT"].map(k=>statArrowCell(k,eff[k])).join("")}</div>
+      <p class="lead tiny center mt">Adjust to match your training focus. Titles + debuffs modify these.</p>
+    </div>
+
+    <div class="panel flat">
+      <div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${wk}/${weeks}</span></div>
+      <div class="name mono hi" style="font-size:16px">${arc.n}</div>
+      <p class="lead tiny">${arc.desc}</p>
+      <div class="directive ${dir.deload?'deload':''}"><span class="pip"></span>${dir.note}</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="tri"></span>Today's Gate<span class="sub">${DAYNAMES[new Date().getDay()]}</span></div>
       ${todayCard()}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="tri"></span>Skill Tree<span class="sub">${S.rpg.skillPoints} SP</span></div>
+      <p class="lead tiny">Spend skill points (1 per level). Nodes grant EXP bonuses + unlock guidance.</p>
+      <div class="tree">${SKILLTREE.map(br=>`<div class="branch"><h3>${br.br}</h3><div class="bd">${br.desc}</div>${br.nodes.map(skillNode).join("")}</div>`).join("")}</div>
     </div>
 
     <div class="grid2">
       <div class="panel flat tap" style="margin:0" onclick="openStreakDetail()">
         <div class="panel-title"><span class="tri"></span>Streak</div>
-        <div class="row spread"><div><div class="lvnum" style="font-size:30px">${S.streak.current}</div><div class="muted tiny mono">CURRENT</div></div>
+        <div class="row spread"><div><div class="lvnum" style="font-size:30px;font-family:var(--display);font-weight:900;color:#fff">${S.streak.current}</div><div class="muted tiny mono">CURRENT</div></div>
         <div style="text-align:right"><div class="mono hi" style="font-size:20px">${S.streak.longest}</div><div class="muted tiny mono">BEST</div></div></div>
       </div>
       <div class="panel flat tap" style="margin:0" onclick="openBodyDetail()">
         <div class="panel-title"><span class="tri"></span>Body</div>
-        <div class="lvnum" style="font-size:30px">${lb0(latestWeightKg()??S.profile.weightKg)}<span class="muted" style="font-size:13px;font-family:var(--mono)"> lb</span></div>
+        <div style="font-size:30px;font-family:var(--display);font-weight:900;color:#fff">${lb0(latestWeightKg()??S.profile.weightKg)}<span class="muted" style="font-size:13px;font-family:var(--mono)"> lb</span></div>
         <div class="muted tiny mono mt">${heightDisplay(S.profile.heightCm)} · tap for trend</div>
       </div>
     </div>`;
+  const lr=document.querySelector("#s-status .lr-val"); if(lr){ const off=lr.getAttribute("data-off"); requestAnimationFrame(()=>{ lr.style.strokeDashoffset=off; }); }
   countUp(document.getElementById("lvnum"),lv,650);
 }
+
 function statCell(k,v,alloc){
   return `<div class="stat ${alloc?'alloc':''}" onclick="openStatDetail('${k}')"><div class="k">${k}</div><div class="v">${v}</div><div class="plus">+</div></div>`;
 }
@@ -1178,6 +1445,9 @@ function allocStat(k){
   S.rpg.stats[k]++; S.rpg.statPoints--; save(); toast(`${k} increased`); return true;
 }
 function todayCard(){
+  if(isBossToday()){ const rec=bossRecLevel(); return `<div class="bossbanner"><div class="bt">⚔ BOSS GATE TODAY</div>
+    <p class="lead tiny" style="margin-top:6px">A HIIT trial stands in your path. Recommended level <b class="am">${rec}</b> — you're Level <b>${S.rpg.level}</b>.${S.rpg.level<rec?' <span class="hi">Beat it under-level for bonus EXP + ability points.</span>':' Clear it to bank the reward.'}</p></div>
+    <button class="btn full mt" onclick="go('train')">Enter the Boss Gate</button>`; }
   const w=todaysWorkout();
   if(w.rest) return `<p class="lead">Scheduled <b class="gr">recovery day</b> · Arc ${w.arc.n} · <span class="hi">${w.dir.phase}</span> week. Recovery is when you grow.</p>
     <div class="directive ${w.dir.deload?'deload':''}"><span class="pip"></span>${w.dir.note}</div>
@@ -1289,82 +1559,170 @@ async function bossPrompt(){
 let sessionDraft=null;
 function sessionLoggedToday(){ const t=todayStr(); return S.sessions.some(s=>s.date===t && !s.forced); }
 
+/* ---- machine + free-weight per movement (D2) ---- */
+const MACHINE={
+  squat:{use:"Squat rack + barbell",free:"Goblet / DB front squat"},
+  goblet:{use:"Dumbbell or kettlebell",free:"Bodyweight squat"},
+  splitsquat:{use:"Dumbbells + bench",free:"Bodyweight, hands on hips"},
+  pistolprog:{use:"Box / bench to assist",free:"Hold a post for balance"},
+  deadlift:{use:"Barbell + plates",free:"DB / kettlebell deadlift"},
+  rdl:{use:"Barbell or dumbbells",free:"Single-leg DB RDL"},
+  hipthrust:{use:"Bench + barbell",free:"Bodyweight glute bridge"},
+  bench:{use:"Flat bench + barbell",free:"DB bench / floor press"},
+  dbpress:{use:"Dumbbells + bench",free:"Floor press / push-up"},
+  ohp:{use:"Barbell or dumbbells",free:"Pike push-up"},
+  pullup:{use:"Pull-up bar",free:"Band-assist / inverted row"},
+  pulldown:{use:"Lat-pulldown machine",free:"Pull-up / band pulldown"},
+  row:{use:"Barbell",free:"DB row / inverted row"},
+  dbrow:{use:"Dumbbell + bench",free:"Backpack row, knee on couch"},
+  invrow:{use:"Smith bar / low bar / rings",free:"Sturdy table edge"},
+  dip:{use:"Dip / parallel bars",free:"Bench dips, feet out"},
+  pushup:{use:"Floor",free:"Knees or incline to scale"},
+  pseudoplanche:{use:"Floor / parallettes",free:"Floor, lean forward"},
+  curl:{use:"Dumbbells / EZ bar",free:"Backpack or band curls"},
+  pushdown:{use:"Cable + rope",free:"Band pushdown / dips"},
+  latraise:{use:"Dumbbells",free:"Water bottles / band"},
+  facepull:{use:"Cable + rope",free:"Band face-pull on a post"},
+  calf:{use:"Calf machine / step",free:"Step edge, bodyweight"},
+  legcurl:{use:"Leg-curl machine",free:"Nordic curl / band curl"},
+  hollow:{use:"Floor / mat",free:"Tuck knees to scale"},
+  legraise:{use:"Pull-up bar / chair",free:"Lying leg raise"},
+  lsit:{use:"Parallettes / dip bars",free:"Floor, hands by hips"},
+  dragonflag:{use:"Bench to grip behind head",free:"Bend knees to scale"},
+  plank:{use:"Floor / mat",free:"—"},
+  frontleverprog:{use:"Pull-up bar / rings",free:"Tuck on any bar"},
+  deadhang:{use:"Pull-up bar",free:"Any sturdy bar / ledge"},
+  cossack:{use:"Floor",free:"Hold support to balance"},
+  deepsquathold:{use:"Floor",free:"Hold a post"},
+  thoracic:{use:"Floor / mat",free:"—"},
+  shoulderdis:{use:"Band or dowel",free:"Towel / broomstick"},
+  wristprep:{use:"Floor",free:"—"},
+  ankle:{use:"Wall",free:"—"},
+  jumprope:{use:"Jump rope",free:"Invisible-rope footwork"},
+  incline:{use:"Treadmill (incline)",free:"Brisk uphill walk outside"},
+  intervals:{use:"Treadmill / track",free:"Outdoor sprints"},
+  burpee:{use:"Floor",free:"—"},
+};
+function machineFor(id){ return MACHINE[id]||{use:"Bodyweight / minimal kit",free:""}; }
+
+/* ---- recommended motivational tracks per category (D4 — title + artist only) ---- */
+const TRACKS_BY_CAT={
+  Legs:[{t:"Till I Collapse",a:"Eminem"},{t:"POWER",a:"Kanye West"},{t:"Black Skinhead",a:"Kanye West"},{t:"HUMBLE.",a:"Kendrick Lamar"}],
+  Push:[{t:"Stronger",a:"Kanye West"},{t:"Remember The Name",a:"Fort Minor"},{t:"Can't Hold Us",a:"Macklemore & Ryan Lewis"},{t:"Lose Yourself",a:"Eminem"}],
+  Pull:[{t:"DNA.",a:"Kendrick Lamar"},{t:"No Role Modelz",a:"J. Cole"},{t:"Sicko Mode",a:"Travis Scott"},{t:"Run This Town",a:"Jay-Z"}],
+  Core:[{t:"Believer",a:"Imagine Dragons"},{t:"Centuries",a:"Fall Out Boy"},{t:"My Songs Know What You Did",a:"Fall Out Boy"},{t:"Warriors",a:"Imagine Dragons"}],
+  Mobility:[{t:"Resonance",a:"HOME"},{t:"Nightcall",a:"Kavinsky"},{t:"Intro",a:"The xx"},{t:"Weightless",a:"Marconi Union"}],
+  Conditioning:[{t:"Titanium",a:"David Guetta ft. Sia"},{t:"Levels",a:"Avicii"},{t:"Don't Stop Me Now",a:"Queen"},{t:"Eye Of The Tiger",a:"Survivor"}],
+  default:[{t:"Till I Collapse",a:"Eminem"},{t:"Levels",a:"Avicii"},{t:"Believer",a:"Imagine Dragons"}]
+};
+function hashId(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; }
+function trackFor(id){ const cat=(EX[id]&&EX[id].cat)||"default"; const arr=TRACKS_BY_CAT[cat]||TRACKS_BY_CAT.default; return arr[hashId(id)%arr.length]; }
+
+/* ---- video resolution + YouTube-app deep link (D3 / F2 override) ---- */
+function parseYouTubeId(u){ if(!u) return ""; const m=String(u).match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/); if(m) return m[1]; return /^[\w-]{11}$/.test(String(u))?String(u):""; }
+function videoFor(id){ const ov=(S.settings.videoOverrides||{})[id]; const search=(EX[id]&&EX[id].yt)||id;
+  if(ov){ const vid=parseYouTubeId(ov); return {vid:vid||"", url:(!vid?ov:""), search}; }
+  return {vid:EMBED[id]||"", url:"", search}; }
+function openYT(id){ const v=videoFor(id);
+  const app=v.vid?("vnd.youtube://"+v.vid):("vnd.youtube://results?search_query="+encodeURIComponent(v.search));
+  const web=v.url?v.url:(v.vid?("https://www.youtube.com/watch?v="+v.vid):("https://www.youtube.com/results?search_query="+encodeURIComponent(v.search)));
+  let done=false; const cancel=()=>{done=true;}; try{document.addEventListener("visibilitychange",cancel,{once:true});}catch(e){}
+  const t=setTimeout(()=>{ try{document.removeEventListener("visibilitychange",cancel);}catch(e){} if(!done){ try{window.open(web,"_blank","noopener");}catch(e){ location.href=web; } } },600);
+  try{ window.location.href=app; }catch(e){ clearTimeout(t); try{window.open(web,"_blank","noopener");}catch(_){ location.href=web; } } }
+
+/* ---- horizontal pager helpers (D1 / D5) ---- */
+function scrollTrainTo(i){ const hs=document.getElementById("hscroll"); if(!hs) return; const x=i*hs.clientWidth; if(hs.scrollTo){ try{ hs.scrollTo({left:x,behavior:"smooth"}); }catch(e){ hs.scrollLeft=x; } } else hs.scrollLeft=x; }
+function updateTrainProgress(){ if(!sessionDraft) return; let tot=0,done=0;
+  sessionDraft.ex.forEach((e,i)=>{ let ed=0; e.sets.forEach(s=>{ tot++; if(s.done){done++;ed++;} });
+    const dot=document.getElementById("hdot_"+(i+1)); if(dot) dot.classList.toggle("done",e.sets.length>0&&ed===e.sets.length); });
+  const f=document.getElementById("trainbarfill"); if(f) f.style.width=(tot?Math.round(done/tot*100):0)+"%";
+  const cnt=document.getElementById("setcount"); if(cnt) cnt.textContent=done+" / "+tot+" sets"; }
+function wireTrainScroll(){ const hs=document.getElementById("hscroll"); if(!hs) return;
+  hs.onscroll=()=>{ clearTimeout(hs._t); hs._t=setTimeout(()=>{ const i=Math.round(hs.scrollLeft/Math.max(1,hs.clientWidth));
+    document.querySelectorAll("#hdots i").forEach((d,di)=>d.classList.toggle("on",di===i)); },60); };
+  updateTrainProgress(); }
+
 function renderTrain(){
-  const el=document.getElementById("s-train"), w=todaysWorkout(), arc=currentArc();
-  if(w.rest && !(sessionDraft&&sessionDraft.forced)){
+  const el=document.getElementById("s-train"), w=todaysWorkout(), arc=currentArc(), weeks=S.program.weeks||24, boss=isBossToday();
+  if(w.rest && !boss && !(sessionDraft&&(sessionDraft.forced||sessionDraft.boss))){
     el.innerHTML=`<div class="panel"><div class="panel-title"><span class="tri"></span>Today's Gate<span class="sub">CLOSED</span></div>
       <p class="lead">No training scheduled today (<b class="gr">recovery</b>). You can still run an optional session, or do mobility + your Daily Quest.</p>
       <button class="btn full mt" onclick="forceTrain()">Open an optional session</button>
       <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility instead</button></div>${arcCard(arc)}`;
     return;
   }
-  if(sessionLoggedToday() && !(sessionDraft&&sessionDraft.forced) && !sessionDraft){
+  if(sessionLoggedToday() && !sessionDraft){
     el.innerHTML=`<div class="panel"><div class="panel-title"><span class="tri"></span>Today's Gate<span class="sub">CLEARED</span></div>
       <div class="bigval gr" style="font-size:30px">✓</div>
       <p class="lead center">Today's Gate is cleared. Recovery now compounds your gains.</p>
       <button class="btn ghost full mt" onclick="forceTrain()">Run an extra optional session</button>
-      <button class="btn full mt" onclick="go('stats')">View your stats</button></div>${arcCard(arc)}`;
+      <button class="btn full mt" onclick="go('stats')">View your data</button></div>${arcCard(arc)}`;
     return;
   }
-  /* build / restore draft (also survives reload via S.draft) */
   if(!sessionDraft){
     if(S.draft && S.draft.date===todayStr()) sessionDraft=S.draft;
-    else sessionDraft={date:todayStr(),dayKey:w.day.key,name:w.day.name,forced:false,
+    else if(boss){ const b=bossWorkout(); sessionDraft={date:todayStr(),dayKey:"BOSS",name:b.name,forced:false,boss:true,rec:b.rec,ex:b.ex}; S.draft=sessionDraft; save(); }
+    else sessionDraft={date:todayStr(),dayKey:w.day.key,name:w.day.name,forced:false,boss:false,
       ex:w.exercises.map(e=>({id:e.id,reps:e.reps,sets:Array.from({length:e.sets},()=>({weight:"",reps:"",rpe:"",done:false}))}))};
   }
-  const dir=sessionDraft.forced?weekDirective(currentWeek()):w.dir;
-  const dispName=sessionDraft.name, dayKey=sessionDraft.dayKey;
-  el.innerHTML=`
-    <div class="panel">
-      <div class="panel-title"><span class="tri"></span>${sessionDraft.forced?'Optional Session':"Today's Gate"}<span class="sub">${dayKey}</span></div>
-      <div class="name mono" style="font-size:16px;color:var(--text-hi)">${dispName}</div>
-      <p class="lead tiny">Arc ${arc.n} · Week ${currentWeek()}/24 · <span class="am">${dir.phase}</span> · target ${dir.rir}. ${arc.desc}</p>
+  const dir = sessionDraft.boss
+    ? {phase:"Boss",rir:"hard intervals",deload:false,note:"Max-effort circuit — push each interval, keep rest short, full send. This is the trial."}
+    : (sessionDraft.forced?weekDirective(currentWeek()):w.dir);
+  let totalSets=0; sessionDraft.ex.forEach(e=>totalSets+=e.sets.length);
+  const pct=totalSets?Math.round(doneCount()/totalSets*100):0, lv=S.rpg.level;
+  const overview=`<div class="hpage"><div class="pageflag">${sessionDraft.boss?'BOSS GATE':'OVERVIEW'} · SWIPE →</div>
+    ${sessionDraft.boss?`<div class="bossbanner"><div class="bt">⚔ BOSS GATE</div>
+      <p class="lead tiny" style="margin-top:6px">An intense HIIT trial. Recommended level <b class="am">${sessionDraft.rec}</b> — you're Level <b>${lv}</b>.
+      ${lv<sessionDraft.rec?` <span class="hi">Beat it under-level for +50% EXP and bonus ability points.</span>`:` Clear it to bank the reward.`}</p></div>`:""}
+    <div class="panel"${sessionDraft.boss?' style="margin-top:10px"':''}>
+      <div class="panel-title"><span class="tri"></span>${sessionDraft.boss?'Boss Gate':(sessionDraft.forced?'Optional Session':"Today's Gate")}<span class="sub">${sessionDraft.dayKey}</span></div>
+      <div class="name mono" style="font-size:16px;color:var(--text-hi)">${sessionDraft.name}</div>
+      <p class="lead tiny">Arc ${arc.n} · Week ${currentWeek()}/${weeks} · <span class="am">${dir.phase}</span> · target ${dir.rir}.</p>
       <div class="directive ${dir.deload?'deload':''}"><span class="pip"></span>${dir.note}</div>
-      <div class="row tiny mono muted mt" style="gap:14px"><span id="setcount">${doneCount()} sets done</span><span>Tap ✓ each set</span></div>
+      <div class="row tiny mono muted mt" style="gap:14px"><span id="setcount">${doneCount()} / ${totalSets} sets</span><span>Swipe → for each move</span></div>
     </div>
-    <div class="panel">
-      <div class="panel-title"><span class="tri"></span>Muscle Map<span class="sub">TODAY'S TARGETS</span></div>
-      ${bodyDiagram(sessionDraft.ex.map(e=>e.id))}
-    </div>
-    <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>Rest Timer<span class="sub">BETWEEN SETS</span></div>
-      <p class="lead tiny">Auto-starts when you check a set. Compounds ~2.5 min, isolation 90s, core/mobility 60s.</p>
-      <div class="rt-presets">
-        <span class="rt-preset" onclick="startRest(60,'Rest — core / mobility')">0:60</span>
-        <span class="rt-preset" onclick="startRest(90,'Rest — isolation')">1:30</span>
-        <span class="rt-preset" onclick="startRest(120,'Rest — recover')">2:00</span>
-        <span class="rt-preset" onclick="startRest(180,'Rest — heavy compound')">3:00</span>
-      </div>
-    </div>
-    ${sessionDraft.ex.map((e,i)=>exerciseCard(e,i)).join("")}
-    <div class="panel flat">
-      <button class="btn full" onclick="finishSession()">Clear Gate — Finish &amp; Claim EXP</button>
-      <p class="center muted tiny mono mt">Progressive overload: beat last time by a rep or a small weight bump.</p>
-    </div>`;
-}
-function exerciseCard(e,idx){
-  const x=EX[e.id], tag=x.stat.toLowerCase(), embedId=EMBED[e.id], lastBest=lastBestFor(e.id);
-  const stepFor=k=> k==="weight"?5:(k==="rpe"?0.5:1);
-  const field=(si,k,val)=>`<div class="stp">
-      <button type="button" onclick="stepField(${idx},${si},'${k}',-${stepFor(k)})">−</button>
-      <input id="set_${idx}_${si}_${k}" inputmode="${k==='reps'?'numeric':'decimal'}" value="${val||""}" placeholder="–" oninput="setVal(${idx},${si},'${k}',this.value)">
-      <button type="button" onclick="stepField(${idx},${si},'${k}',${stepFor(k)})">+</button></div>`;
-  return `<div class="ex">
-    <div class="hd"><div class="grow">
-      <div class="nm">${idx+1}. ${x.n}</div>
-      <div class="meta">${x.cat} · target <b class="am">${e.reps}</b> · ${e.sets.length} sets${lastBest?` · last: <span class="hi">${lastBest}</span>`:""}</div>
-    </div><span class="tag ${tag}">${x.stat}</span></div>
-    <div class="cues">${x.cues}</div>
-    <div class="sethdr"><div class="h">SET</div><div class="h">WEIGHT (lb)</div><div class="h">REPS</div><div class="h">RPE</div><div class="h">✓</div></div>
-    ${e.sets.map((s,si)=>`<div class="setrow">
-        <div class="si">${si+1}</div>
-        ${field(si,'weight',s.weight)}${field(si,'reps',s.reps)}${field(si,'rpe',s.rpe)}
-        <div class="setdone ${s.done?'on':''}" id="done_${idx}_${si}" onclick="toggleSet(${idx},${si})">${s.done?'✓':''}</div>
-      </div>`).join("")}
-    <a class="vbtn" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.yt)}" target="_blank" rel="noopener"><span class="play"></span> Form video (YouTube)</a>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Muscle Map<span class="sub">TARGETS</span></div>${bodyDiagram(sessionDraft.ex.map(e=>e.id))}</div>
+    <div class="panel flat"><div class="panel-title"><span class="tri"></span>Rest Timer<span class="sub">AUTO</span></div>
+      <p class="lead tiny">Auto-starts when you check a set. Compounds ~2.5 min · isolation 90s · core/mobility 60s.</p>
+      <div class="rt-presets"><span class="rt-preset" onclick="startRest(60,'Rest — core / mobility')">0:60</span><span class="rt-preset" onclick="startRest(90,'Rest — isolation')">1:30</span><span class="rt-preset" onclick="startRest(120,'Rest — recover')">2:00</span><span class="rt-preset" onclick="startRest(180,'Rest — heavy compound')">3:00</span></div></div>
   </div>`;
+  const finish=`<div class="hpage"><div class="pageflag">FINISH</div>
+    <div class="panel flat"><div class="panel-title"><span class="tri"></span>${sessionDraft.boss?'Defeat the Boss':'Clear the Gate'}<span class="sub">CLAIM EXP</span></div>
+      <p class="lead tiny">${doneCount()} of ${totalSets} sets logged. Progressive overload: beat last time by a rep or a small load bump.</p>
+      <button class="btn full mt" onclick="finishSession()">${sessionDraft.boss?'⚔ Defeat Boss — Finish &amp; Claim':'Clear Gate — Finish &amp; Claim EXP'}</button>
+      <button class="btn ghost full mt" onclick="scrollTrainTo(0)">Back to start</button></div></div>`;
+  const pageCount=sessionDraft.ex.length+2;
+  const dots=Array.from({length:pageCount},(_,i)=>`<i id="hdot_${i}" class="${i===0?'on':''}" onclick="scrollTrainTo(${i})"></i>`).join("");
+  el.innerHTML=`<div class="trainbar"><i id="trainbarfill" style="width:${pct}%"></i></div>
+    <div class="hscroll" id="hscroll">${overview}${sessionDraft.ex.map((e,i)=>exercisePage(e,i)).join("")}${finish}</div>
+    <div class="hdots" id="hdots">${dots}</div>`;
+  wireTrainScroll();
 }
-/* state writes happen IN PLACE — no re-render, so nothing is lost */
+function exercisePage(e,idx){
+  const x=EX[e.id], tag=x.stat.toLowerCase(), lastBest=lastBestFor(e.id), mac=machineFor(e.id), trk=trackFor(e.id), vid=videoFor(e.id);
+  const stepFor=k=>k==="weight"?5:(k==="rpe"?0.5:1);
+  const field=(si,k,val)=>`<div class="stp"><button type="button" onclick="stepField(${idx},${si},'${k}',-${stepFor(k)})">−</button><input id="set_${idx}_${si}_${k}" inputmode="${k==='reps'?'numeric':'decimal'}" value="${val||""}" placeholder="–" oninput="setVal(${idx},${si},'${k}',this.value)"><button type="button" onclick="stepField(${idx},${si},'${k}',${stepFor(k)})">+</button></div>`;
+  const embed = vid.vid
+    ? `<div class="exvid"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${vid.vid}?rel=0&modestbranding=1" allow="accelerometer;encrypted-media;gyroscope;picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`
+    : `<div class="exvid"><div class="vph" onclick="openYT('${e.id}')"><span class="play"></span>Tap to find a form demo</div></div>`;
+  const webHref = vid.url ? vid.url : (vid.vid?('https://www.youtube.com/watch?v='+vid.vid):('https://www.youtube.com/results?search_query='+encodeURIComponent(vid.search)));
+  return `<div class="hpage"><div class="pageflag">MOVE ${idx+1} / ${sessionDraft.ex.length}</div>
+    <div class="ex">
+      <div class="hd"><div class="grow"><div class="nm">${idx+1}. ${x.n}</div>
+        <div class="meta">${x.cat} · target <b class="am">${e.reps}</b> · ${e.sets.length} sets${lastBest?` · last <span class="hi">${lastBest}</span>`:""}</div></div>
+        <span class="tag ${tag}">${x.stat}</span></div>
+      <div class="machine"><span class="mchip">🛠 ${mac.use}</span>${mac.free&&mac.free!=="—"?`<span class="mchip free">free-weight: ${mac.free}</span>`:""}</div>
+      ${embed}
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="ytbtn" onclick="openYT('${e.id}')"><span class="play"></span> Open in YouTube app</button>
+        <a class="ytbtn ghost" href="${webHref}" target="_blank" rel="noopener">Form video ↗</a></div>
+      <div class="track"><span class="mu"></span><div><div class="tt">${trk.t}</div><div class="ta">${trk.a} · recommended track</div></div></div>
+      <div class="cues" style="margin-top:11px">${x.cues}</div>
+      <div class="sethdr"><div class="h">SET</div><div class="h">WEIGHT (lb)</div><div class="h">REPS</div><div class="h">RPE</div><div class="h">✓</div></div>
+      ${e.sets.map((s,si)=>`<div class="setrow"><div class="si">${si+1}</div>${field(si,'weight',s.weight)}${field(si,'reps',s.reps)}${field(si,'rpe',s.rpe)}<div class="setdone ${s.done?'on':''}" id="done_${idx}_${si}" onclick="toggleSet(${idx},${si})">${s.done?'✓':''}</div></div>`).join("")}
+    </div></div>`;
+}
+
 function setVal(ei,si,k,v){ if(!sessionDraft) return; sessionDraft.ex[ei].sets[si][k]=v; S.draft=sessionDraft; save(); }
 function stepField(ei,si,k,delta){
   if(!sessionDraft) return;
@@ -1380,14 +1738,14 @@ function toggleSet(ei,si){
   const s=sessionDraft.ex[ei].sets[si]; s.done=!s.done;
   const box=document.getElementById(`done_${ei}_${si}`);
   if(box){ box.classList.toggle("on",s.done); box.textContent=s.done?"✓":""; }
-  const cnt=document.getElementById("setcount"); if(cnt) cnt.textContent=doneCount()+" sets done";
+  if(typeof updateTrainProgress==="function") updateTrainProgress();
   if(s.done){ const x=EX[sessionDraft.ex[ei].id]; const compound=["Legs","Push","Pull"].includes(x.cat)&&x.stat==="STR"; const core=x.cat==="Core"||x.cat==="Mobility";
     startRest(compound?150:(core?60:90), compound?"Rest — heavy compound":(core?"Rest — core / mobility":"Rest — isolation")); }
   S.draft=sessionDraft; save();
 }
 function forceTrain(){
   const split=splitForDays(S.profile.days.length), day=split[S.program.seq%split.length], dir=weekDirective(currentWeek());
-  sessionDraft={date:todayStr(),dayKey:day.key,name:day.name,forced:true,
+  sessionDraft={date:todayStr(),dayKey:day.key,name:day.name,forced:true,boss:false,
     ex:day.slots.map(sl=>{ const id=pickEx(sl,S.profile.equip); return {id,reps:sl.r,sets:Array.from({length:adjSets(sl.s,dir.setDelta)},()=>({weight:"",reps:"",rpe:"",done:false}))}; })};
   S.draft=sessionDraft; save(); renderTrain(); decorPanels(); window.scrollTo(0,0);
 }
@@ -1398,12 +1756,21 @@ function finishSession(){
   if(setsDone===0){ toast("Mark at least one set ✓ first"); return; }
   exp+=40;
   if(sessionDraft.ex.some(e=>EX[e.id].cat==="Conditioning") && S.skills.owned.includes("bl1")) exp=Math.round(exp*1.2);
-  const r=addExp(exp,"session");
-  S.sessions.push({date:sessionDraft.date,dayKey:sessionDraft.dayKey,name:sessionDraft.name,forced:!!sessionDraft.forced,setsDone,exp:r.gained,
-    ex:sessionDraft.ex.map(e=>({id:e.id,sets:e.sets.filter(s=>s.done).map(s=>({w:+s.weight||0,reps:+s.reps||0,rpe:+s.rpe||0}))}))});
-  if(!sessionDraft.forced) S.program.seq++;
-  markActivityToday(); sessionDraft=null; S.draft=null; save();
-  notify("GATE CLEARED",`<b>${setsDone}</b> sets logged.<br>+<b>${r.gained} EXP</b>`); handleLevels(r);
+  const isBoss=!!sessionDraft.boss, wk=currentWeek();
+  let bossBonus=0, slayer=false;
+  if(isBoss){ exp=Math.round(exp*1.5)+60; const rec=sessionDraft.rec||bossRecLevel(wk);
+    if(S.rpg.level<rec){ bossBonus=Math.round(exp*0.5)+40; slayer=true; } }
+  const r=addExp(exp+bossBonus,isBoss?"boss":"session");
+  const exRec=sessionDraft.ex.map(e=>({id:e.id,sets:e.sets.filter(s=>s.done).map(s=>({w:+s.weight||0,reps:+s.reps||0,rpe:+s.rpe||0}))}));
+  S.sessions.push({date:sessionDraft.date,dayKey:sessionDraft.dayKey,name:sessionDraft.name,forced:!!sessionDraft.forced,boss:isBoss,setsDone,exp:r.gained,ex:exRec});
+  updatePRs(exRec);
+  if(isBoss){ S.rpg.bossesBeaten=S.rpg.bossesBeaten||[]; if(!S.rpg.bossesBeaten.includes(wk)) S.rpg.bossesBeaten.push(wk);
+    if(slayer){ S.rpg.giantSlayer=true; S.rpg.statPoints+=2; } }
+  if(!sessionDraft.forced && !isBoss) S.program.seq++;
+  markActivityToday(); sessionDraft=null; S.draft=null; checkTitleUnlocks(); save();
+  if(isBoss) notify("BOSS DEFEATED",`The Boss Gate falls. <b>${setsDone}</b> sets cleared.<br>+<b>${r.gained} EXP</b>${slayer?'<br><span class="am">UNDER-LEVEL KILL — +2 ability points</span>':''}`);
+  else notify("GATE CLEARED",`<b>${setsDone}</b> sets logged.<br>+<b>${r.gained} EXP</b>`);
+  handleLevels(r);
 }
 function statExp(stat){ return {STR:14,AGI:13,VIT:11,SEN:10,INT:10}[stat]||10; }
 function lastBestFor(id){
@@ -1411,7 +1778,7 @@ function lastBestFor(id){
     if(e&&e.sets.length){ const best=e.sets.reduce((a,b)=>(b.w*100+b.reps)>(a.w*100+a.reps)?b:a); return best.w?`${best.w} lb × ${best.reps}`:`${best.reps} reps`; } }
   return null;
 }
-function arcCard(arc){ return `<div class="panel flat"><div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${currentWeek()}/24</span></div>
+function arcCard(arc){ return `<div class="panel flat"><div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${currentWeek()}/${S.program.weeks||24}</span></div>
   <div class="name mono hi" style="font-size:15px">${arc.n}</div><p class="lead tiny">${arc.desc}</p></div>`; }
 
 /* ---- STATS dashboard (per-day rings + animated charts — feature #3) ---- */
@@ -1477,12 +1844,12 @@ function renderStats(){
 
     <div class="panel">
       <div class="panel-title"><span class="tri"></span>7-Day Activity<span class="sub">PRODUCTIVITY</span></div>
-      ${barChart(days7,100)}
+      ${lineChart(days7.map(d=>({x:d.label,y:d.val})),"score")}
     </div>
 
     <div class="panel">
       <div class="panel-title"><span class="tri"></span>Training Volume<span class="sub">SETS / WEEK</span></div>
-      ${volBy.length ? barChart(volBy) : `<p class="lead tiny">Finish a session to start tracking weekly volume.</p>`}
+      ${volBy.length>=2 ? lineChart(volBy.map(d=>({x:d.label,y:d.val})),"sets") : (volBy.length ? `<p class="lead tiny">One week logged so far — finish another week's sessions to draw the trend line.</p>` : `<p class="lead tiny">Finish a session to start tracking weekly volume.</p>`)}
     </div>
 
     <div class="panel flat">
@@ -1530,42 +1897,102 @@ async function logWeightPrompt(){
 
 /* ---- SYSTEM (skills + data + settings) ---- */
 function renderSystem(){
+  const bars=S.settings.barStyle||"glow";
   document.getElementById("s-system").innerHTML=`
-    <div class="panel">
-      <div class="panel-title"><span class="tri"></span>Skill Tree<span class="sub">${S.rpg.skillPoints} SP</span></div>
-      <p class="lead tiny">Spend skill points (1 per level). Nodes grant EXP bonuses + unlock guidance. Higher branches need higher level.</p>
-      <div class="tree">${SKILLTREE.map(br=>`<div class="branch"><h3>${br.br}</h3><div class="bd">${br.desc}</div>${br.nodes.map(skillNode).join("")}</div>`).join("")}</div>
-    </div>
-    <div class="panel">
-      <div class="panel-title"><span class="tri"></span>Data — Backup &amp; Restore<span class="sub">REDUNDANCY</span></div>
-      <p class="lead tiny">Your progress saves on this device automatically. Export a backup file regularly so a cleared cache can't wipe your climb.</p>
-      <div class="grid2">
-        <button class="btn" onclick="exportData()">Export backup</button>
-        <button class="btn" onclick="document.getElementById('importfile').click()">Import backup</button>
-      </div>
-      ${!storageOK?`<div class="banner">This preview can't auto-save. On your phone's browser it will. <b>Export regularly</b> to be safe.</div>`:""}
-    </div>
-    <div class="panel">
-      <div class="panel-title"><span class="tri"></span>Settings</div>
-      <label class="fld"><span>System accent</span>
-        <select onchange="setAccent(this.value)">
-          <option value="cyan" ${S.settings.accent==='cyan'?'selected':''}>System Cyan (default)</option>
-          <option value="violet" ${S.settings.accent==='violet'?'selected':''}>Monarch Violet</option>
-          <option value="crimson" ${S.settings.accent==='crimson'?'selected':''}>Penalty Crimson</option>
-        </select></label>
-      <label class="fld"><span>Interface sound</span>
-        <select onchange="setSound(this.value)">
-          <option value="on" ${soundOn()?'selected':''}>On — UI clicks</option>
-          <option value="off" ${!soundOn()?'selected':''}>Off — silent</option>
-        </select></label>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Settings<span class="sub">SYSTEM</span></div>
+      <label class="fld"><span>System accent</span><select onchange="setAccent(this.value)">
+        <option value="cyan" ${S.settings.accent==='cyan'?'selected':''}>System Cyan (default)</option>
+        <option value="violet" ${S.settings.accent==='violet'?'selected':''}>Monarch Violet</option>
+        <option value="crimson" ${S.settings.accent==='crimson'?'selected':''}>Penalty Crimson</option></select></label>
+      <label class="fld"><span>Bar style</span><select onchange="setBars(this.value)">
+        <option value="glow" ${bars==='glow'?'selected':''}>Glow (default)</option>
+        <option value="solid" ${bars==='solid'?'selected':''}>Solid</option>
+        <option value="striped" ${bars==='striped'?'selected':''}>Striped</option>
+        <option value="minimal" ${bars==='minimal'?'selected':''}>Minimal</option></select></label>
+      <label class="fld"><span>Interface sound</span><select onchange="setSound(this.value)">
+        <option value="on" ${soundOn()?'selected':''}>On — UI clicks</option>
+        <option value="off" ${!soundOn()?'selected':''}>Off — silent</option></select></label>
       <button class="btn ghost full mt" onclick="editProfile()">Edit profile / schedule</button>
-      <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button>
     </div>
-    <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>About the program</div>
-      <p class="lead tiny">24-week climb across 3 Arcs, built for a lean beginner aiming for a strong, mobile, climber-style physique. Compound lifts + calisthenic progressions + mobility + conditioning, with progressive overload. Nutrition uses the Mifflin–St Jeor equation for BMR and ~1.9 g/kg protein. Every movement links to a current YouTube form demo. Not medical advice.</p>
-    </div>`;
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Program Length<span class="sub">${S.program.weeks||24} WEEKS</span></div>
+      <p class="lead tiny">Extend the climb. Currently week ${currentWeek()} of ${S.program.weeks||24}. Added weeks hold the final Arc's intensity.</p>
+      <div class="grid3"><button class="btn" onclick="setWeeks((S.program.weeks||24)+4)">+4 weeks</button><button class="btn" onclick="setWeeks((S.program.weeks||24)+8)">+8 weeks</button><button class="btn ghost" onclick="setWeeks(24)">Reset 24</button></div>
+    </div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Form Videos<span class="sub">OVERRIDE LINKS</span></div>
+      <p class="lead tiny">Each movement embeds a demo + opens YouTube. Override any link that's outdated.</p>
+      <button class="btn full" onclick="openVideoEditor()">Edit video links</button></div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Admin<span class="sub">NO PASSWORD</span></div>
+      <p class="lead tiny">Directly edit your character — level, attributes, EXP, titles. Each change confirms first.</p>
+      <button class="btn full" onclick="openAdmin()">Open admin editor</button></div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Data — Backup &amp; Restore<span class="sub">REDUNDANCY</span></div>
+      <p class="lead tiny">Progress auto-saves on this device. Export a backup so a cleared cache can't wipe your climb.</p>
+      <div class="grid2"><button class="btn" onclick="exportData()">Export backup</button><button class="btn" onclick="document.getElementById('importfile').click()">Import backup</button></div>
+      ${!storageOK?`<div class="banner">This preview can't auto-save. On your phone it will. <b>Export regularly.</b></div>`:""}
+      <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button></div>
+    <div class="panel flat"><div class="panel-title"><span class="tri"></span>About</div>
+      <p class="lead tiny">A ${S.program.weeks||24}-week climb across 3 Arcs for a lean, mobile, climber-style build. Compound lifts + calisthenic progressions + mobility + conditioning, progressive overload. Mifflin–St Jeor nutrition. Not medical advice.</p></div>`;
 }
+function setBars(v){ S.settings.barStyle=v; save(); document.documentElement.setAttribute("data-bars",v); }
+function setWeeks(n){ n=Math.max(8,Math.min(104,n)); S.program.weeks=n; save(); toast(`Program set to ${n} weeks`); render(); decorPanels(); }
+let adminUnlocked=false;
+/* ---- F2: form-video link override editor ---- */
+function openVideoEditor(){
+  const ov=S.settings.videoOverrides||{};
+  const rows=Object.keys(EX).map(id=>{ const has=!!ov[id], emb=EMBED[id];
+    const tag = has?'<span class="vtag ov">override</span>':(emb?'<span class="vtag em">embedded</span>':'<span class="vtag se">search</span>');
+    return `<div class="vrow"><div class="grow"><div class="vn">${EX[id].n}</div><div class="vmeta">${EX[id].cat}${has?' · '+esc(String(ov[id])).slice(0,40):''}</div></div>${tag}
+      <button class="btn sm" onclick="editVideo('${id}')">Set</button>${has?`<button class="btn sm ghost" onclick="clearVideo('${id}')">✕</button>`:''}</div>`; }).join("");
+  detail("[ VIDEOS ]","FORM VIDEO LINKS",
+    `<p class="lead tiny">Paste a YouTube link or 11-char ID to override a movement's demo. Embedded = built-in clip · search = opens YouTube search. Blank clears it.</p><div class="vlist">${rows}</div>`,
+    [{label:"Done",kind:"ghost",onClick:()=>hideOverlay()}]);
+}
+async function editVideo(id){
+  const cur=(S.settings.videoOverrides||{})[id]||"";
+  const v=await sysPrompt({big:EX[id].n.toUpperCase(),msg:"YouTube link or video ID (blank = clear):",value:cur,placeholder:"https://youtu.be/…"});
+  if(v===null){ openVideoEditor(); return; }
+  S.settings.videoOverrides=S.settings.videoOverrides||{};
+  const val=String(v).trim(); if(!val) delete S.settings.videoOverrides[id]; else S.settings.videoOverrides[id]=val;
+  save(); toast(val?"Video link set":"Override cleared"); openVideoEditor();
+}
+function clearVideo(id){ if(S.settings.videoOverrides) delete S.settings.videoOverrides[id]; save(); toast("Override cleared"); openVideoEditor(); }
+
+/* ---- F3: admin character editor (no password — confirm to enter) ---- */
+async function openAdmin(){
+  if(!adminUnlocked){ const ok=await sysConfirm("ADMIN ACCESS","Open the character editor? Direct edits bypass normal progression.","Open"); if(!ok) return; adminUnlocked=true; }
+  renderAdmin();
+}
+function renderAdmin(){
+  const st=S.rpg.stats, eff=effStats();
+  const statRows=["STR","AGI","VIT","SEN","INT"].map(k=>`<div class="adminrow"><span>${k} <b>${st[k]}</b> <span class="muted">→ ${eff[k]} eff</span></span><div><button class="btn sm" onclick="adminStat('${k}',-1)">−</button><button class="btn sm" onclick="adminStat('${k}',1)">+</button></div></div>`).join("");
+  const titleChips=TITLES.map(t=>{ const owned=(S.rpg.titles.owned||[]).includes(t.id); return `<div class="title-chip ${owned?'eq':'locked'}" onclick="adminTitle('${t.id}')">${owned?'✓':'+'} ${t.n}</div>`; }).join("");
+  const body=`<p class="lead tiny">Live edits — applied instantly. Bends the System's rules; use sparingly.</p>
+    <div class="adminrow"><span>Level <b>${S.rpg.level}</b> · ${rankFor(S.rpg.level)}-Rank</span><div><button class="btn sm" onclick="adminLevel(-1)">−</button><button class="btn sm" onclick="adminLevel(1)">+</button><button class="btn sm" onclick="adminSet('level')">Set</button></div></div>
+    ${statRows}
+    <div class="adminrow"><span>EXP <b>${S.rpg.exp}</b> / ${expToNext(S.rpg.level)}</span><div><button class="btn sm" onclick="adminSet('exp')">Set</button></div></div>
+    <div class="adminrow"><span>Skill points <b>${S.rpg.skillPoints}</b></span><div><button class="btn sm" onclick="adminSet('sp')">Set</button></div></div>
+    <div class="adminrow"><span>Ability points <b>${S.rpg.statPoints}</b></span><div><button class="btn sm" onclick="adminSet('ap')">Set</button></div></div>
+    <div class="fld-head mt">Titles — tap to grant / revoke</div><div class="tslot">${titleChips}</div>
+    <button class="btn full mt" onclick="adminUnlockAll()">Grant all titles</button>
+    <button class="btn ghost full mt" onclick="adminResetBoss()">Reset boss record + Giant Slayer</button>`;
+  detail("[ ADMIN ]","CHARACTER EDITOR",body,[{label:"Done",kind:"ghost",onClick:()=>hideOverlay()}]);
+}
+function adminLevel(d){ S.rpg.level=Math.max(1,S.rpg.level+d); checkTitleUnlocks(); save(); render(); renderAdmin(); }
+function adminStat(k,d){ S.rpg.stats[k]=Math.max(1,(S.rpg.stats[k]||0)+d); checkTitleUnlocks(); save(); render(); renderAdmin(); }
+function adminTitle(id){ const t=S.rpg.titles=S.rpg.titles||{owned:[],equipped:[]};
+  const i=(t.owned||[]).indexOf(id); if(i>=0){ t.owned.splice(i,1); const j=(t.equipped||[]).indexOf(id); if(j>=0)t.equipped.splice(j,1); } else { (t.owned=t.owned||[]).push(id); }
+  save(); render(); renderAdmin(); }
+function adminUnlockAll(){ const t=S.rpg.titles=S.rpg.titles||{owned:[],equipped:[]}; t.owned=TITLES.map(x=>x.id); save(); toast("All titles granted"); render(); renderAdmin(); }
+function adminResetBoss(){ S.rpg.bossesBeaten=[]; S.rpg.giantSlayer=false; save(); toast("Boss record reset"); render(); renderAdmin(); }
+async function adminSet(which){
+  const map={level:["LEVEL",S.rpg.level,1,200],exp:["CURRENT EXP",S.rpg.exp,0,999999],sp:["SKILL POINTS",S.rpg.skillPoints,0,999],ap:["ABILITY POINTS",S.rpg.statPoints,0,999]};
+  const cfg=map[which], v=await sysPrompt({big:cfg[0],msg:"Enter a value:",value:cfg[1],numeric:true,step:1,min:cfg[2],max:cfg[3]});
+  if(v!==null&&v!==""){ const n=Math.max(cfg[2],Math.min(cfg[3],Math.round(+v||0)));
+    if(which==="level") S.rpg.level=Math.max(1,n); else if(which==="exp") S.rpg.exp=n; else if(which==="sp") S.rpg.skillPoints=n; else S.rpg.statPoints=n;
+    checkTitleUnlocks(); save(); render(); }
+  renderAdmin();
+}
+
+
 function skillNode(nd){
   const owned=S.skills.owned.includes(nd.id), meets=S.rpg.level>=nd.lv, canBuy=!owned&&meets&&S.rpg.skillPoints>=nd.cost;
   const cls=owned?"owned":(canBuy?"avail":"locked");
@@ -1682,7 +2109,7 @@ function editProfile(){
 }
 
 /* ============================================================ NAV + CHIPS ================================================== */
-const TABS=["status","quests","train","stats","system"];
+const TABS=["quests","train","status","stats","system"];
 function renderFor(t){ if(t==="status")renderStatus(); else if(t==="quests")renderQuests(); else if(t==="train")renderTrain(); else if(t==="stats")renderStats(); else if(t==="system")renderSystem(); decorPanels(); }
 function moveMarker(){ const idx=Math.max(0,TABS.indexOf(activeTab)); document.getElementById("navmark").style.left=(idx*20)+"%"; }
 function go(t){
@@ -1759,6 +2186,61 @@ function bootSequence(){
   let i=0;
   (function next(){ if(i>=lines.length) return; const ln=document.createElement("div"); ln.className="ln"; ln.innerHTML=lines[i]+'<span class="ok">OK</span>'; term.appendChild(ln); requestAnimationFrame(()=>ln.classList.add("in")); i++; setTimeout(next,640); })();
   setTimeout(finish,4100);
+}
+
+function barMini(arr){ const max=Math.max(1,...arr); const W=300,H=60,n=arr.length,gap=6,bw=(W-(n+1)*gap)/n; let b="";
+  arr.forEach((v,i)=>{ const h=Math.max(2,(v/max)*(H-14)),x=gap+i*(bw+gap),y=H-h;
+    b+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--accent)" style="filter:drop-shadow(0 0 4px rgb(var(--ac) / .5))"/><text x="${(x+bw/2).toFixed(1)}" y="${H-2}" text-anchor="middle" style="fill:var(--ghost);font-size:7px;font-family:var(--mono)">${v}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:64px;display:block;margin-top:6px">${b}</svg>`; }
+function missedListRecent(daysBack){ const end=todayStr(new Date(Date.now()-86400000)), start=todayStr(new Date(Date.now()-86400000*daysBack));
+  const miss=scheduledDatesBetween(start,end).filter(dt=>!S.sessions.some(s=>s.date===dt&&!s.forced)).slice(-8);
+  if(!miss.length) return ""; return `<div class="mt">${miss.map(dt=>`<div class="kv"><span class="k">${DAYNAMES[new Date(dt+"T00:00:00").getDay()]} · ${dt.slice(5)}</span><span class="v cr">missed</span></div>`).join("")}</div>`; }
+function openDayDetail(date){ const ses=workoutsOn(date), dow=DAYNAMES[new Date(date+"T00:00:00").getDay()];
+  const body = ses.length ? ses.map(s=>`<div class="drow"><div class="dk">${s.boss?'BOSS':s.dayKey||'GATE'}</div><div class="dv"><b>${s.name}</b><br>${s.setsDone} sets · +${s.exp} EXP<br><span class="muted tiny">${(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||e.id; const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return nm+(top.w?` ${top.w}×${top.reps}`:` ×${top.reps||e.sets.length}`); }).join(" · ")||"—"}</span></div></div>`).join("")
+    : `<p class="lead tiny center">No Gate cleared on this day.${(S.profile&&S.profile.days.includes(new Date(date+"T00:00:00").getDay())&&date<todayStr())?' <span class="cr">Missed.</span>':''}</p>`;
+  detail("[ LOG ]",`${dow} · ${date.slice(5)}`,body); }
+function toggleTitle(id){ const t=S.rpg.titles=S.rpg.titles||{owned:[],equipped:[]}; if(!t.owned.includes(id)) return;
+  const i=t.equipped.indexOf(id); if(i>=0) t.equipped.splice(i,1); else { if(t.equipped.length>=MAX_TITLES){ toast(`Max ${MAX_TITLES} titles equipped`); return; } t.equipped.push(id); }
+  save(); if(typeof playSfx==="function")playSfx("tap"); openProfile(); if(typeof renderStatus==="function"){ renderStatus(); decorPanels(); } }
+function closeProfile(){ document.getElementById("profile").classList.remove("show"); document.body.style.overflow=""; }
+function openProfile(){
+  if(!S.profile) return;
+  const lv=S.rpg.level, rank=rankFor(lv), eff=effStats(), base=S.rpg.stats, ci=rankIndex(lv);
+  const ladder=RANKS.map((r,i)=>`<div class="rk ${i<ci?'done':''} ${i===ci?'cur':''}">${r[0]==='MONARCH'?'MON':r[0]}<span class="tk">Lv ${r[1]}</span></div>`).join("");
+  const t=S.rpg.titles||{owned:[],equipped:[]};
+  const titleHTML=TITLES.map(def=>{ const owned=t.owned.includes(def.id), eq=t.equipped.includes(def.id);
+    const modtxt=Object.entries(def.mods).map(([k,v])=>`${v>0?'+':''}${v} ${k}`).join(' · ');
+    if(!owned) return `<div class="title-chip locked"><span>🔒 ${def.n}</span><span class="tm">${def.how}</span></div>`;
+    return `<div class="title-chip ${eq?'eq':''}" onclick="toggleTitle('${def.id}')"><span>${eq?'★':'☆'} ${def.n}</span><span class="tm">${modtxt}</span></div>`; }).join("");
+  const debuffs=activeDebuffs();
+  const debuffHTML=debuffs.length?debuffs.map(d=>{ const m=Object.entries(d.mods).map(([k,v])=>`${v} ${k}`).join(' '); return `<div class="debuff"><div class="dbico">!</div><div class="grow"><div class="nm">${d.n}</div><div class="ds">${d.d}</div></div><div class="dm">${m}</div></div>`;}).join("")
+    :`<p class="lead tiny">No active debuffs. Clear Gates and hit your targets to stay clean.</p>`;
+  const attrHTML=["STR","AGI","VIT","SEN","INT"].map(k=>{ const d=eff[k]-base[k]; const mm=d>0?`<div class="mm up">+${d}</div>`:(d<0?`<div class="mm dn">${d}</div>`:`<div class="mm"></div>`);
+    return `<div class="prcell"><div class="k">${k}</div><div class="v">${eff[k]}</div>${mm}</div>`; }).join("");
+  const pr=(S.records&&S.records.pr)||{}, prKeys=Object.keys(pr).sort((a,b)=>(pr[b].e1rm||0)-(pr[a].e1rm||0));
+  const prHTML=prKeys.length?prKeys.map(id=>{ const r=pr[id], nm=(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} lb × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):`${r.reps} reps/hold`; return `<div class="kv"><span class="k">${nm}</span><span class="v">${val}</span></div>`; }).join(""):`<p class="lead tiny">Log sets in the Gate to set personal records.</p>`;
+  const expW=expByDayWeek(), expSpark=barMini(expW.map(e=>e.val));
+  const cals=caloriesByDayWeek(), calHTML=cals.map(c=>`<div class="kv"><span class="k">${c.label} · ${c.date.slice(5)}</span><span class="v">${c.cal?c.cal+' kcal · '+c.pro+'g P':'—'}</span></div>`).join("");
+  const missed=missedCount(28), missList=missedListRecent(28);
+  const hist=S.sessions.slice(-14).reverse();
+  const histHTML=hist.length?hist.map(s=>`<div class="histday"><div class="hd"><span>${s.date.slice(5)} · ${s.name}${s.boss?' · BOSS':''}</span><span>${s.setsDone} sets · +${s.exp} EXP</span></div><div class="hx">${(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||e.id; const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return `<b>${nm}</b> ${e.sets.length}×${top.w?` ${top.w}lb`:''}`; }).join(" · ")||"—"}</div></div>`).join(""):`<p class="lead tiny">No Gate history yet.</p>`;
+  const arc=currentArc(), wk=currentWeek(), weeks=S.program.weeks||24, totalScore=expGainedTotal(), weekScore=expGainedWeek(), weekProd=sevenDays().reduce((a,d)=>a+d.score,0);
+  document.getElementById("profileBody").innerHTML=`
+    <div class="panel"><div class="rankhuge"><span class="smr">HUNTER RANK</span>${rank==='MONARCH'?'M':rank}</div>
+      <div class="rankrow">${ladder}</div><div class="class center mt">${esc(S.profile.name)} · ${CLASS_BY_RANK[rank]} · Lv ${lv}</div></div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Attributes<span class="sub">EFFECTIVE</span></div><div class="prgrid">${attrHTML}</div><p class="lead tiny center mt">Base + equipped titles + active debuffs.</p></div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Titles<span class="sub">${(t.equipped||[]).length}/${MAX_TITLES} EQUIPPED</span></div><p class="lead tiny">Equip up to ${MAX_TITLES}. Each alters your attributes. Tap to equip / unequip.</p><div class="tslot">${titleHTML}</div></div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Status Effects<span class="sub">DEBUFFS</span></div>${debuffHTML}</div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Score &amp; EXP<span class="sub">PROGRESS</span></div>
+      <div class="prgrid" style="grid-template-columns:1fr 1fr 1fr"><div class="prcell"><div class="k">TOTAL SCORE</div><div class="v">${totalScore}</div><div class="mm"></div></div><div class="prcell"><div class="k">EXP / WK</div><div class="v">${weekScore}</div><div class="mm"></div></div><div class="prcell"><div class="k">WK SCORE</div><div class="v">${weekProd}</div><div class="mm"></div></div></div>
+      <div class="fld-head mt">EXP gained per day (this week)</div>${expSpark}</div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Calories / Day<span class="sub">THIS WEEK</span></div>${calHTML}</div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Missed Days<span class="sub">LAST 28D</span></div><div class="bigval ${missed?'cr':'gr'}" style="font-size:34px">${missed}</div><p class="lead tiny center">${missed?`Scheduled Gates not cleared in the last 28 days.`:`No missed Gates in 28 days. Relentless.`}</p>${missList}</div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Personal Records<span class="sub">BEST SETS</span></div>${prHTML}</div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${wk}/${weeks}</span></div><div class="name mono hi" style="font-size:15px">${arc.n}</div><p class="lead tiny">${arc.desc}</p></div>
+    <div class="panel flat"><div class="panel-title"><span class="tri"></span>Gate History<span class="sub">RECENT</span></div>${histHTML}</div>`;
+  document.getElementById("profile").classList.add("show"); document.body.style.overflow="hidden"; if(typeof playSfx==="function")playSfx("tap");
+  decorPanels();
 }
 
 /* ============================================================ INIT ========================================================= */
