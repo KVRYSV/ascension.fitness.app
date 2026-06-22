@@ -443,13 +443,14 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
   filter:drop-shadow(0 0 13px rgb(var(--ac) / .55)) drop-shadow(0 0 26px rgb(var(--ac) / .3)); }
 .nav .marker{ display:none; }
 .nav button.navfocus{ color:var(--accent); }
-.nav button.navfocus .ic{ width:46px; height:46px; margin-top:-22px; border-radius:0; transform:rotate(45deg);
+.nav button.navfocus .ic{ width:42px; height:42px; margin-top:-22px; border-radius:0; transform:rotate(45deg);
   background:linear-gradient(160deg, rgb(var(--ac) / .85), rgb(var(--ac) / .42)); color:#fff;
   border:1.5px solid rgb(255 255 255 / .5); display:grid; place-items:center;
   box-shadow:0 0 18px rgb(var(--ac) / .65), 0 8px 20px rgb(0 0 0 / .55), inset 0 0 12px rgb(255 255 255 / .12); }
-.nav button.navfocus .ic svg{ width:22px; height:22px; transform:rotate(-45deg); stroke:#fff; stroke-width:1.6; fill:none; }
+.nav button.navfocus .ic svg{ width:28px; height:28px; transform:rotate(-45deg); stroke:#fff; stroke-width:1.7; fill:none; }
 .nav button.navfocus.active .ic{ transform:rotate(45deg) scale(1.05); filter:none; box-shadow:0 0 24px rgb(var(--ac) / .85), 0 8px 20px rgb(0 0 0 / .55); }
-.nav button.navfocus span:not(.ic){ margin-top:22px; }
+.nav button.navfocus .flabel{ position:absolute; left:0; right:0; bottom:6px; text-align:center; font-family:var(--display); font-weight:800; font-size:9px; letter-spacing:.16em; color:#ffd66b; text-shadow:0 0 9px rgb(255 206 90 / .95), 0 0 20px rgb(255 170 30 / .5); }
+.nav button.navfocus.active .flabel{ color:#ffe08a; }
 
 /* B1/B2 — big level + circular EXP ring */
 .lvring{ position:relative; width:208px; height:208px; margin:8px auto 4px; }
@@ -697,7 +698,7 @@ html[data-bars="minimal"] .resttimer .rt-bar{ height:3px; }
   <div class="marker" id="navmark"></div>
   <button data-t="quests"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg></span>Quests</button>
   <button data-t="train"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg></span>Train</button>
-  <button data-t="status" class="navfocus"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 12c3-5 15-5 18 0-3 5-15 5-18 0Z"/><line x1="12" y1="8.4" x2="12" y2="15.6"/></svg></span>Status</button>
+  <button data-t="status" class="navfocus"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4.5 4.5 L18 18"/><path d="M19.5 4.5 L6 18"/><path d="M12.8 16.2 L16.2 12.8"/><path d="M7.8 12.8 L11.2 16.2"/></svg></span><span class="flabel">STATUS</span></button>
   <button data-t="stats"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Data</button>
   <button data-t="system"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span>Settings</button>
 </nav>
