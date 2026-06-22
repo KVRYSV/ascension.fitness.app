@@ -53,9 +53,9 @@
   --clip-s: polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
   --clip-p: polygon(0 13px,13px 0,calc(100% - 13px) 0,100% 13px,100% calc(100% - 13px),calc(100% - 13px) 100%,13px 100%,0 calc(100% - 13px));
 }
-html[data-accent="cyan"]   { --ac:84 215 255;  --ac2:167 139 250; }
-html[data-accent="violet"] { --ac:167 139 250; --ac2:96 199 255; }
-html[data-accent="crimson"]{ --ac:255 84 104;  --ac2:255 200 120; }
+html[data-accent="cyan"]   { --ac:84 215 255;  --ac2:167 139 250; --ink:#d6e7fb; --ink-hi:#f3f9ff; --ghost:#8298bd; --ghost-2:#465a7e; --mp:#3f8cff; }
+html[data-accent="violet"] { --ac:167 139 250; --ac2:214 188 255; --ink:#e7ddfb; --ink-hi:#f6f1ff; --ghost:#9a86bd; --ghost-2:#5a4680; --mp:#a78bfa; }
+html[data-accent="crimson"]{ --ac:250 66 70;   --ac2:255 150 110; --ink:#fbdde0; --ink-hi:#fff2f3; --ghost:#c08a93; --ghost-2:#824651; --mp:#ff7a6b; --hp:#ff4658; }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;background:var(--void);color:var(--ink);font-family:var(--ui);overscroll-behavior:none;}
@@ -97,8 +97,8 @@ b,strong{font-weight:700;}
 .rankpill b{font-family:var(--display);font-weight:700;font-size:13px;text-shadow:0 0 9px var(--accent);}
 
 /* ---------- glass panel (corner brackets + top light-bar signature) ---------- */
-.panel{position:relative;background:linear-gradient(168deg, rgb(20 34 60 / .42), rgb(7 11 22 / .56));
-  backdrop-filter:blur(17px) saturate(1.25); -webkit-backdrop-filter:blur(17px) saturate(1.25);
+.panel{position:relative;background:linear-gradient(168deg, rgb(20 34 60 / .33), rgb(7 11 22 / .44));
+  backdrop-filter:blur(20px) saturate(1.3); -webkit-backdrop-filter:blur(20px) saturate(1.3);
   border:1px solid var(--line);margin:13px 0;padding:18px 15px;
   box-shadow:var(--glow), 0 10px 32px rgb(0 0 0 / .46), inset 0 1px 0 rgb(255 255 255 / .06);
   clip-path:var(--clip-p);}
@@ -193,7 +193,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .status .lvnum{font-family:var(--display);font-weight:900;font-size:38px;color:#fff;line-height:.9;text-shadow:0 0 20px var(--accent);}
 
 .bar{height:11px;background:rgb(8 14 26 / .8);border:1px solid var(--line);position:relative;overflow:hidden;cursor:pointer;}
-.bar>i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),#dffcff);box-shadow:0 0 14px var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1);}
+.bar>i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),#ffffff);box-shadow:0 0 14px var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1);}
 .bar.hp>i{background:linear-gradient(90deg,var(--hp),#ffb6bd);box-shadow:0 0 14px var(--hp);}
 .bar.mp>i{background:linear-gradient(90deg,var(--mp),#a8d2ff);box-shadow:0 0 14px var(--mp);}
 .bar-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ghost);margin:12px 0 4px;cursor:pointer;}
@@ -375,7 +375,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .resttimer .rt-mid{flex:1;}
 .resttimer .rt-label{font-family:var(--mono);font-size:9px;letter-spacing:.17em;color:var(--ghost);text-transform:uppercase;margin-bottom:6px;}
 .resttimer .rt-bar{height:5px;background:rgb(8 14 26 / .8);border:1px solid var(--line);overflow:hidden;}
-.resttimer .rt-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#dffcff);box-shadow:0 0 10px var(--accent);width:100%;}
+.resttimer .rt-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#ffffff);box-shadow:0 0 10px var(--accent);width:100%;}
 .resttimer .rt-x{font-family:var(--mono);font-size:11px;color:var(--ghost);border:1px solid var(--line);padding:10px 11px;cursor:pointer;background:transparent;}
 .resttimer .rt-x:active{transform:scale(.94);}
 .rt-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
@@ -413,7 +413,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 #boot .term .ln.in{opacity:1;transform:none;transition:.25s;}
 #boot .term .ln .ok{color:var(--green);float:right;}
 #boot .loadbar{width:min(86vw,320px);height:4px;background:rgb(8 14 26 / .8);border:1px solid var(--line);overflow:hidden;}
-#boot .loadbar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#dffcff);box-shadow:0 0 12px var(--accent);animation:bootload 3.9s cubic-bezier(.3,.05,.2,1) .15s forwards;}
+#boot .loadbar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#ffffff);box-shadow:0 0 12px var(--accent);animation:bootload 3.9s cubic-bezier(.3,.05,.2,1) .15s forwards;}
 @keyframes bootword{to{opacity:1;}}
 @keyframes bootload{to{width:100%;}}
 .bootdraw{stroke-dasharray:340;stroke-dashoffset:340;animation:bootdraw 1.1s ease forwards;}
@@ -433,20 +433,23 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 /* A2 — levitating frosted nav + A3 centred STATUS focus button */
 .nav{ left:50%; right:auto; transform:translateX(-50%);
   bottom:calc(14px + env(safe-area-inset-bottom)); width:min(94%,470px);
-  border:1px solid var(--line-2); border-top:1px solid var(--line-2); border-radius:24px;
-  padding:9px 6px; background:linear-gradient(180deg, rgb(13 22 42 / .72), rgb(6 10 20 / .84));
-  backdrop-filter:blur(28px) saturate(1.6); -webkit-backdrop-filter:blur(28px) saturate(1.6);
-  box-shadow:0 18px 52px rgb(0 0 0 / .62), 0 0 26px rgb(var(--ac) / .18), inset 0 1px 0 rgb(255 255 255 / .09);
-  overflow:visible; align-items:center; }
+  --navclip:polygon(16px 0,calc(100% - 16px) 0,100% 16px,100% calc(100% - 16px),calc(100% - 16px) 100%,16px 100%,0 calc(100% - 16px),0 16px);
+  border:none; border-radius:0; background:none; box-shadow:none; overflow:visible;
+  padding:9px 6px; align-items:center; }
+.nav::before{ content:""; position:absolute; inset:0; z-index:-1; clip-path:var(--navclip);
+  background:linear-gradient(180deg, rgb(13 22 42 / .42), rgb(6 10 20 / .55));
+  -webkit-backdrop-filter:blur(26px) saturate(1.5); backdrop-filter:blur(26px) saturate(1.5);
+  box-shadow:inset 0 0 0 1px rgb(var(--ac) / .32), inset 0 1px 0 rgb(255 255 255 / .08);
+  filter:drop-shadow(0 0 13px rgb(var(--ac) / .55)) drop-shadow(0 0 28px rgb(var(--ac) / .3)); }
 .nav .marker{ display:none; }
 .nav button.navfocus{ color:var(--accent); }
-.nav button.navfocus .ic{ width:56px; height:56px; margin-top:-30px; border-radius:50%;
-  background:linear-gradient(160deg, var(--accent), rgb(var(--ac) / .55)); color:#02060c;
-  border:2px solid rgb(255 255 255 / .28); display:grid; place-items:center;
-  box-shadow:0 0 24px rgb(var(--ac) / .75), 0 10px 24px rgb(0 0 0 / .55), inset 0 2px 0 rgb(255 255 255 / .4); }
-.nav button.navfocus .ic svg{ width:27px; height:27px; stroke:#02060c; stroke-width:2; }
-.nav button.navfocus.active .ic{ transform:scale(1.04); filter:none; }
-.nav button.navfocus span:not(.ic){ margin-top:4px; }
+.nav button.navfocus .ic{ width:54px; height:54px; margin-top:-28px; border-radius:7px; transform:rotate(45deg);
+  background:linear-gradient(160deg, var(--accent), rgb(var(--ac) / .5)); color:#02060c;
+  border:2px solid rgb(255 255 255 / .3); display:grid; place-items:center;
+  box-shadow:0 0 26px rgb(var(--ac) / .8), 0 10px 24px rgb(0 0 0 / .55), inset 0 2px 0 rgb(255 255 255 / .4); }
+.nav button.navfocus .ic svg{ width:24px; height:24px; transform:rotate(-45deg); stroke:#02060c; stroke-width:2; }
+.nav button.navfocus.active .ic{ transform:rotate(45deg) scale(1.05); filter:none; }
+.nav button.navfocus span:not(.ic){ margin-top:9px; }
 
 /* B1/B2 — big level + circular EXP ring */
 .lvring{ position:relative; width:208px; height:208px; margin:8px auto 4px; }
@@ -496,8 +499,8 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 
 /* C — profile full-screen */
 .profile-screen{ position:fixed; inset:0; z-index:180; display:none; overflow-y:auto; -webkit-overflow-scrolling:touch;
-  background:radial-gradient(120% 80% at 50% -6%, rgb(var(--ac) / .14), transparent 55%), rgb(4 6 13 / .975);
-  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+  background:radial-gradient(120% 80% at 50% -6%, rgb(var(--ac) / .14), transparent 55%), rgb(4 6 13 / .82);
+  backdrop-filter:blur(15px) saturate(1.2); -webkit-backdrop-filter:blur(15px) saturate(1.2); }
 .profile-screen.show{ display:block; animation:screenIn .3s cubic-bezier(.2,.85,.2,1); }
 .papp{ max-width:560px; margin:0 auto; padding:calc(15px + env(safe-area-inset-top)) 14px calc(44px + env(safe-area-inset-bottom)); }
 .phead{ display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:3;
@@ -522,10 +525,10 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 
 /* D — train horizontal scroll + media */
 .trainbar{ position:sticky; top:calc(env(safe-area-inset-top) + 0px); z-index:30; height:4px; background:rgb(8 14 26 / .7); margin:0 -14px; }
-.trainbar>i{ display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),#dffcff); box-shadow:0 0 10px var(--accent); transition:width .45s cubic-bezier(.2,.8,.2,1); }
+.trainbar>i{ display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),#ffffff); box-shadow:0 0 10px var(--accent); transition:width .45s cubic-bezier(.2,.8,.2,1); }
 .hscroll{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; margin:0 -14px; scrollbar-width:none; }
 .hscroll::-webkit-scrollbar{ display:none; }
-.hpage{ flex:0 0 100%; width:100%; scroll-snap-align:center; padding:6px 14px 4px; box-sizing:border-box; }
+.hpage{ flex:0 0 100%; width:100%; scroll-snap-align:center; scroll-snap-stop:always; padding:6px 14px 4px; box-sizing:border-box; }
 .pageflag{ font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--ghost); text-align:center; margin:2px 0 6px; }
 .hdots{ display:flex; gap:6px; justify-content:center; margin:8px 0 2px; flex-wrap:wrap; }
 .hdots i{ width:7px; height:7px; border-radius:50%; background:var(--line-2); transition:.2s; cursor:pointer; }
@@ -549,9 +552,9 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .bossbanner .bt{ font-family:var(--display); font-weight:900; font-size:16px; color:#ffd0d6; letter-spacing:.04em; text-shadow:0 0 14px rgb(255 84 104 / .6); }
 
 /* F4 — bar styles */
-html[data-bars="solid"] .bar>i{ box-shadow:none; }
-html[data-bars="striped"] .bar>i{ background:repeating-linear-gradient(45deg, var(--accent) 0 8px, rgb(var(--ac) / .5) 8px 16px); box-shadow:0 0 8px rgb(var(--ac)/.4); }
-html[data-bars="minimal"] .bar{ height:6px; } html[data-bars="minimal"] .bar>i{ box-shadow:none; }
+html[data-bars="solid"] .bar:not(.hp):not(.mp)>i{ background:var(--accent); box-shadow:none; }
+html[data-bars="striped"] .bar:not(.hp):not(.mp)>i{ background:repeating-linear-gradient(45deg, var(--accent) 0 9px, rgb(var(--ac) / .45) 9px 18px); box-shadow:0 0 8px rgb(var(--ac) / .4); }
+html[data-bars="minimal"] .bar{ height:5px; } html[data-bars="minimal"] .bar:not(.hp):not(.mp)>i{ background:rgb(var(--ac) / .72); box-shadow:none; }
 html[data-bars="minimal"] .resttimer .rt-bar{ height:3px; }
 
 .play{ width:0;height:0;border-left:9px solid var(--accent);border-top:6px solid transparent;border-bottom:6px solid transparent;display:inline-block; }
@@ -954,10 +957,10 @@ function daysSinceLastSession(){ const r=realSessions(S); if(!r.length) return n
 function scheduledDatesBetween(startStr,endStr){ const out=[]; if(!S.profile) return out;
   let d=new Date(startStr+"T00:00:00"), end=new Date(endStr+"T00:00:00");
   while(d<=end){ if(S.profile.days.includes(d.getDay())) out.push(todayStr(d)); d=new Date(d.getTime()+86400000); } return out; }
-function missedCount(daysBack){ const end=todayStr(new Date(Date.now()-86400000)), start=todayStr(new Date(Date.now()-86400000*daysBack));
+function missedCount(daysBack){ const end=todayStr(new Date(Date.now()-86400000)); let start=todayStr(new Date(Date.now()-86400000*daysBack)); const sb=(S.program&&S.program.startDate)||start; if(start<sb) start=sb; if(start>end) return 0;
   let miss=0; scheduledDatesBetween(start,end).forEach(dt=>{ if(!S.sessions.some(s=>s.date===dt&&!s.forced)) miss++; }); return miss; }
 function nutritionFlag(){ let over=0,under=0,unlogged=0; const ct=S.profile?calorieTarget():2500;
-  for(let i=0;i<7;i++){ const dt=todayStr(new Date(Date.now()-86400000*i)); const n=S.nutrition.log.find(x=>x.date===dt);
+  for(let i=0;i<7;i++){ const dt=todayStr(new Date(Date.now()-86400000*i)); if(S.program&&dt<S.program.startDate) continue; const n=S.nutrition.log.find(x=>x.date===dt);
     if(!n){ unlogged++; continue; } if(n.cal>ct*1.3) over++; else if(n.cal>0&&n.cal<ct*0.6) under++; }
   return {over:over>=2,under:under>=2,unlogged}; }
 function activeDebuffs(){
@@ -992,7 +995,7 @@ function caloriesByDayWeek(){ const out=[]; for(let i=6;i>=0;i--){ const dt=toda
 function workoutsOn(date){ return S.sessions.filter(s=>s.date===date); }
 function sevenDays(){ const out=[]; for(let i=6;i>=0;i--){ const dt=todayStr(new Date(Date.now()-86400000*i));
   const ses=workoutsOn(dt), trained=ses.length>0, dow=new Date(dt+"T00:00:00").getDay();
-  const sched=S.profile&&S.profile.days.includes(dow), missed=sched&&!trained&&dt<todayStr();
+  const sched=S.profile&&S.profile.days.includes(dow), missed=sched&&!trained&&dt<todayStr()&&(!S.program||dt>=S.program.startDate);
   out.push({date:dt,dow:DAYNAMES[dow][0],trained,sched,missed,sessions:ses,score:dayScore(dt),today:dt===todayStr()}); } return out; }
 
 /* boss fights */
@@ -1367,7 +1370,7 @@ function levelRing(have,need,lv,rank){
 }
 function statArrowCell(k,v){ const d=statDelta(k);
   const mod=d>0?`<div class="mod up">+${d}</div>`:(d<0?`<div class="mod dn">${d}</div>`:`<div class="mod"></div>`);
-  return `<div class="statx"><div class="k">${k}</div><div class="v" onclick="openStatDetail('${k}')">${v}</div>${mod}
+  return `<div class="statx"><div class="k">${k}</div><div class="v" onclick="openStatSet('${k}')">${v}</div>${mod}
     <div class="arrows"><button onclick="adjustStat('${k}',-1)">▾</button><button onclick="adjustStat('${k}',1)">▴</button></div></div>`;
 }
 function adjustStat(k,delta){ const b=S.rpg.stats; b[k]=Math.max(1,(b[k]||0)+delta); save(); checkTitleUnlocks(); if(typeof playSfx==="function")playSfx("tap"); renderStatus(); decorPanels(); }
@@ -1393,7 +1396,7 @@ function renderStatus(){
     </div>
 
     <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>This Week<span class="sub">TAP A DAY</span></div>
+      <div class="panel-title"><span class="tri"></span>This Week</div>
       <div class="weekstrip">${days.map(d=>`<div class="daycell ${d.trained?'done':''} ${d.missed?'missed':''} ${d.today?'today':''}" onclick="openDayDetail('${d.date}')"><div class="dn">${d.dow}</div><div class="dd">${d.trained?'✓':(d.missed?'✕':'')}</div></div>`).join("")}</div>
     </div>
 
@@ -1406,8 +1409,7 @@ function renderStatus(){
     <div class="panel flat">
       <div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${wk}/${weeks}</span></div>
       <div class="name mono hi" style="font-size:16px">${arc.n}</div>
-      <p class="lead tiny">${arc.desc}</p>
-      <div class="directive ${dir.deload?'deload':''}"><span class="pip"></span>${dir.note}</div>
+      ${arcProgressBar()}
     </div>
 
     <div class="panel">
@@ -1502,6 +1504,7 @@ function openBodyDetail(){
   if(wlog.length>=2){ const d=lb1(wlog[wlog.length-1].kg)-lb1(wlog[0].kg); trend=`<div class="drow"><div class="dk">Change</div><div class="dv">${d>=0?'+':''}${d.toFixed(1)} lb across ${wlog.length} entries.</div></div>`; }
   detail("[ BODY ]","BODYWEIGHT",
     `<div class="bigval">${cur}<span style="font-size:16px;color:var(--muted)"> lb</span></div>
+     ${wlog.length>=2?lineChart(wlog.map(w=>({x:w.date.slice(5),y:lb1(w.kg)})),"lb"):`<p class="lead tiny center">Log your weight on a few days to chart the trend.</p>`}
      <div class="drow"><div class="dk">Height</div><div class="dv">${heightDisplay(S.profile.heightCm)}</div></div>
      <div class="drow"><div class="dk">Target</div><div class="dv">${goalMode()==="leanbulk"?"Lean Build — aim for a slow climb (~0.5–1 lb/week).":goalMode()==="cut"?"Cut — aim for a slow drop (~0.5–1 lb/week).":"Recomp — hold weight, let the mirror change."}</div></div>${trend}`,
     [{label:"Log weight",onClick:()=>{ hideOverlay(()=>logWeightPrompt()); }},{label:"Close",kind:"ghost",onClick:()=>hideOverlay()}]);
@@ -1525,8 +1528,8 @@ function renderQuests(){
       <button class="btn full" onclick="bossPrompt()">Log a PR (+EXP)</button>
     </div>
     <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>Supplements<span class="sub">EVIDENCE-BASED</span></div>
-      <p class="lead tiny">Optional tools with real research behind them. Check what you took today.</p>
+      <div class="panel-title"><span class="tri"></span>Items &amp; Potions<span class="sub">DAILY USE</span></div>
+      <p class="lead tiny">Consumables with real research behind them — log what you took today. Uptake is tracked in your Profile + Data.</p>
       ${SUPPS.map(sp=>{ const on=(S.supps.checks[todayStr()]||[]).includes(sp.id);
         return `<div class="quest ${on?'done':''}"><div class="qx" onclick="toggleSupp('${sp.id}')">${on?'✓':''}</div>
           <div><div class="ql">${sp.n}</div><div class="muted tiny" style="margin-top:2px">${sp.dose} · ${sp.why}</div></div></div>`;}).join("")}
@@ -1691,11 +1694,8 @@ function renderTrain(){
       <p class="lead tiny">${doneCount()} of ${totalSets} sets logged. Progressive overload: beat last time by a rep or a small load bump.</p>
       <button class="btn full mt" onclick="finishSession()">${sessionDraft.boss?'⚔ Defeat Boss — Finish &amp; Claim':'Clear Gate — Finish &amp; Claim EXP'}</button>
       <button class="btn ghost full mt" onclick="scrollTrainTo(0)">Back to start</button></div></div>`;
-  const pageCount=sessionDraft.ex.length+2;
-  const dots=Array.from({length:pageCount},(_,i)=>`<i id="hdot_${i}" class="${i===0?'on':''}" onclick="scrollTrainTo(${i})"></i>`).join("");
   el.innerHTML=`<div class="trainbar"><i id="trainbarfill" style="width:${pct}%"></i></div>
-    <div class="hscroll" id="hscroll">${overview}${sessionDraft.ex.map((e,i)=>exercisePage(e,i)).join("")}${finish}</div>
-    <div class="hdots" id="hdots">${dots}</div>`;
+    <div class="hscroll" id="hscroll">${overview}${sessionDraft.ex.map((e,i)=>exercisePage(e,i)).join("")}${finish}</div>`;
   wireTrainScroll();
 }
 function exercisePage(e,idx){
@@ -1852,6 +1852,10 @@ function renderStats(){
       ${volBy.length>=2 ? lineChart(volBy.map(d=>({x:d.label,y:d.val})),"sets") : (volBy.length ? `<p class="lead tiny">One week logged so far — finish another week's sessions to draw the trend line.</p>` : `<p class="lead tiny">Finish a session to start tracking weekly volume.</p>`)}
     </div>
 
+    <div class="panel">
+      <div class="panel-title"><span class="tri"></span>Items &amp; Potions<span class="sub">7-DAY USE</span></div>
+      ${suppUsage().map(u=>`<div class="kv"><span class="k">${u.n}</span><span class="v ${u.week>=5?'gr':(u.week?'':'muted')}">${u.week}/7 days${u.total?` · ${u.total} total`:''}</span></div>`).join("")}
+    </div>
     <div class="panel flat">
       <div class="panel-title"><span class="tri"></span>Recent Gates</div>
       ${S.sessions.slice(-6).reverse().map(s=>`<div class="kv"><span class="k">${s.date.slice(5)} · ${s.name}</span><span class="v">${s.setsDone} sets · +${s.exp}</span></div>`).join("")||`<p class="lead tiny">No sessions yet.</p>`}
@@ -1915,8 +1919,11 @@ function renderSystem(){
       <button class="btn ghost full mt" onclick="editProfile()">Edit profile / schedule</button>
     </div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Program Length<span class="sub">${S.program.weeks||24} WEEKS</span></div>
-      <p class="lead tiny">Extend the climb. Currently week ${currentWeek()} of ${S.program.weeks||24}. Added weeks hold the final Arc's intensity.</p>
-      <div class="grid3"><button class="btn" onclick="setWeeks((S.program.weeks||24)+4)">+4 weeks</button><button class="btn" onclick="setWeeks((S.program.weeks||24)+8)">+8 weeks</button><button class="btn ghost" onclick="setWeeks(24)">Reset 24</button></div>
+      <p class="lead tiny">Week count + every stat track from your <b class="hi">start date</b> — so starting today never costs you penalties. Added weeks hold the final Arc's intensity.</p>
+      <div class="kv"><span class="k">Start date</span><span class="v">${fmtDate(S.program.startDate)}</span></div>
+      <div class="kv"><span class="k">Estimated end</span><span class="v">${fmtDate(programEndDate())}</span></div>
+      <div class="grid3 mt"><button class="btn" onclick="setWeeks((S.program.weeks||24)+4)">+4 weeks</button><button class="btn" onclick="setWeeks((S.program.weeks||24)+8)">+8 weeks</button><button class="btn ghost" onclick="setWeeks(24)">Reset 24</button></div>
+      <button class="btn ghost full mt" onclick="setStartDate()">Set start date</button>
     </div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Form Videos<span class="sub">OVERRIDE LINKS</span></div>
       <p class="lead tiny">Each movement embeds a demo + opens YouTube. Override any link that's outdated.</p>
@@ -1930,7 +1937,8 @@ function renderSystem(){
       ${!storageOK?`<div class="banner">This preview can't auto-save. On your phone it will. <b>Export regularly.</b></div>`:""}
       <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button></div>
     <div class="panel flat"><div class="panel-title"><span class="tri"></span>About</div>
-      <p class="lead tiny">A ${S.program.weeks||24}-week climb across 3 Arcs for a lean, mobile, climber-style build. Compound lifts + calisthenic progressions + mobility + conditioning, progressive overload. Mifflin–St Jeor nutrition. Not medical advice.</p></div>`;
+      <p class="lead tiny">ASCENSION turns the grind toward a lean, mobile, climber-style build into a Solo-Leveling <b class="hi">System</b>: a ${S.program.weeks||24}-week (extendable) periodized program across three Arcs — compound lifts, calisthenic progressions, mobility and conditioning under progressive overload — wrapped in levels, ranks, attributes, titles, debuffs, daily quests, boss gates and Mifflin–St Jeor nutrition. It lives in a single offline file and saves straight to your device. Not medical advice — just the System nudging you up the tower.</p>
+      <p class="lead tiny mt" style="color:var(--ghost-2)">Coded, designed &amp; built by <b class="hi">Claude</b> (Anthropic) — your friendly neighborhood AI architect, who has never done a pull-up but has rendered a great many. Now go clear a Gate. ⚔</p></div>`;
 }
 function setBars(v){ S.settings.barStyle=v; save(); document.documentElement.setAttribute("data-bars",v); }
 function setWeeks(n){ n=Math.max(8,Math.min(104,n)); S.program.weeks=n; save(); toast(`Program set to ${n} weeks`); render(); decorPanels(); }
@@ -2035,7 +2043,7 @@ function lineChart(pts,unit){
   len=Math.ceil(len*1.25);
   const area=`${d} L${P[P.length-1].x.toFixed(1)} ${H-padB} L${P[0].x.toFixed(1)} ${H-padB} Z`;
   const grid=[0,.5,1].map(f=>{ const y=padT+f*(H-padT-padB), val=Math.round(hi-f*rng); return `<line class="grid" x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}"/><text x="4" y="${(y+3).toFixed(1)}">${val}</text>`; }).join("");
-  const dots=P.map((pt,i)=>`<circle class="node-dot" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${i===P.length-1?3.4:2}" fill="${i===P.length-1?'var(--accent)':'#dffcff'}" style="animation-delay:${(0.5+i*0.06).toFixed(2)}s;filter:drop-shadow(0 0 4px var(--accent))"/>`).join("");
+  const dots=P.map((pt,i)=>`<circle class="node-dot" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${i===P.length-1?3.4:2}" fill="${i===P.length-1?'var(--accent)':'#ffffff'}" style="animation-delay:${(0.5+i*0.06).toFixed(2)}s;filter:drop-shadow(0 0 4px var(--accent))"/>`).join("");
   const labels=`<text x="${padL}" y="${H-7}">${pts[0].x}</text><text x="${W-padR}" y="${H-7}" text-anchor="end">${pts[pts.length-1].x}</text>`;
   const trend=pts[pts.length-1].y-pts[0].y;
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
@@ -2192,7 +2200,7 @@ function barMini(arr){ const max=Math.max(1,...arr); const W=300,H=60,n=arr.leng
   arr.forEach((v,i)=>{ const h=Math.max(2,(v/max)*(H-14)),x=gap+i*(bw+gap),y=H-h;
     b+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--accent)" style="filter:drop-shadow(0 0 4px rgb(var(--ac) / .5))"/><text x="${(x+bw/2).toFixed(1)}" y="${H-2}" text-anchor="middle" style="fill:var(--ghost);font-size:7px;font-family:var(--mono)">${v}</text>`; });
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:64px;display:block;margin-top:6px">${b}</svg>`; }
-function missedListRecent(daysBack){ const end=todayStr(new Date(Date.now()-86400000)), start=todayStr(new Date(Date.now()-86400000*daysBack));
+function missedListRecent(daysBack){ const end=todayStr(new Date(Date.now()-86400000)); let start=todayStr(new Date(Date.now()-86400000*daysBack)); const sb=(S.program&&S.program.startDate)||start; if(start<sb) start=sb;
   const miss=scheduledDatesBetween(start,end).filter(dt=>!S.sessions.some(s=>s.date===dt&&!s.forced)).slice(-8);
   if(!miss.length) return ""; return `<div class="mt">${miss.map(dt=>`<div class="kv"><span class="k">${DAYNAMES[new Date(dt+"T00:00:00").getDay()]} · ${dt.slice(5)}</span><span class="v cr">missed</span></div>`).join("")}</div>`; }
 function openDayDetail(date){ const ses=workoutsOn(date), dow=DAYNAMES[new Date(date+"T00:00:00").getDay()];
@@ -2227,7 +2235,10 @@ function openProfile(){
   const arc=currentArc(), wk=currentWeek(), weeks=S.program.weeks||24, totalScore=expGainedTotal(), weekScore=expGainedWeek(), weekProd=sevenDays().reduce((a,d)=>a+d.score,0);
   document.getElementById("profileBody").innerHTML=`
     <div class="panel"><div class="rankhuge"><span class="smr">HUNTER RANK</span>${rank==='MONARCH'?'M':rank}</div>
-      <div class="rankrow">${ladder}</div><div class="class center mt">${esc(S.profile.name)} · ${CLASS_BY_RANK[rank]} · Lv ${lv}</div></div>
+      <div class="rankrow">${ladder}</div>
+      <div class="class center mt">${esc(S.profile.name)} · ${CLASS_BY_RANK[rank]}</div>
+      <div class="bar-label" style="margin-top:13px"><span>LEVEL ${lv} → ${lv+1}</span><b>${S.rpg.exp} / ${expToNext(lv)} EXP</b></div>
+      <div class="bar"><i style="width:${Math.min(100,S.rpg.exp/expToNext(lv)*100)}%"></i></div></div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Attributes<span class="sub">EFFECTIVE</span></div><div class="prgrid">${attrHTML}</div><p class="lead tiny center mt">Base + equipped titles + active debuffs.</p></div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Titles<span class="sub">${(t.equipped||[]).length}/${MAX_TITLES} EQUIPPED</span></div><p class="lead tiny">Equip up to ${MAX_TITLES}. Each alters your attributes. Tap to equip / unequip.</p><div class="tslot">${titleHTML}</div></div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Status Effects<span class="sub">DEBUFFS</span></div>${debuffHTML}</div>
@@ -2235,6 +2246,7 @@ function openProfile(){
       <div class="prgrid" style="grid-template-columns:1fr 1fr 1fr"><div class="prcell"><div class="k">TOTAL SCORE</div><div class="v">${totalScore}</div><div class="mm"></div></div><div class="prcell"><div class="k">EXP / WK</div><div class="v">${weekScore}</div><div class="mm"></div></div><div class="prcell"><div class="k">WK SCORE</div><div class="v">${weekProd}</div><div class="mm"></div></div></div>
       <div class="fld-head mt">EXP gained per day (this week)</div>${expSpark}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Calories / Day<span class="sub">THIS WEEK</span></div>${calHTML}</div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Items &amp; Potions<span class="sub">USAGE</span></div><p class="lead tiny">Supplements logged as consumables — your uptake over time.</p>${suppUsage().map(u=>`<div class="kv"><span class="k">${u.n}</span><span class="v">${u.total} taken${u.week?` · ${u.week}/7 wk`:''}${u.last?` · last ${u.last.slice(5)}`:''}</span></div>`).join("")}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Missed Days<span class="sub">LAST 28D</span></div><div class="bigval ${missed?'cr':'gr'}" style="font-size:34px">${missed}</div><p class="lead tiny center">${missed?`Scheduled Gates not cleared in the last 28 days.`:`No missed Gates in 28 days. Relentless.`}</p>${missList}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Personal Records<span class="sub">BEST SETS</span></div>${prHTML}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${wk}/${weeks}</span></div><div class="name mono hi" style="font-size:15px">${arc.n}</div><p class="lead tiny">${arc.desc}</p></div>
@@ -2242,6 +2254,19 @@ function openProfile(){
   document.getElementById("profile").classList.add("show"); document.body.style.overflow="hidden"; if(typeof playSfx==="function")playSfx("tap");
   decorPanels();
 }
+
+/* ---- v5.3 helpers: arc progress, items usage, free stat set, start date ---- */
+function fmtDate(iso){ try{ return new Date(iso+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }catch(e){ return iso||""; } }
+function programEndDate(){ const w=S.program.weeks||24; const d=new Date(((S.program&&S.program.startDate)||todayStr())+"T00:00:00"); d.setDate(d.getDate()+w*7-1); return todayStr(d); }
+async function setStartDate(){ const v=await sysPrompt({big:"START DATE",msg:"Date your climb began (YYYY-MM-DD). Week count + stats track from here.",value:S.program.startDate,placeholder:"2026-06-22"});
+  if(v===null||v==="") return; const t=String(v).trim(); if(!/^\d{4}-\d{2}-\d{2}$/.test(t)||isNaN(new Date(t+"T00:00:00").getTime())){ toast("Use format YYYY-MM-DD"); return; }
+  S.program.startDate=t; save(); toast("Start date set"); render(); decorPanels(); }
+function arcProgressBar(){ const wk=currentWeek(), a=currentArc(); const span=a.wk[1]-a.wk[0]+1; const into=Math.min(span,Math.max(1,wk-a.wk[0]+1)); const pct=Math.round(into/span*100); const isFinal=a.wk[1]>=24||a===ARCS[ARCS.length-1]; const left=a.wk[1]-wk;
+  return `<div class="bar-label" style="margin-top:10px"><span>ARC PROGRESS</span><b>${isFinal?'FINAL ARC':(left<=0?'next week':left+' wk to next Arc')}</b></div><div class="bar"><i style="width:${isFinal?100:pct}%"></i></div>`; }
+function suppUsage(){ const checks=S.supps.checks||{}, dates=Object.keys(checks); const last7=[]; for(let i=0;i<7;i++) last7.push(todayStr(new Date(Date.now()-86400000*i)));
+  return SUPPS.map(sp=>{ let total=0,last=null,w=0; dates.forEach(dt=>{ if((checks[dt]||[]).includes(sp.id)){ total++; if(!last||dt>last)last=dt; if(last7.includes(dt))w++; } }); return {id:sp.id,n:sp.n,dose:sp.dose,total,last,week:w}; }); }
+async function openStatSet(k){ const cur=S.rpg.stats[k]; const v=await sysPrompt({big:k+" — SET VALUE",msg:"Set this attribute to any value. Free to raise or lower.",value:cur,numeric:true,step:1,min:1,max:999});
+  if(v===null||v==="") return; const n=Math.max(1,Math.min(999,Math.round(+v||1))); S.rpg.stats[k]=n; save(); checkTitleUnlocks(); renderStatus(); decorPanels(); toast(k+" set to "+n); }
 
 /* ============================================================ INIT ========================================================= */
 try{ startApp(); }catch(e){ try{ document.getElementById("onboard").style.display="block"; }catch(_){} }
