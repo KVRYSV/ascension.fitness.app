@@ -1,6 +1,22 @@
 # ascension.fitness.app
 personal use fitness app vibecoded using claude.
 
+v5.3 polish pass
+
+
+Stats start on your real start date. Week count and every derived stat (missed days, debuffs, nutrition flags) track from the program start, so starting today never hands you phantom penalties. Settings now shows start date + estimated end and lets you set the start date.
+More glass. Floating nav and panels are ~20% more transparent with stronger bokeh blur, so the live background reads through every window.
+Edgier nav. The floating bar is now polygonal with a glowing edge (no solid outline); the centre Status button is a diamond.
+Free attributes. Tap any attribute to set it to any value (arrows still nudge ±1) — no point economy.
+Distinct bar styles — glow / solid / striped / minimal now actually look different (not just sized differently).
+Cohesive theming. Crimson is properly red now, and the whole text ramp + live background re-hue to the active accent instead of staying blue.
+Current Arc shows a progress bar to the next Arc instead of duplicated advice (advice now lives only on Today's Gate).
+Cleaner Train: removed the page-dots indicator; gentler one-card-per-swipe snapping.
+Cleaner Profile: the level number is now an EXP-to-next bar.
+Supplements = items/potions: logged as consumables and tracked in Profile + Data (uptake, weekly count, last taken).
+Body window now draws the weight trend chart.
+About rewritten as a quirky summary, crediting Claude as coder, designer & builder.
+
 # ASCENSION — v5.0 update notes
 
 A self-contained, offline-first fitness PWA with a Solo-Leveling "System" interface. Everything below ships inside the single `index.html` (no external dependencies). Old saves migrate automatically — nothing is wiped.
