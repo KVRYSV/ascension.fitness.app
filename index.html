@@ -557,9 +557,13 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .bossbanner .bt{ font-family:var(--display); font-weight:900; font-size:16px; color:#ffd0d6; letter-spacing:.04em; text-shadow:0 0 14px rgb(255 84 104 / .6); }
 
 /* F4 — bar styles */
-html[data-bars="solid"] .bar:not(.hp):not(.mp)>i{ background:var(--accent); box-shadow:none; }
-html[data-bars="striped"] .bar:not(.hp):not(.mp)>i{ background:repeating-linear-gradient(45deg, var(--accent) 0 9px, rgb(var(--ac) / .45) 9px 18px); box-shadow:0 0 8px rgb(var(--ac) / .4); }
-html[data-bars="minimal"] .bar{ height:5px; } html[data-bars="minimal"] .bar:not(.hp):not(.mp)>i{ background:rgb(var(--ac) / .72); box-shadow:none; }
+html[data-bars="solid"] .bar>i{ background:var(--accent); box-shadow:none; }
+html[data-bars="solid"] .bar.hp>i{ background:var(--hp); } html[data-bars="solid"] .bar.mp>i{ background:var(--mp); }
+html[data-bars="striped"] .bar>i{ background:repeating-linear-gradient(45deg, var(--accent) 0 9px, rgb(var(--ac) / .4) 9px 18px); box-shadow:0 0 8px rgb(var(--ac) / .4); }
+html[data-bars="striped"] .bar.hp>i{ background:repeating-linear-gradient(45deg, var(--hp) 0 9px, rgb(255 70 88 / .4) 9px 18px); }
+html[data-bars="striped"] .bar.mp>i{ background:repeating-linear-gradient(45deg, var(--mp) 0 9px, rgb(120 150 255 / .4) 9px 18px); }
+html[data-bars="minimal"] .bar{ height:5px; } html[data-bars="minimal"] .bar>i{ box-shadow:none; background:var(--accent); }
+html[data-bars="minimal"] .bar.hp>i{ background:var(--hp); } html[data-bars="minimal"] .bar.mp>i{ background:var(--mp); }
 html[data-bars="minimal"] .resttimer .rt-bar{ height:3px; }
 
 .play{ width:0;height:0;border-left:9px solid var(--accent);border-top:6px solid transparent;border-bottom:6px solid transparent;display:inline-block; }
@@ -604,6 +608,30 @@ html[data-bars="minimal"] .resttimer .rt-bar{ height:3px; }
 input[type=date]{color-scheme:dark;}
 .fld.checkrow{ display:flex; flex-direction:row; align-items:center; justify-content:space-between; cursor:pointer; gap:10px; }
 .fld.checkrow input[type=checkbox]{ width:22px; height:22px; accent-color:var(--accent); color-scheme:dark; cursor:pointer; flex:0 0 auto; }
+.subbox{ border:1px solid var(--line-2); background:rgb(var(--ac) / .035); padding:13px 13px 15px; }
+.catline{ display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+.catword{ font-family:var(--mono); font-weight:700; font-size:11px; letter-spacing:.14em; color:#02060c; background:var(--accent); padding:3px 10px; box-shadow:0 0 12px rgb(var(--ac) / .5); }
+.catline .sub2{ font-family:var(--mono); font-size:11px; color:var(--ghost); }
+.setbox{ display:inline-flex; align-items:stretch; margin-top:13px; border:1px solid var(--line-2); }
+.setbox .sb{ display:flex; flex-direction:column; align-items:center; padding:8px 20px; }
+.setbox .sbk{ font-family:var(--mono); font-size:9px; letter-spacing:.16em; color:var(--ghost); }
+.setbox .sbv{ font-family:var(--display); font-weight:800; font-size:23px; color:var(--accent); text-shadow:0 0 10px rgb(var(--ac) / .5); line-height:1.05; margin-top:3px; }
+.setbox .sbx{ display:flex; align-items:center; padding:0 6px; font-family:var(--display); font-size:18px; color:var(--ghost); background:rgb(var(--ac) / .05); }
+.histmonth{ font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--accent); text-transform:uppercase; margin:14px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--line); }
+.histmonth:first-child{ margin-top:2px; }
+.histscroll{ max-height:62vh; overflow-y:auto; }
+.bonusquest{ border-left:3px solid var(--accent); }
+.bonusquest .qr{ color:var(--accent); }
+.hxc{ font-family:var(--mono); font-size:11px; color:var(--accent); margin-top:5px; opacity:.92; }
+.laddercap{ font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; color:var(--ghost-2); text-align:center; margin-top:7px; cursor:pointer; text-transform:uppercase; }
+.rkinfo{ border:1px solid var(--line); border-left:3px solid var(--line-2); padding:10px 12px; margin-top:9px; background:rgb(var(--ac) / .03); }
+.rkinfo.done{ border-left-color:var(--accent); }
+.rkinfo.cur{ border-left-color:var(--accent); background:rgb(var(--ac) / .09); box-shadow:0 0 16px rgb(var(--ac) / .15); }
+.rkinfo .rh{ display:flex; align-items:center; gap:9px; }
+.rkinfo .rn{ font-family:var(--display); font-weight:800; font-size:14px; color:var(--ink-hi); letter-spacing:.03em; }
+.rkinfo .rc{ font-family:var(--mono); font-size:10px; letter-spacing:.1em; color:var(--accent); text-transform:uppercase; }
+.rkinfo .rcur{ margin-left:auto; font-family:var(--mono); font-size:9px; letter-spacing:.14em; color:#02060c; background:var(--accent); padding:2px 7px; }
+.rkinfo p{ font-family:var(--mono); font-size:11.5px; line-height:1.5; color:var(--ghost); margin-top:6px; }
 </style>
 </head>
 <body>
@@ -626,7 +654,7 @@ input[type=date]{color-scheme:dark;}
 
 <!-- ============ ONBOARDING ============ -->
 <div id="onboard" class="app" style="display:none;">
-  <div class="topbar"><div class="brand">ASCENSION<small>PLAYER REGISTRATION</small></div></div>
+  <div class="topbar"><div class="brand">//ASCENSION SYSTEM<small>REGISTRATION</small></div></div>
   <div class="panel">
     <div class="panel-title"><span class="tri"></span>System // Awakening<span class="sub">REQUIRED</span></div>
     <p class="lead">You have been selected as a <span class="hi">Player</span>. Register your vessel to begin the climb from <b class="hi">E-Rank</b>. All data stays on this device.</p>
@@ -696,7 +724,7 @@ input[type=date]{color-scheme:dark;}
 <!-- ============ MAIN APP ============ -->
 <div id="main" class="app" style="display:none;">
   <div class="topbar">
-    <div class="brand">ASCENSION<small id="tb_name">PLAYER</small></div>
+    <div class="brand">//ASCENSION SYSTEM<small id="tb_name">PLAYER</small></div>
     <div class="rankpill" id="tb_pill" onclick="openProfile()"><span id="tb_rank">E</span>·RANK <span class="sep">|</span> Lv <b id="tb_lv">1</b></div>
   </div>
   <section class="screen active" id="s-status"></section>
@@ -1176,7 +1204,24 @@ function genDailyQuest(){
     {id:"q_hang",label:`Dead hang or plank — ${scale(20,1)}s`,exp:20,done:false},
     {id:"q_mob",label:`5 min mobility (hips / shoulders / wrists)`,exp:20,done:false},
   ];
-  S.quests={date:todayStr(),items,bonusGiven:false}; save();
+  const pool=[
+    {id:"b_run",label:`Run ${1+Math.round(Math.min(lv,30)/12)} miles`,exp:60},
+    {id:"b_push",label:`${40+scale(0,1)} push-ups (any split)`,exp:45},
+    {id:"b_steps",label:`Hit 10,000 steps today`,exp:40},
+    {id:"b_plank",label:`Accumulate ${60+Math.min(lv,40)}s of plank`,exp:40},
+    {id:"b_mob",label:`15 min full mobility flow`,exp:35},
+    {id:"b_pull",label:`${15+Math.round(Math.min(lv,40)/2)} pull-ups (any split)`,exp:55}
+  ];
+  const rare=[
+    {id:"r_hiit",label:`⚔ HIIT TRIAL — 8 rounds, 20s on / 10s off`,exp:120},
+    {id:"r_burpee",label:`⚔ 100 burpees for time`,exp:130},
+    {id:"r_emom",label:`⚔ 15-min EMOM — 10 push-ups + 15 squats`,exp:125}
+  ];
+  const bonus=[];
+  if(Math.random()<0.5) bonus.push(pool[Math.floor(Math.random()*pool.length)]);
+  if(Math.random()<0.10){ const rr=rare[Math.floor(Math.random()*rare.length)]; if(!bonus.find(b=>b.id===rr.id)) bonus.push(rr); }
+  bonus.forEach(b=>b.done=false);
+  S.quests={date:todayStr(),items,bonus,bonusGiven:false}; save();
 }
 function ensureDailyQuest(){ if(S.quests.date!==todayStr()) genDailyQuest(); }
 
@@ -1387,6 +1432,44 @@ function countUp(el,to,dur,suffix){
 }
 function decorPanels(){ document.querySelectorAll(".panel").forEach(pn=>{ if(!pn.querySelector(":scope > .sheen")){ const sh=document.createElement("div"); sh.className="sheen"; pn.insertBefore(sh,pn.firstChild); } }); }
 function esc(s){ return (s+"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+/* ---- full-history modal (group by month) ---- */
+function monthLabel(iso){ try{ return new Date(iso+"T00:00:00").toLocaleDateString(undefined,{month:"long",year:"numeric"}); }catch(e){ return (iso||"").slice(0,7); } }
+function historyModal(title, rows){
+  const sorted=[...rows].filter(r=>r&&r.date).sort((a,b)=>a.date<b.date?1:-1);
+  let out="", cur="";
+  sorted.forEach(r=>{ const m=(r.date||"").slice(0,7); if(m!==cur){ cur=m; out+=`<div class="histmonth">${monthLabel(r.date)}</div>`; } out+=r.html; });
+  if(!out) out=`<p class="lead tiny center">Nothing logged yet.</p>`;
+  detail("[ FULL HISTORY ]", title, `<div class="histscroll">${out}</div>`, [{label:"Close",kind:"ghost",onClick:()=>hideOverlay()}]);
+}
+function gateRowHTML(s){
+  const exs=(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||e.id; const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return `<b>${nm}</b> ${e.sets.length}×${top.w?` ${top.w}${unitW()}`:''}`; }).join(" · ")||"—";
+  const cust=(s.custom&&s.custom.length)?`<div class="hxc">▹ ${s.custom.map(c=>esc(c)).join(" · ")}</div>`:"";
+  return `<div class="histday"><div class="hd"><span>${s.date.slice(5)} · ${s.name}${s.boss?' · BOSS':''}</span><span>${s.setsDone} sets · +${s.exp} EXP</span></div><div class="hx">${exs}</div>${cust}</div>`;
+}
+function histCal(){ const rows=(S.nutrition.log||[]).map(e=>({date:e.date, html:`<div class="kv tap" onclick="calEdit('${e.date}')"><span class="k">${fmtDate(e.date)}</span><span class="v">${e.cal} kcal · ${e.pro}g P ›</span></div>`})); historyModal("Calorie Log", rows); }
+function histWeight(){ const wl=(S.metrics&&S.metrics.weight)||[]; const rows=wl.map(w=>({date:w.date, html:`<div class="kv tap" onclick="weightEdit('${w.date}')"><span class="k">${fmtDate(w.date)}</span><span class="v">${lb1(w.kg)} ${unitW()} ›</span></div>`})); historyModal("Bodyweight", rows); }
+function histGates(){ const prLog=(S.records&&S.records.prLog)||[]; const tl=S.sessions.map(s=>({t:"s",date:s.date,s})).concat(prLog.map(p=>({t:"p",date:p.date,p}))); const rows=tl.map(it=> it.t==="s" ? {date:it.s.date, html:gateRowHTML(it.s)} : {date:it.p.date, html:`<div class="histday pr"><div class="hd"><span>${it.p.date.slice(5)} · ◆ PR</span><span>${prValShort(it.p)}</span></div><div class="hx"><b>${esc(it.p.name)}</b></div></div>`}); historyModal("Gate History", rows); }
+function histPRs(){ const pr=(S.records&&S.records.pr)||{}; const rows=Object.keys(pr).map(id=>{ const r=pr[id], nm=r.n||(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):(r.hold>0?`${r.hold}s hold`:`${r.reps||0} reps`); return {date:r.date||"", html:`<div class="kv"><span class="k">${nm}</span><span class="v">${val}</span></div>`}; }); historyModal("Personal Records", rows); }
+/* ---- personal work on a Gate ---- */
+function addCustomWork(){ if(!sessionDraft) return; const el=document.getElementById("customwork"); if(!el) return; const v=(el.value||"").trim(); if(!v){ toast("Type a workout first"); return; } sessionDraft.custom=sessionDraft.custom||[]; sessionDraft.custom.push(v); S.draft=sessionDraft; save(); renderTrain(); toast("Added to today's Gate"); }
+function rmCustomWork(i){ if(!sessionDraft||!sessionDraft.custom) return; sessionDraft.custom.splice(i,1); S.draft=sessionDraft; save(); renderTrain(); }
+/* ---- bonus quests ---- */
+function toggleBonus(id){ const b=((S.quests&&S.quests.bonus)||[]).find(x=>x.id===id); if(!b) return; if(b.done){ b.done=false; save(); renderQuests(); return; } b.done=true; const r=addExp(b.exp,"bonus"); markActivityToday(); handleLevels(r); save(); renderQuests(); toast(`Bonus cleared · +${r.gained} EXP`); }
+/* ---- hunter rank explanations ---- */
+const RANK_INFO=[
+ ["E","Awakened Novice","The weakest and most common tier. No special edge beyond raw effort and the skills you train. Every Hunter begins here — the climb starts now."],
+ ["D","Iron Aspirant","Habits have set. Noticeably stronger and more capable than an untrained person. The body answers when you call on it."],
+ ["C","Tempered Fighter","Solid and reliable. Clears most Gates without trouble. Real, visible conditioning earned through repetition."],
+ ["B","Shadow Athlete","Rare. Athletic, powerful, hard to rattle — the kind of strength people notice across a room."],
+ ["A","Apex Hunter","Elite. Few ever reach this far. A genuine force in any Gate, composed under maximum load."],
+ ["S","Sovereign","One in hundreds of millions. The strongest class of Hunter — peak human output, near the ceiling of what is possible."],
+ ["MONARCH","Shadow Monarch","Beyond rank. A summit almost no one will ever witness. Total mastery of body and will."]
+];
+function openRankInfo(){
+  const ci=rankIndex(S.rpg.level);
+  const body=RANK_INFO.map((r,i)=>`<div class="rkinfo ${i===ci?'cur':''} ${i<ci?'done':''}"><div class="rh"><span class="rn">${r[0]==='MONARCH'?'MONARCH':r[0]+'-RANK'}</span><span class="rc">${r[1]}</span>${i===ci?'<span class="rcur">YOU</span>':''}</div><p>${r[2]}</p></div>`).join("");
+  detail("[ HUNTER RANKS ]","Rank System",`<p class="lead tiny" style="margin-bottom:2px">Your rank rises with your Level — a higher rank reflects a stronger, more capable Hunter.</p>${body}`,[{label:"Close",kind:"ghost",onClick:()=>hideOverlay()}]);
+}
 function latestWeightKg(){ const w=S.metrics.weight; return w.length?w[w.length-1].kg:null; }
 function lastNSessions(n){ const t=Date.now(),out=[]; for(let i=0;i<n;i++){ const d=todayStr(new Date(t-86400000*i)); if(S.sessions.some(s=>s.date===d)) out.push(d); } return out; }
 
@@ -1440,7 +1523,8 @@ function renderStatus(){
       <div class="class center">${CLASS_BY_RANK[rank]}${eqT.length?` · <span class="hi">${eqT.map(id=>{const t=TITLES.find(x=>x.id===id);return t?t.n:"";}).filter(Boolean).join(" · ")}</span>`:""}</div>
       ${levelRing(have,need,lv,rank)}
       <div class="row spread tiny mono muted" style="margin-top:2px"><span>Week ${wk}/${weeks}</span><span>Arc ${arc.n.split(" ")[0]}</span><span class="hi" onclick="openProfile()" style="cursor:pointer">Profile →</span></div>
-      <div class="ladder">${ladder}</div>
+      <div class="ladder" onclick="openRankInfo()" style="cursor:pointer">${ladder}</div>
+      <div class="laddercap" onclick="openRankInfo()">Tap a rank to learn what it means ›</div>
       <div class="bar-label" onclick="openBarDetail('hp')"><span>HP — recovery</span><b>${hpMax()}</b></div>
       <div class="bar hp" onclick="openBarDetail('hp')"><i style="width:${recoveryPct()}%"></i></div>
       <div class="bar-label" onclick="openBarDetail('mp')"><span>MP — readiness</span><b>${mpMax()}</b></div>
@@ -1567,7 +1651,11 @@ function openBodyDetail(){
 function renderQuests(){
   ensureDailyQuest();
   const q=S.quests.items, all=q.every(i=>i.done);
+  const bn=(S.quests.bonus||[]);
   document.getElementById("s-quests").innerHTML=`
+    ${bn.length?`<div class="panel questbox"><div class="panel-title"><span class="tri"></span>Bonus Quests<span class="sub">SURGE</span></div>
+      <p class="lead tiny">The System opened extra contracts today. Optional — clear them for bonus EXP.</p>
+      ${bn.map(b=>`<div class="quest bonusquest ${b.done?'done':''}"><div class="qx" onclick="toggleBonus('${b.id}')">${b.done?'✓':''}</div><div class="ql">${esc(b.label)}</div><div class="qr">+${b.exp}</div></div>`).join("")}</div>`:""}
     <div class="panel questbox">
       <div class="panel-title"><span class="tri"></span>Daily Quest<span class="sub">${all?'CLEAR':'ACTIVE'}</span></div>
       <p class="lead tiny">The System's standing order. Scaled to your level — always clearable, never optional. Clear all for bonus EXP.</p>
@@ -1761,9 +1849,13 @@ function renderTrain(){
       <button class="btn ghost full mt" onclick="skipToday()">Skip today — no penalty</button>
     </div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Muscle Map<span class="sub">TARGETS</span></div>${bodyDiagram(sessionDraft.ex.map(e=>e.id))}</div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Personal Work<span class="sub">FREESTYLE</span></div>
+      <p class="lead tiny">Log anything extra you do today — planche holds, burpees, sprints. It's saved with this Gate's record.</p>
+      <div class="row" style="gap:8px;align-items:stretch"><input id="customwork" type="text" placeholder="e.g. 3× planche 15s, 50 burpees" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomWork();}"><button class="btn" style="width:auto;padding:0 18px" onclick="addCustomWork()">Add</button></div>
+      ${(sessionDraft.custom&&sessionDraft.custom.length)?`<div class="mt">${sessionDraft.custom.map((c,i)=>`<div class="kv"><span class="k">▹ ${esc(c)}</span><span class="v tap" onclick="rmCustomWork(${i})">✕</span></div>`).join("")}</div>`:""}</div>
     <div class="panel flat"><div class="panel-title"><span class="tri"></span>Rest Timer<span class="sub">AUTO</span></div>
       <p class="lead tiny">Auto-starts when you check a set. Compounds ~2.5 min · isolation 90s · core/mobility 60s.</p>
-      <div class="rt-presets"><span class="rt-preset" onclick="startRest(60,'Rest — core / mobility')">0:60</span><span class="rt-preset" onclick="startRest(90,'Rest — isolation')">1:30</span><span class="rt-preset" onclick="startRest(120,'Rest — recover')">2:00</span><span class="rt-preset" onclick="startRest(180,'Rest — heavy compound')">3:00</span></div></div>
+      <div class="rt-presets"><span class="rt-preset" onclick="startRest(30,'Rest — quick')">0:30</span><span class="rt-preset" onclick="startRest(90,'Rest — isolation')">1:30</span><span class="rt-preset" onclick="startRest(120,'Rest — recover')">2:00</span><span class="rt-preset" onclick="startRest(180,'Rest — compound')">3:00</span><span class="rt-preset" onclick="startRest(240,'Rest — heavy')">4:00</span><span class="rt-preset" onclick="startRest(300,'Rest — max effort')">5:00</span></div></div>
   </div>`;
   const finish=`<div class="hpage"><div class="pageflag">FINISH</div>
     <div class="panel flat"><div class="panel-title"><span class="tri"></span>${sessionDraft.boss?'Defeat the Boss':'Clear the Gate'}<span class="sub">CLAIM EXP</span></div>
@@ -1792,8 +1884,9 @@ function exercisePage(e,idx){
   return `<div class="hpage"><div class="pageflag">MOVE ${idx+1} / ${sessionDraft.ex.length}</div>
     <div class="ex">
       <div class="hd"><div class="grow"><div class="nm">${x.n}</div>
-        <div class="exmeta2"><span class="big">${e.sets.length} × ${e.reps}</span><span class="sub2">sets × reps · ${x.cat}${lastBest?` · last <span class="hi">${lastBest}</span>`:""}</span></div></div>
+        <div class="catline"><span class="catword cat-${x.cat.toLowerCase()}">${x.cat.toUpperCase()}</span>${lastBest?`<span class="sub2">last ${lastBest}</span>`:""}</div></div>
         <span class="tag ${tag}">${x.stat}</span></div>
+      <div class="setbox"><div class="sb"><span class="sbk">SETS</span><span class="sbv">${e.sets.length}</span></div><div class="sbx">×</div><div class="sb"><span class="sbk">REPS</span><span class="sbv">${e.reps}</span></div></div>
       <div class="machine"><span class="mchip">⋈ ${mac.use}</span>${mac.free&&mac.free!=="—"?`<span class="mchip free">free-weight: ${mac.free}</span>`:""}</div>
       ${embed}
       <div class="row" style="gap:8px;flex-wrap:wrap">
@@ -1847,7 +1940,7 @@ function finishSession(){
     if(S.rpg.level<rec){ bossBonus=Math.round(exp*0.5)+40; slayer=true; } }
   const r=addExp(exp+bossBonus,isBoss?"boss":"session");
   const exRec=sessionDraft.ex.map(e=>({id:e.id,sets:e.sets.filter(s=>s.done).map(s=>({w:+s.weight||0,reps:+s.reps||0,rpe:+s.rpe||0}))}));
-  S.sessions.push({date:sessionDraft.date,dayKey:sessionDraft.dayKey,name:sessionDraft.name,forced:!!sessionDraft.forced,boss:isBoss,setsDone,exp:r.gained,ex:exRec});
+  S.sessions.push({date:sessionDraft.date,dayKey:sessionDraft.dayKey,name:sessionDraft.name,forced:!!sessionDraft.forced,boss:isBoss,setsDone,exp:r.gained,ex:exRec,custom:(sessionDraft.custom||[])});
   updatePRs(exRec);
   if(isBoss){ S.rpg.bossesBeaten=S.rpg.bossesBeaten||[]; if(!S.rpg.bossesBeaten.includes(wk)) S.rpg.bossesBeaten.push(wk);
     if(slayer){ S.rpg.giantSlayer=true; S.rpg.statPoints+=2; } }
@@ -1885,8 +1978,10 @@ function renderStats(){
   const days7=[]; for(let i=6;i>=0;i--){ const d=todayStr(new Date(Date.now()-86400000*i)); days7.push({label:DAYNAMES[new Date(d+"T00:00:00").getDay()][0],val:dayScore(d)}); }
   const clog=[...S.nutrition.log].sort((a,b)=>a.date<b.date?-1:1);
   const calChart = clog.length>=2 ? lineChart(clog.slice(-14).map(e=>({x:e.date.slice(5),y:e.cal})),"kcal") : `<p class="lead tiny">Log calories on a couple of days to see the trend.</p>`;
-  const calListHTML = [...S.nutrition.log].sort((a,b)=>a.date<b.date?1:-1).slice(0,10).map(e=>`<div class="kv tap" onclick="calEdit('${e.date}')"><span class="k">${fmtDate(e.date)}</span><span class="v">${e.cal} kcal · ${e.pro}g P ›</span></div>`).join("")||`<p class="lead tiny center">No days logged yet.</p>`;
-  const wListHTML = [...wlog].sort((a,b)=>a.date<b.date?1:-1).slice(0,8).map(w=>`<div class="kv tap" onclick="weightEdit('${w.date}')"><span class="k">${fmtDate(w.date)}</span><span class="v">${lb1(w.kg)} ${unitW()} ›</span></div>`).join("")||"";
+  const _cl=[...S.nutrition.log].sort((a,b)=>a.date<b.date?1:-1);
+  const calListHTML = (_cl.slice(0,7).map(e=>`<div class="kv tap" onclick="calEdit('${e.date}')"><span class="k">${fmtDate(e.date)}</span><span class="v">${e.cal} kcal · ${e.pro}g P ›</span></div>`).join("")||`<p class="lead tiny center">No days logged yet.</p>`)+(_cl.length>7?`<button class="btn ghost full mt" onclick="histCal()">View full history (${_cl.length})</button>`:"");
+  const _wl=[...wlog].sort((a,b)=>a.date<b.date?1:-1);
+  const wListHTML = (_wl.slice(0,7).map(w=>`<div class="kv tap" onclick="weightEdit('${w.date}')"><span class="k">${fmtDate(w.date)}</span><span class="v">${lb1(w.kg)} ${unitW()} ›</span></div>`).join("")||"")+(_wl.length>7?`<button class="btn ghost full mt" onclick="histWeight()">View full history (${_wl.length})</button>`:"");
   document.getElementById("s-stats").innerHTML=`
     <div class="panel">
       <div class="panel-title"><span class="tri"></span>Today<span class="sub">${DAYNAMES[new Date().getDay()]}</span></div>
@@ -1908,19 +2003,21 @@ function renderStats(){
         <div class="m"><div class="v">${carbTarget()}g</div><div class="k">Carbs</div></div>
         <div class="m"><div class="v">${fatTarget()}g</div><div class="k">Fat</div></div>
       </div>
-      <div class="fld-head mt">After a meal — adds to today</div>
+      <div class="fld-head mt2">After a meal — adds to today</div>
       <div class="grid2">
         <label class="fld"><span>Meal calories</span><input id="m_cal" type="number" inputmode="numeric" placeholder="e.g. 650"></label>
         <label class="fld"><span>Meal protein (g)</span><input id="m_pro" type="number" inputmode="numeric" placeholder="e.g. 40"></label>
       </div>
       <button class="btn full mt" onclick="mealAdd()">+ Add meal to today</button>
-      <div class="fld-head mt">Today's running total</div>
-      <div class="grid2">
-        <label class="fld"><span>Calories (kcal)</span><input id="n_cal" type="number" inputmode="numeric" value="${nut?nut.cal:""}" placeholder="e.g. 2600"></label>
-        <label class="fld"><span>Protein (g)</span><input id="n_pro" type="number" inputmode="numeric" value="${nut?nut.pro:""}" placeholder="e.g. 150"></label>
+      <div class="subbox mt2">
+        <div class="fld-head" style="margin-top:0">Today's running total</div>
+        <div class="grid2">
+          <label class="fld"><span>Calories (kcal)</span><input id="n_cal" type="number" inputmode="numeric" value="${nut?nut.cal:""}" placeholder="e.g. 2600"></label>
+          <label class="fld"><span>Protein (g)</span><input id="n_pro" type="number" inputmode="numeric" value="${nut?nut.pro:""}" placeholder="e.g. 150"></label>
+        </div>
+        <button class="btn ghost full mt" onclick="logNutrition()">Overwrite today's total</button>
+        ${todayNutritionSummary()}
       </div>
-      <button class="btn ghost full mt" onclick="logNutrition()">Overwrite today's total</button>
-      ${todayNutritionSummary()}
       <label class="fld"><span>Override goal mode</span>
         <select onchange="setGoal(this.value)">
           <option value="">Use profile (${S.profile.goal})</option>
@@ -2118,7 +2215,7 @@ function renderSystem(){
         <li><b>Lift heavy?</b> Not required — use whatever equipment you have; bodyweight progressions count. Just beat your last log over time.</li>
         <li><b>Lose progress?</b> Everything saves locally. Back up via Settings, and import it on a new device.</li>
       </ul>
-      <div class="creditbox"><span class="sig">// SYSTEM ADMINISTRATOR</span>Coded, designed &amp; built by <b class="hi">Claude</b> (Anthropic) — your friendly neighborhood AI architect, who has never done a pull-up but has rendered a great many. Arise, Hunter. ⚔</div></div>`;
+      <div class="creditbox"><span class="sig">// SYSTEM ADMINISTRATOR</span>Designed and tested by <b class="hi">KVRYSV</b>. Built, verified, and coded by <b class="hi">Claude</b> — your friendly neighborhood AI architect, who has never done a pull-up but has rendered a great many. Arise, Hunter. ⚔</div></div>`;
 }
 function setBars(v){ S.settings.barStyle=v; save(); document.documentElement.setAttribute("data-bars",v); }
 function setWeeks(n){ n=Math.max(8,Math.min(104,n)); S.program.weeks=n; save(); toast(`Program set to ${n} weeks`); render(); decorPanels(); }
@@ -2412,16 +2509,17 @@ function openProfile(){
   const attrHTML=["STR","AGI","VIT","SEN","INT"].map(k=>{ const d=eff[k]-base[k]; const mm=d>0?`<div class="mm up">+${d}</div>`:(d<0?`<div class="mm dn">${d}</div>`:`<div class="mm"></div>`);
     return `<div class="prcell"><div class="k">${k}</div><div class="v">${eff[k]}</div>${mm}</div>`; }).join("");
   const pr=(S.records&&S.records.pr)||{}, prKeys=Object.keys(pr).sort((a,b)=>(pr[b].e1rm||0)-(pr[a].e1rm||0));
-  const prHTML=prKeys.length?prKeys.map(id=>{ const r=pr[id], nm=r.n||(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):(r.hold>0?`${r.hold}s hold`:`${r.reps||0} reps`); return `<div class="kv"><span class="k">${nm}</span><span class="v">${val}</span></div>`; }).join(""):`<p class="lead tiny">Log sets in the Gate to set personal records.</p>`;
+  const prHTML=(prKeys.length?prKeys.slice(0,7).map(id=>{ const r=pr[id], nm=r.n||(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):(r.hold>0?`${r.hold}s hold`:`${r.reps||0} reps`); return `<div class="kv"><span class="k">${nm}</span><span class="v">${val}</span></div>`; }).join(""):`<p class="lead tiny">Log sets in the Gate to set personal records.</p>`)+(prKeys.length>7?`<button class="btn ghost full mt" onclick="histPRs()">View full history (${prKeys.length})</button>`:"");
   const expW=expByDayWeek(), expSpark=barMini(expW.map(e=>e.val));
   const cals=caloriesByDayWeek(), calHTML=cals.map(c=>`<div class="kv"><span class="k">${c.label} · ${c.date.slice(5)}</span><span class="v">${c.cal?c.cal+' kcal · '+c.pro+'g P':'—'}</span></div>`).join("");
   const missed=missedCount(28), missList=missedListRecent(28);
   const prLog=(S.records&&S.records.prLog)||[];
-  const timeline=S.sessions.map(s=>({t:"s",date:s.date,s})).concat(prLog.map(p=>({t:"p",date:p.date,p}))).sort((a,b)=>a.date<b.date?1:(a.date>b.date?-1:0)).slice(0,16);
-  const histHTML=timeline.length?timeline.map(it=> it.t==="s"
-    ? `<div class="histday"><div class="hd"><span>${it.s.date.slice(5)} · ${it.s.name}${it.s.boss?' · BOSS':''}</span><span>${it.s.setsDone} sets · +${it.s.exp} EXP</span></div><div class="hx">${(it.s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||e.id; const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return `<b>${nm}</b> ${e.sets.length}×${top.w?` ${top.w}${unitW()}`:''}`; }).join(" · ")||"—"}</div></div>`
+  const fullTL=S.sessions.map(s=>({t:"s",date:s.date,s})).concat(prLog.map(p=>({t:"p",date:p.date,p}))).sort((a,b)=>a.date<b.date?1:(a.date>b.date?-1:0));
+  const timeline=fullTL.slice(0,7);
+  const histHTML=(timeline.length?timeline.map(it=> it.t==="s"
+    ? gateRowHTML(it.s)
     : `<div class="histday pr"><div class="hd"><span>${it.p.date.slice(5)} · ◆ PR</span><span>${prValShort(it.p)}</span></div><div class="hx"><b>${esc(it.p.name)}</b></div></div>`
-  ).join(""):`<p class="lead tiny">No Gate history yet.</p>`;
+  ).join(""):`<p class="lead tiny">No Gate history yet.</p>`)+(fullTL.length>7?`<button class="btn ghost full mt" onclick="histGates()">View full history (${fullTL.length})</button>`:"");
   const arc=currentArc(), wk=currentWeek(), weeks=S.program.weeks||24, totalScore=expGainedTotal(), weekScore=expGainedWeek(), weekProd=sevenDays().reduce((a,d)=>a+d.score,0);
   document.getElementById("profileBody").innerHTML=`
     <div class="panel"><div class="rankhuge"><span class="smr">HUNTER RANK</span>${rank==='MONARCH'?'M':rank}</div>
@@ -2510,9 +2608,12 @@ if("serviceWorker" in navigator && location.protocol!=="file:"){
     ctx.strokeStyle=rgba(col,alpha); ctx.lineWidth=1.4; ctx.stroke();
   }
   function frame(){ ctx.clearRect(0,0,W,H);
+    var g=ctx.createLinearGradient(0,H,0,H*0.22);
+    g.addColorStop(0, rgba(ac, 0.22)); g.addColorStop(0.45, rgba(ac2, 0.08)); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
     var bands=6;
-    for(var i=0;i<bands;i++){ var f=i/(bands-1); wave(H*(0.22+f*0.6), 14+f*12, 150+f*70, 0.22+f*0.05, i*1.5, (i%2?ac2:ac), 0.11-f*0.012); }
-    t+=0.01; raf=requestAnimationFrame(frame);
+    for(var i=0;i<bands;i++){ var f=i/(bands-1); wave(H*(0.34+f*0.58), 16+f*17, 125+f*55, 0.55+f*0.16, i*1.5, (i%2?ac2:ac), 0.14-f*0.013); }
+    t+=0.024; raf=requestAnimationFrame(frame);
   }
   readAccent(); resize();
   window.addEventListener("resize", resize, {passive:true});
