@@ -4,17 +4,17 @@ Personal use fitness app vibecoded and developed using claude. Uses HTML for ful
 ## v5.6.8.2 — Data clean up features update
 Done:
 
-**Full-history popups (grouped by month, scrollable) for any list past 7 entries** — Calorie Log, Bodyweight (Data), Personal Records + Gate History (Profile). Inline capped at 7 with a "View full history (N)" button.
-**Personal Work panel on Train** — type extras (planche, burpees, sprints), saved into that day's Gate record and shown in Gate History.
-**Sets/reps box** — SETS [n] × REPS [range] split box replaces 3 × 8-12.
-**Highlighted muscle word** — category chip (LEGS/PUSH/PULL/CORE…) on each exercise card.
-**Background** — glow now rises from the bottom, brighter, theme-colored; waves faster + more dynamic.
-**Nutrition spacing** — boxed "Today's running total" (field included), more breathing room.
-**Rest presets on Gates** — added 0:30, 4:00, 5:00 (now 0:30/1:30/2:00/3:00/4:00/5:00); usable for personal work too.
-**Bar style fix** — solid/striped/glow/minimal now apply to all horizontal bars incl. HP/MP (which keep their red/blue).
-**Header** → //ASCENSION SYSTEM.
-**Rank explanations** — tap the rank ladder on Status → E→Monarch modal, your current rank marked.
-**Random bonus quests** — extra contracts sometimes appear atop the Daily Quest (~50% one bonus, ~10% a rare ⚔ HIIT/boss trial), claimable for EXP, refresh daily.
+- **Full-history popups (grouped by month, scrollable) for any list past 7 entries** — Calorie Log, Bodyweight (Data), Personal Records + Gate History (Profile). Inline capped at 7 with a "View full history (N)" button
+- **Personal Work panel on Train** — type extras (planche, burpees, sprints), saved into that day's Gate record and shown in Gate History.
+- **Sets/reps box** — SETS [n] × REPS [range] split box replaces 3 × 8-12.
+- **Highlighted muscle word** — category chip (LEGS/PUSH/PULL/CORE…) on each exercise card.
+- **Background** — glow now rises from the bottom, brighter, theme-colored; waves faster + more dynamic.
+- **Nutrition spacing** — boxed "Today's running total" (field included), more breathing room.
+- **Rest presets on Gates** — added 0:30, 4:00, 5:00 (now 0:30/1:30/2:00/3:00/4:00/5:00); usable for personal work too.
+- **Bar style fix** — solid/striped/glow/minimal now apply to all horizontal bars incl. HP/MP (which keep their red/blue).
+- **Header** → //ASCENSION SYSTEM.
+- **Rank explanations** — tap the rank ladder on Status → E→Monarch modal, your current rank marked.
+- **Random bonus quests** — extra contracts sometimes appear atop the Daily Quest (~50% one bonus, ~10% a rare ⚔ HIIT/boss trial), claimable for EXP, refresh daily.
 
 ## v5.4 polish pass (peer-feedback round)
 - **Attributes are SP-bound again.** The ▴ / ▾ arrows spend and refund ability points earned per Gate; arrows **grey out** when you have no SP (▴) or are back at base 10 (▾). Unlimited editing now lives only in the Settings → Admin panel. Tapping a stat brings back its **full explanation**, and attributes now **affect the workout** — a per-exercise System tip scales load jumps, bonus reps, rest, or tempo to the governing stat, and session EXP scales slightly with it.
