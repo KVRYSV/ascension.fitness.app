@@ -602,6 +602,8 @@ html[data-bars="minimal"] .resttimer .rt-bar{ height:3px; }
 .kv.tap:active{background:rgb(var(--ac) / .10);}
 .kv.tap .v{color:var(--accent);}
 input[type=date]{color-scheme:dark;}
+.fld.checkrow{ display:flex; flex-direction:row; align-items:center; justify-content:space-between; cursor:pointer; gap:10px; }
+.fld.checkrow input[type=checkbox]{ width:22px; height:22px; accent-color:var(--accent); color-scheme:dark; cursor:pointer; flex:0 0 auto; }
 </style>
 </head>
 <body>
@@ -680,6 +682,11 @@ input[type=date]{color-scheme:dark;}
       <div class="chip" data-v="recomp" aria-pressed="false">Recomposition</div>
       <div class="chip" data-v="cut" aria-pressed="false">Cut / definition</div>
     </div>
+
+    <h2 class="section">Time zone</h2>
+    <p class="lead tiny">Your day count tracks by this. Auto uses your device's time zone — switch it off to set one manually.</p>
+    <label class="fld checkrow"><span>Sync automatically (device)</span><input type="checkbox" id="ob_tz_auto" checked onchange="document.getElementById('ob_tz_wrap').style.display=this.checked?'none':'block'"></label>
+    <div id="ob_tz_wrap" style="display:none"><label class="fld"><span>Select time zone</span><select id="ob_tz_zone"></select></label></div>
 
     <div class="banner mt2">This System gives evidence-based training and nutrition guidance only — no supplements or "remedies" without research backing. It is not medical advice. Clear new exercise with a doctor if you have any condition.</div>
     <button class="btn full mt2" id="ob_start">Awaken — Begin Ascension</button>
@@ -1059,10 +1066,13 @@ function defaultState(){
     quests:{date:null,items:[],bonusGiven:false}, streak:{current:0,longest:0,last:null},
     metrics:{weight:[]}, nutrition:{log:[],goalOverride:null}, supps:{checks:{}},
     records:{pr:{},prLog:[]}, log:{exp:[]}, skips:[],
-    settings:{accent:"cyan",sound:true,barStyle:"glow",videoOverrides:{},units:"imperial"}, draft:null
+    settings:{accent:"cyan",sound:true,barStyle:"glow",videoOverrides:{},units:"imperial",tz:{auto:true,zone:""}}, draft:null
   };
 }
-function todayStr(d){ d=d||new Date(); return d.toISOString().slice(0,10); }
+function appTZ(){ try{ const z=S&&S.settings&&S.settings.tz; if(z && z.auto===false && z.zone) return z.zone; }catch(e){} return null; }
+function todayStr(d){ d=d||new Date(); const z=appTZ();
+  if(z){ try{ const p={}; new Intl.DateTimeFormat('en-US',{timeZone:z,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d).forEach(x=>{p[x.type]=x.value;}); if(p.year&&p.month&&p.day) return p.year+'-'+p.month+'-'+p.day; }catch(e){} }
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return y+'-'+m+'-'+dd; }
 function deepMerge(base,over){ // fill missing keys without clobbering existing nested data
   const out=Array.isArray(base)?base.slice():Object.assign({},base);
   for(const k in over){
@@ -2047,7 +2057,7 @@ function weightAddPast(){
 
 /* ---- SYSTEM (skills + data + settings) ---- */
 function renderSystem(){
-  const bars=S.settings.barStyle||"glow";
+  const bars=S.settings.barStyle||"glow"; const tz=S.settings.tz||{auto:true,zone:""};
   document.getElementById("s-system").innerHTML=`
     <div class="panel"><div class="panel-title"><span class="tri"></span>Settings<span class="sub">SYSTEM</span></div>
       <label class="fld"><span>System accent</span><select onchange="setAccent(this.value)">
@@ -2065,6 +2075,10 @@ function renderSystem(){
       <label class="fld"><span>Units</span><select onchange="setUnits(this.value)">
         <option value="imperial" ${(S.settings.units||'imperial')==='imperial'?'selected':''}>Imperial — lb · ft/in</option>
         <option value="metric" ${S.settings.units==='metric'?'selected':''}>Metric — kg · cm</option></select></label>
+      <div class="fld-head mt">Time zone</div>
+      <label class="fld checkrow"><span>Sync automatically (device time)</span><input type="checkbox" ${tz.auto?'checked':''} onchange="setTzAuto(this.checked)"></label>
+      <label class="fld" ${tz.auto?'style="display:none"':''}><span>Select time zone</span><select onchange="setTzZone(this.value)">${tzOptions(tz.zone||detectTZ())}</select></label>
+      <p class="lead tiny">Today reads as <b class="hi">${fmtDate(todayStr())}</b> · ${tz.auto?('auto — '+detectTZ().replace(/_/g,' ')):(tz.zone||detectTZ()).replace(/_/g,' ')}</p>
       <button class="btn ghost full mt" onclick="editProfile()">Edit profile / schedule</button>
     </div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Program Length<span class="sub">${S.program.weeks||24} WEEKS</span></div>
@@ -2278,6 +2292,9 @@ function editProfile(){
   document.getElementById("ob_w").value=lb1(p.weightKg);
   document.getElementById("ob_act").value=String(p.activity);
   setChips("ob_equip",[p.equip]); setChips("ob_days",p.days.map(String)); setChips("ob_goal",[p.goal]);
+  { const tz=S.settings.tz||{auto:true,zone:""}, a=document.getElementById("ob_tz_auto"), z=document.getElementById("ob_tz_zone"), wrap=document.getElementById("ob_tz_wrap");
+    if(z&&!z.options.length) z.innerHTML=tzOptions(tz.zone||detectTZ()); if(z) z.value=tz.zone||detectTZ();
+    if(a) a.checked=(tz.auto!==false); if(wrap) wrap.style.display=(tz.auto!==false)?"none":"block"; }
   document.getElementById("main").style.display="none"; document.getElementById("nav").style.display="none";
   document.getElementById("onboard").style.display="block"; window.scrollTo(0,0);
 }
@@ -2320,6 +2337,8 @@ document.getElementById("ob_start").onclick=()=>{
   if(!ft||ft<3||ft>8){ toast("Enter your height in ft / in"); return; }
   if(!wlb||wlb<55||wlb>660){ toast("Enter your bodyweight in lb"); return; }
   if(!days.length){ toast("Pick at least one training day"); return; }
+  { const tzA=document.getElementById("ob_tz_auto"), tzZ=document.getElementById("ob_tz_zone");
+    const auto=tzA?tzA.checked:true; S.settings.tz={auto, zone:(tzZ&&tzZ.value)?tzZ.value:detectTZ()}; }
   const isNew=!S.profile;
   S.profile={name,sex,age,heightCm:ftInToCm(ft,inch),weightKg:lbToKg(wlb),activity,
     equip:equipArr[0]||"gym",days,goal:goalArr[0]||"leanbulk",bmrHigh:activity>=1.55};
@@ -2346,6 +2365,7 @@ function startApp(){
   load();
   document.documentElement.setAttribute("data-accent",(S.settings&&S.settings.accent)||"cyan");
   wireChips("ob_equip",false); wireChips("ob_days",true); wireChips("ob_goal",false);
+  try{ const _z=document.getElementById("ob_tz_zone"); if(_z&&!_z.options.length) _z.innerHTML=tzOptions(); }catch(e){}
   document.querySelectorAll(".nav button").forEach(b=> b.onclick=()=>go(b.dataset.t));
   if(S.profile) bootUI();
   else { document.getElementById("onboard").style.display="block"; ensureDailyQuest&&0; }
@@ -2438,6 +2458,13 @@ async function openStatSet(k){ const cur=S.rpg.stats[k]; const v=await sysPrompt
   if(v===null||v==="") return; const n=Math.max(1,Math.min(999,Math.round(+v||1))); S.rpg.stats[k]=n; save(); checkTitleUnlocks(); renderStatus(); decorPanels(); toast(k+" set to "+n); }
 
 /* ---- v5.4 helpers: units, skip day, arc map ---- */
+function detectTZ(){ try{ return Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC"; }catch(e){ return "UTC"; } }
+function tzOptions(sel){ let zones=[]; try{ zones=(typeof Intl!=="undefined"&&Intl.supportedValuesOf)?Intl.supportedValuesOf("timeZone"):[]; }catch(e){}
+  if(!zones||!zones.length){ zones=[detectTZ(),"UTC","America/New_York","America/Chicago","America/Denver","America/Los_Angeles","America/Anchorage","Pacific/Honolulu","Europe/London","Europe/Paris","Europe/Berlin","Asia/Dubai","Asia/Kolkata","Asia/Shanghai","Asia/Tokyo","Australia/Sydney"]; }
+  const seen={},uniq=[]; zones.forEach(z=>{ if(z&&!seen[z]){seen[z]=1;uniq.push(z);} }); const cur=sel||detectTZ();
+  return uniq.map(z=>`<option value="${z}" ${z===cur?"selected":""}>${z.replace(/_/g," ")}</option>`).join(""); }
+function setTzAuto(on){ S.settings.tz=S.settings.tz||{auto:true,zone:""}; S.settings.tz.auto=!!on; if(!on&&!S.settings.tz.zone) S.settings.tz.zone=detectTZ(); save(); toast(on?"Time zone: auto (device)":"Time zone: manual"); try{ensureDailyQuest();}catch(e){} render(); decorPanels(); }
+function setTzZone(z){ S.settings.tz=S.settings.tz||{auto:false,zone:""}; S.settings.tz.zone=z; S.settings.tz.auto=false; save(); toast("Time zone: "+z.replace(/_/g," ")); try{ensureDailyQuest();}catch(e){} render(); decorPanels(); }
 function setUnits(v){ S.settings.units=(v==="metric")?"metric":"imperial"; save(); toast("Units: "+(v==="metric"?"metric (kg)":"imperial (lb)")); render(); decorPanels(); }
 async function skipToday(){ const ok=await sysConfirm("Skip today's Gate?","You won't take a status debuff for skipping — but you also won't earn EXP for today.","confirm (no status debuff)");
   if(!ok) return; const t=todayStr(); S.skips=S.skips||[]; if(!S.skips.includes(t)) S.skips.push(t); if(S.draft&&S.draft.date===t){ S.draft=null; sessionDraft=null; } save(); toast("Day skipped — no penalty"); renderTrain(); decorPanels(); }

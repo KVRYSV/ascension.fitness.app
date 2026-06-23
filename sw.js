@@ -1,5 +1,5 @@
 /* ASCENSION service worker — offline cache. Bump VERSION on each deploy. */
-const VERSION = "ascension-v5.4.6";
+const VERSION = "ascension-v5.4.7";
 const CORE = [
   "./",
   "./index.html",
