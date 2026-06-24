@@ -238,6 +238,25 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .tag.vit{color:#7dffb0;border-color:rgb(125 255 176 / .42);} .tag.sen{color:#c98bff;border-color:rgb(201 139 255 / .42);}
 .tag.int{color:#ffce6b;border-color:rgb(255 206 107 / .42);}
 .cues{font-size:13px;color:var(--ghost);line-height:1.5;margin-top:9px;}
+.loadhint{display:flex;align-items:center;gap:10px;margin-top:11px;padding:9px 11px;border:1px solid var(--line-2);background:rgb(var(--ac) / .05);}
+.loadhint .lhk{font-family:var(--mono);font-weight:700;font-size:9px;letter-spacing:.16em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
+.loadhint .lhv{font-size:13px;color:var(--ink);line-height:1.35;}
+.holdbtn{ margin-top:9px; }
+.nutri-targets{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+.nutri-targets .nt{ border:1px solid var(--line); background:rgb(var(--ac) / .04); padding:10px 4px; text-align:center; position:relative; }
+.nutri-targets .ntk{ display:block; font-family:var(--mono); font-size:9px; letter-spacing:.12em; color:var(--ghost); text-transform:uppercase; }
+.nutri-targets .ntv{ display:block; font-family:var(--display); font-weight:700; font-size:16px; color:#fff; margin-top:3px; text-shadow:0 0 8px var(--accent); }
+.nutri-guide{ margin-top:12px; border:1px solid var(--line); background:rgb(var(--ac) / .04); }
+.nutri-guide>summary{ cursor:pointer; padding:11px 12px; font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--accent); text-transform:uppercase; list-style:none; display:flex; align-items:center; gap:9px; }
+.nutri-guide>summary::-webkit-details-marker{ display:none; }
+.nutri-guide>summary::before{ content:""; width:0; height:0; border-left:7px solid var(--accent); border-top:4px solid transparent; border-bottom:4px solid transparent; filter:drop-shadow(0 0 4px var(--accent)); transition:transform .2s; }
+.nutri-guide[open]>summary::before{ transform:rotate(90deg); }
+.nutri-guide[open]>summary{ border-bottom:1px solid var(--line); }
+.nutri-guide .ng-body{ padding:11px 12px; }
+.nutri-guide .ng-body p{ font-size:13px; color:var(--ghost); line-height:1.5; margin:0 0 8px; }
+.nutri-guide .ng-body p:last-child{ margin-bottom:0; }
+.nutri-guide .ng-body p b{ color:var(--ink-hi); }
+.nutri-guide .ng-cal{ border-top:1px dashed var(--line); padding-top:9px; }
 .sethdr{display:grid;grid-template-columns:26px 1fr 1fr 1fr 32px;gap:6px;margin-top:12px;}
 .sethdr .h{font-family:var(--mono);font-size:8.5px;color:var(--ghost-2);letter-spacing:.07em;text-transform:uppercase;text-align:center;}
 .setrow{display:grid;grid-template-columns:28px 1fr 1fr 1fr 48px;gap:7px;align-items:stretch;margin-top:11px;}
@@ -814,27 +833,27 @@ const DAYNAMES=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
 /* ===== Exercise database — real, evidence-based movements ===== */
 const EX = {
-  squat:{n:"Back Squat",cat:"Legs",stat:"STR",eq:["gym"],yt:"barbell back squat proper form beginner",cues:"Brace core, sit between hips, knees track toes, drive through midfoot. Depth = hip crease below knee."},
-  goblet:{n:"Goblet Squat",cat:"Legs",stat:"STR",eq:["gym","home","minimal"],yt:"goblet squat form",cues:"Hold dumbbell at chest, elbows inside knees at bottom, tall chest."},
-  splitsquat:{n:"Bulgarian Split Squat",cat:"Legs",stat:"STR",eq:["gym","home","minimal","calisthenics"],yt:"bulgarian split squat form",cues:"Rear foot elevated, front shin near vertical, control the descent."},
+  squat:{n:"Back Squat",cat:"Legs",stat:"STR",eq:["gym"],yt:"barbell back squat proper form beginner",cues:"Brace core, sit between hips, knees track toes, drive through midfoot. Depth = hip crease below knee.",load:"Empty bar (45 lb) or 25 lb goblet"},
+  goblet:{n:"Goblet Squat",cat:"Legs",stat:"STR",eq:["gym","home","minimal"],yt:"goblet squat form",cues:"Hold dumbbell at chest, elbows inside knees at bottom, tall chest.",load:"Start 25 lb DB"},
+  splitsquat:{n:"Bulgarian Split Squat",cat:"Legs",stat:"STR",eq:["gym","home","minimal","calisthenics"],yt:"bulgarian split squat form",cues:"Rear foot elevated, front shin near vertical, control the descent.",load:"Bodyweight → hold 10–20 lb DBs"},
   pistolprog:{n:"Pistol Squat Progression",cat:"Legs",stat:"AGI",eq:["calisthenics","home","minimal","gym"],yt:"pistol squat progression beginner",cues:"Start to a box/bench, one leg, control down + up. Builds single-leg strength + balance."},
-  deadlift:{n:"Conventional Deadlift",cat:"Pull",stat:"STR",eq:["gym"],yt:"deadlift proper form beginner",cues:"Bar over midfoot, neutral spine, push floor away, lock hips + knees together."},
-  rdl:{n:"Romanian Deadlift",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"romanian deadlift form dumbbell",cues:"Soft knees, hinge at hips, bar/db close, feel hamstrings, flat back."},
-  hipthrust:{n:"Hip Thrust",cat:"Legs",stat:"STR",eq:["gym","home","minimal"],yt:"hip thrust form glute",cues:"Upper back on bench, chin tucked, drive hips to full lockout, squeeze glutes."},
-  bench:{n:"Barbell Bench Press",cat:"Push",stat:"STR",eq:["gym"],yt:"bench press proper form beginner",cues:"Retract scapula, slight arch, bar to lower chest, elbows ~45°, drive up."},
-  dbpress:{n:"Dumbbell Bench Press",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"dumbbell bench press form",cues:"Wrists stacked, lower with control to chest level, press up + slightly in."},
-  ohp:{n:"Overhead Press",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"overhead press barbell form",cues:"Brace glutes + core, bar/db from shoulders to overhead, head 'through' at top."},
-  pullup:{n:"Pull-up",cat:"Pull",stat:"AGI",eq:["gym","home","calisthenics"],yt:"pull up proper form beginner",cues:"Dead hang, pull elbows to ribs, chest to bar, control the negative. Use band if needed."},
-  pulldown:{n:"Lat Pulldown",cat:"Pull",stat:"STR",eq:["gym"],yt:"lat pulldown proper form",cues:"Slight lean back, pull bar to upper chest, drive elbows down, squeeze lats."},
-  row:{n:"Barbell Row",cat:"Pull",stat:"STR",eq:["gym"],yt:"barbell row proper form",cues:"Hinge ~45°, flat back, pull to lower ribs, elbows tight, control down."},
-  dbrow:{n:"Dumbbell Row",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"single arm dumbbell row form",cues:"Brace on bench, flat back, row to hip, no torso twisting."},
+  deadlift:{n:"Conventional Deadlift",cat:"Pull",stat:"STR",eq:["gym"],yt:"deadlift proper form beginner",cues:"Bar over midfoot, neutral spine, push floor away, lock hips + knees together.",load:"Start ~95 lb, perfect hinge"},
+  rdl:{n:"Romanian Deadlift",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"romanian deadlift form dumbbell",cues:"Soft knees, hinge at hips, bar/db close, feel hamstrings, flat back.",load:"Start ~65–95 lb"},
+  hipthrust:{n:"Hip Thrust",cat:"Legs",stat:"STR",eq:["gym","home","minimal"],yt:"hip thrust form glute",cues:"Upper back on bench, chin tucked, drive hips to full lockout, squeeze glutes.",load:"Bar + 25–45 lb to start"},
+  bench:{n:"Barbell Bench Press",cat:"Push",stat:"STR",eq:["gym"],yt:"bench press proper form beginner",cues:"Retract scapula, slight arch, bar to lower chest, elbows ~45°, drive up.",load:"Empty bar or 15–20 lb DBs"},
+  dbpress:{n:"Dumbbell Bench Press",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"dumbbell bench press form",cues:"Wrists stacked, lower with control to chest level, press up + slightly in.",load:"Start 15–20 lb DBs"},
+  ohp:{n:"Overhead Press",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"overhead press barbell form",cues:"Brace glutes + core, bar/db from shoulders to overhead, head 'through' at top.",load:"Empty bar or 10–15 lb DBs"},
+  pullup:{n:"Pull-up",cat:"Pull",stat:"AGI",eq:["gym","home","calisthenics"],yt:"pull up proper form beginner",cues:"Dead hang, pull elbows to ribs, chest to bar, control the negative. Use band if needed.",load:"Bodyweight (band-assist) → +5 lb once 8 clean"},
+  pulldown:{n:"Lat Pulldown",cat:"Pull",stat:"STR",eq:["gym"],yt:"lat pulldown proper form",cues:"Slight lean back, pull bar to upper chest, drive elbows down, squeeze lats.",load:"Start ~60–70 lb"},
+  row:{n:"Barbell Row",cat:"Pull",stat:"STR",eq:["gym"],yt:"barbell row proper form",cues:"Hinge ~45°, flat back, pull to lower ribs, elbows tight, control down.",load:"Start 45–65 lb bar"},
+  dbrow:{n:"Dumbbell Row",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"single arm dumbbell row form",cues:"Brace on bench, flat back, row to hip, no torso twisting.",load:"Start 20–25 lb DB"},
   invrow:{n:"Inverted Row",cat:"Pull",stat:"AGI",eq:["gym","home","calisthenics"],yt:"inverted row bodyweight form",cues:"Body straight, pull chest to bar, squeeze shoulder blades. Lower bar = harder."},
-  dip:{n:"Dips",cat:"Push",stat:"AGI",eq:["gym","home","calisthenics"],yt:"parallel bar dips form chest triceps",cues:"Lean slightly forward for chest, lower until shoulders ~elbow height, press up."},
+  dip:{n:"Dips",cat:"Push",stat:"AGI",eq:["gym","home","calisthenics"],yt:"parallel bar dips form chest triceps",cues:"Lean slightly forward for chest, lower until shoulders ~elbow height, press up.",load:"Bodyweight → +10 lb once 10 clean"},
   pushup:{n:"Push-up",cat:"Push",stat:"AGI",eq:["calisthenics","home","minimal","gym"],yt:"perfect push up form",cues:"Body line straight, elbows ~45°, chest to floor, full lockout. Scale on knees if needed."},
   pseudoplanche:{n:"Pseudo-Planche Push-up",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"pseudo planche push up tutorial",cues:"Hands by waist, lean forward over hands, protract shoulders. Builds straight-arm strength."},
-  curl:{n:"Biceps Curl",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"dumbbell biceps curl form",cues:"Elbows pinned, no swing, full range, squeeze at top."},
+  curl:{n:"Biceps Curl",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"dumbbell biceps curl form",cues:"Elbows pinned, no swing, full range, squeeze at top.",load:"Start 10–15 lb DBs"},
   pushdown:{n:"Triceps Pushdown",cat:"Push",stat:"STR",eq:["gym"],yt:"triceps pushdown form",cues:"Elbows tucked, extend fully, control return."},
-  latraise:{n:"Lateral Raise",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"lateral raise form shoulders",cues:"Lead with elbows, slight forward lean, raise to shoulder height, no shrugging."},
+  latraise:{n:"Lateral Raise",cat:"Push",stat:"STR",eq:["gym","home","minimal"],yt:"lateral raise form shoulders",cues:"Lead with elbows, slight forward lean, raise to shoulder height, no shrugging.",load:"Start 5–10 lb DBs"},
   facepull:{n:"Face Pull",cat:"Pull",stat:"SEN",eq:["gym","home"],yt:"face pull form rear delt",cues:"Pull rope/band to face, externally rotate, great for shoulder health + posture."},
   calf:{n:"Calf Raise",cat:"Legs",stat:"STR",eq:["gym","home","minimal","calisthenics"],yt:"standing calf raise form",cues:"Full stretch at bottom, pause + squeeze at top, controlled tempo."},
   legcurl:{n:"Leg Curl (machine)",cat:"Legs",stat:"STR",eq:["gym"],yt:"seated leg curl form hamstring",cues:"Controlled, full range, squeeze hamstrings, no hip lifting."},
@@ -855,6 +874,26 @@ const EX = {
   incline:{n:"Incline Walk",cat:"Conditioning",stat:"VIT",eq:["gym","home","calisthenics","minimal"],yt:"incline treadmill walk fat loss",cues:"Brisk uphill walk, low-impact conditioning, keeps muscle while leaning out."},
   intervals:{n:"Sprint Intervals",cat:"Conditioning",stat:"VIT",eq:["calisthenics","home","gym","minimal"],yt:"running sprint intervals beginner",cues:"Hard effort + full recovery. Builds engine without burning muscle."},
   burpee:{n:"Burpees",cat:"Conditioning",stat:"VIT",eq:["calisthenics","home","minimal","gym"],yt:"burpee proper form",cues:"Full-body conditioning. Chest to floor, explode up, soft landing."},
+  planchelean:{n:"Planche Lean",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"planche lean tutorial beginner",cues:"Hands by hips, lean shoulders past hands, protract (push the floor away, round the upper back). 3×15–30s, grow the lean over weeks. Wrist prep first.",load:"Bodyweight · progress by leaning further"},
+  frogstand:{n:"Frog Stand / Crow",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"frog stand crow pose tutorial",cues:"Knees on bent elbows, tip weight forward onto the hands, balance. 3×30–60s. Builds the straight-arm balance base for planche."},
+  tuckplanche:{n:"Tuck Planche",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"tuck planche tutorial",cues:"Knees tucked to chest, hips at shoulder height, arms STRAIGHT. 3×10–20s. Never to failure — protect the elbows."},
+  advtuckplanche:{n:"Advanced Tuck Planche",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"advanced tuck planche tutorial",cues:"From tuck, round the back, knees off the chest, hips open. 3×10–15s. Earn this rung before straddle."},
+  bentarmplanche:{n:"Bent-Arm Planche",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"bent arm planche progression",cues:"From advanced tuck, lower elbows to ~90° and hold the body horizontal. Train slow negatives first. Long-term goal."},
+  scappull:{n:"Scapular Pull-ups",cat:"Pull",stat:"AGI",eq:["gym","home","calisthenics"],yt:"scapular pull ups tutorial",cues:"Dead hang, arms straight, pull the shoulder blades down + back to raise the body slightly. 3×8. Base for levers + pull-ups."},
+  sapulldown:{n:"Straight-Arm Pulldown",cat:"Pull",stat:"STR",eq:["gym","home"],yt:"straight arm pulldown band cable",cues:"Arms straight, drive the bar/band down with the lats only. 3×8–10. Builds the straight-arm pull for front lever.",load:"Light band or cable"},
+  flraise:{n:"Front Lever Raises",cat:"Pull",stat:"AGI",eq:["calisthenics","home","gym"],yt:"front lever raises tuck tutorial",cues:"From a hang, pull to horizontal (tuck) and lower with control. 3×5–8. Dynamic strength toward the full lever."},
+  wallhandstand:{n:"Wall Handstand",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"wall handstand chest to wall hold",cues:"Chest-to-wall, body straight, push tall through the shoulders. 3×20–40s. Wrist prep first, always."},
+  pikehold:{n:"Pike / Wall Plank Hold",cat:"Push",stat:"AGI",eq:["calisthenics","home","gym"],yt:"wall plank pike hold shoulder",cues:"Feet up the wall, hips stacked over shoulders, push the floor away. 3×30s. Overhead shoulder endurance for handstands."},
+  reverseplank:{n:"Reverse Plank",cat:"Core",stat:"VIT",eq:["calisthenics","home","minimal","gym"],yt:"reverse plank hold tutorial",cues:"Hands behind, drive hips to a straight line, squeeze glutes, chest open. 3×30–45s. Posterior chain + shoulders."},
+  farmercarry:{n:"Farmer Carry",cat:"Pull",stat:"STR",eq:["gym","home","minimal"],yt:"farmer carry form grip",cues:"Heavy DBs at the sides, tall posture, braced, walk. 3×30–40 m. Climber grip + trap + core.",load:"Moderate–heavy DBs"},
+  towelhang:{n:"Towel / Thick-Bar Hang",cat:"Pull",stat:"VIT",eq:["gym","home","calisthenics"],yt:"towel hang grip strength",cues:"Once a 60s bar hang is easy, hang from towels over the bar. 3× max time. Brutal climber grip."},
+  wristcurl:{n:"Wrist Curls (±)",cat:"Mobility",stat:"STR",eq:["gym","home","minimal"],yt:"wrist curls reverse forearm",cues:"Light DB: curl up, then reverse-curl. 2×15 each. Bulletproofs the wrists/forearms for push + skill work.",load:"Light 5–10 lb"},
+  germanhang:{n:"German Hang",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","gym"],yt:"german hang shoulder mobility beginner",cues:"Only when ready: hang behind with open shoulders, SHORT holds. Builds shoulder extension for levers. Ease in slowly."},
+  couchstretch:{n:"Couch Stretch",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","minimal","gym"],yt:"couch stretch hip flexor tutorial",cues:"Rear foot up a wall/couch, tall torso, tuck the pelvis. 60s/side. Opens hip flexors from all the sitting."},
+  ninety:{n:"90/90 Hip Rotations",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","minimal","gym"],yt:"90 90 hip rotations mobility",cues:"Seated, rotate both knees side to side staying tall. 2×8/side. Hip internal + external rotation."},
+  catcow:{n:"Cat-Cow + Open Book",cat:"Mobility",stat:"SEN",eq:["calisthenics","home","minimal","gym"],yt:"cat cow open book thoracic mobility",cues:"Quadruped cat-cow, then side-lying open-book rotations. 2×8. Spinal + thoracic mobility."},
+  zone2:{n:"Zone-2 Cardio (track)",cat:"Conditioning",stat:"VIT",eq:["calisthenics","home","gym","minimal"],yt:"zone 2 cardio easy pace benefits",cues:"Easy, conversational pace, 20–30 min. Heart health + recovery + mild fat loss without burning muscle.",load:"Easy — can hold a conversation"},
+  strides:{n:"Strides / 100m Intervals",cat:"Conditioning",stat:"VIT",eq:["calisthenics","gym","home","minimal"],yt:"running strides 100m technique",cues:"From month 4: 6–8 × 100 m at ~80% with full walk-back rest. Athletic conditioning, muscle-sparing."},
 };
 
 /* optional inline form-video ids for headline lifts (search button always works too) */
@@ -880,6 +919,13 @@ const MUS={
   shoulderdis:{p:["delts"],s:["traps"]},wristprep:{p:["forearms"],s:[]},ankle:{p:["calves"],s:[]},
   jumprope:{p:["calves"],s:["quads"]},incline:{p:["quads"],s:["glutes","calves"]},intervals:{p:["quads","hamstrings"],s:["glutes","calves"]},
   burpee:{p:["chest","quads"],s:["abs","delts"]},
+  planchelean:{p:["delts","chest"],s:["triceps","forearms","abs"]},frogstand:{p:["forearms","delts"],s:["abs"]},
+  tuckplanche:{p:["delts","chest"],s:["abs","triceps","forearms"]},advtuckplanche:{p:["delts","chest"],s:["abs","triceps","forearms"]},
+  bentarmplanche:{p:["delts","chest"],s:["triceps","abs"]},scappull:{p:["lats","traps"],s:["forearms"]},sapulldown:{p:["lats"],s:["abs"]},
+  flraise:{p:["lats","abs"],s:["biceps","lowerback"]},wallhandstand:{p:["delts"],s:["traps","triceps","abs"]},pikehold:{p:["delts"],s:["traps","abs"]},
+  reverseplank:{p:["glutes","lowerback"],s:["hamstrings","delts"]},farmercarry:{p:["forearms","traps"],s:["abs","glutes"]},towelhang:{p:["forearms"],s:["lats"]},
+  wristcurl:{p:["forearms"],s:[]},germanhang:{p:["delts"],s:["chest"]},couchstretch:{p:["quads"],s:["glutes"]},ninety:{p:["glutes"],s:[]},catcow:{p:["lowerback"],s:["traps"]},
+  zone2:{p:["quads"],s:["calves","hamstrings"]},strides:{p:["hamstrings","quads"],s:["glutes","calves"]},
 };
 const MUS_NAMES={chest:"chest",delts:"shoulders",biceps:"biceps",triceps:"triceps",forearms:"forearms",abs:"abs",
   obliques:"obliques",lats:"lats",traps:"traps",lowerback:"lower back",glutes:"glutes",quads:"quads",hamstrings:"hamstrings",calves:"calves"};
@@ -910,13 +956,13 @@ const SPLITS={
   3:[
     {key:"FB-A",name:"Full Body — Drive",slots:[
       {ids:["squat","goblet","splitsquat"],s:3,r:"5–8"},{ids:["bench","dbpress","pushup"],s:3,r:"6–10"},
-      {ids:["row","dbrow","invrow"],s:3,r:"8–12"},{ids:["hollow"],s:3,r:"20–40s"},{ids:["deepsquathold","cossack"],s:2,r:"30s"} ]},
+      {ids:["row","dbrow","invrow"],s:3,r:"8–12"},{ids:["hollow","reverseplank"],s:3,r:"20–40s"},{ids:["deepsquathold","cossack"],s:2,r:"30s"} ]},
     {key:"FB-B",name:"Full Body — Pull",slots:[
       {ids:["deadlift","rdl"],s:3,r:"5–8"},{ids:["ohp","dbpress"],s:3,r:"6–10"},{ids:["pullup","pulldown","invrow"],s:3,r:"5–10"},
       {ids:["legraise"],s:3,r:"8–12"},{ids:["shoulderdis","thoracic"],s:2,r:"10 reps"} ]},
     {key:"FB-C",name:"Full Body — Skill",slots:[
       {ids:["hipthrust","splitsquat"],s:3,r:"8–12"},{ids:["dip","pushup"],s:3,r:"6–12"},{ids:["dbrow","invrow","pullup"],s:3,r:"8–12"},
-      {ids:["frontleverprog","lsit"],s:3,r:"10–20s"},{ids:["wristprep","ankle"],s:1,r:"routine"} ]},
+      {ids:["frontleverprog","tuckplanche","lsit"],s:3,r:"10–20s"},{ids:["pseudoplanche","frogstand","pushup"],s:3,r:"6–10"},{ids:["wristprep","ankle"],s:1,r:"routine"} ]},
   ],
   4:[
     {key:"UP-1",name:"Upper — Strength",slots:[
@@ -930,7 +976,7 @@ const SPLITS={
       {ids:["facepull"],s:3,r:"12–15"},{ids:["frontleverprog","lsit"],s:3,r:"10–20s"} ]},
     {key:"LO-2",name:"Lower — Skill + Mobility",slots:[
       {ids:["hipthrust"],s:3,r:"8–12"},{ids:["pistolprog","splitsquat"],s:3,r:"5–8"},{ids:["legcurl","rdl"],s:3,r:"10–12"},
-      {ids:["cossack","deepsquathold"],s:2,r:"30s"},{ids:["ankle","wristprep"],s:1,r:"routine"} ]},
+      {ids:["cossack","deepsquathold"],s:2,r:"30s"},{ids:["ankle","couchstretch","wristprep"],s:1,r:"routine"} ]},
   ],
   5:[
     {key:"PUSH",name:"Push",slots:[
@@ -943,11 +989,11 @@ const SPLITS={
       {ids:["squat","goblet"],s:4,r:"5–8"},{ids:["rdl"],s:3,r:"8–12"},{ids:["splitsquat","pistolprog"],s:3,r:"8–12"},
       {ids:["legraise"],s:3,r:"12–20"},{ids:["calf"],s:4,r:"12–20"} ]},
     {key:"UPPER",name:"Upper — Skill",slots:[
-      {ids:["frontleverprog"],s:4,r:"10–20s"},{ids:["dip","pushup"],s:3,r:"8–12"},{ids:["invrow","dbrow"],s:3,r:"8–12"},
-      {ids:["pseudoplanche","pushup"],s:3,r:"6–10"},{ids:["lsit"],s:3,r:"10–20s"} ]},
+      {ids:["frontleverprog","flraise"],s:4,r:"10–20s"},{ids:["scappull"],s:3,r:"8"},{ids:["dip","pushup"],s:3,r:"8–12"},{ids:["invrow","dbrow"],s:3,r:"8–12"},
+      {ids:["pseudoplanche","pushup"],s:3,r:"6–10"},{ids:["lsit"],s:3,r:"10–20s"},{ids:["wallhandstand","pikehold"],s:3,r:"20–40s"} ]},
     {key:"COND",name:"Conditioning + Mobility",slots:[
-      {ids:["jumprope","intervals","burpee"],s:6,r:"30s"},{ids:["incline"],s:1,r:"15–20m"},{ids:["cossack"],s:2,r:"30s"},
-      {ids:["thoracic"],s:2,r:"10 reps"},{ids:["deadhang"],s:3,r:"max"} ]},
+      {ids:["jumprope","intervals","burpee"],s:6,r:"30s"},{ids:["zone2","incline"],s:1,r:"20–30m"},{ids:["cossack"],s:2,r:"30s"},
+      {ids:["thoracic"],s:2,r:"10 reps"},{ids:["deadhang","towelhang"],s:3,r:"max"},{ids:["farmercarry"],s:3,r:"30–40 m"} ]},
   ],
   6:[
     {key:"PUSH-H",name:"Push — Heavy",slots:[
@@ -960,11 +1006,11 @@ const SPLITS={
       {ids:["squat","goblet"],s:5,r:"4–6"},{ids:["rdl"],s:3,r:"8–10"},{ids:["splitsquat"],s:3,r:"8–12"},
       {ids:["legcurl","legraise"],s:3,r:"12"},{ids:["calf"],s:4,r:"15–20"} ]},
     {key:"PUSH-V",name:"Push — Volume + Skill",slots:[
-      {ids:["dbpress","pushup"],s:4,r:"8–12"},{ids:["pseudoplanche","pushup"],s:3,r:"6–10"},{ids:["dip"],s:3,r:"8–12"},
+      {ids:["dbpress","pushup"],s:4,r:"8–12"},{ids:["pseudoplanche","tuckplanche","pushup"],s:3,r:"6–10"},{ids:["planchelean","frogstand"],s:3,r:"15–30s"},{ids:["dip"],s:3,r:"8–12"},
       {ids:["latraise"],s:3,r:"15"},{ids:["lsit"],s:3,r:"10–20s"} ]},
     {key:"PULL-V",name:"Pull — Volume + Skill",slots:[
-      {ids:["pullup","invrow"],s:4,r:"6–10"},{ids:["frontleverprog"],s:4,r:"10–20s"},{ids:["dbrow"],s:3,r:"10–12"},
-      {ids:["facepull"],s:3,r:"15"},{ids:["deadhang"],s:3,r:"max"} ]},
+      {ids:["pullup","invrow"],s:4,r:"6–10"},{ids:["frontleverprog","flraise"],s:4,r:"10–20s"},{ids:["scappull","sapulldown"],s:3,r:"8–10"},{ids:["dbrow"],s:3,r:"10–12"},
+      {ids:["facepull"],s:3,r:"15"},{ids:["deadhang","towelhang","farmercarry"],s:3,r:"max"} ]},
     {key:"LEGS-V",name:"Legs — Skill + Mobility",slots:[
       {ids:["hipthrust"],s:4,r:"8–12"},{ids:["pistolprog"],s:3,r:"5–8"},{ids:["rdl"],s:3,r:"10–12"},
       {ids:["cossack","deepsquathold"],s:2,r:"30s"},{ids:["ankle"],s:1,r:"routine"} ]},
@@ -998,12 +1044,14 @@ const SKILLTREE=[
     {id:"dp3",n:"System's Chosen",lv:25,cost:2,d:"+10% EXP from all sources. The System favors the relentless."} ]},
 ];
 const SUPPS=[
-  {id:"creatine",n:"Creatine Monohydrate",dose:"3–5 g/day, any time",why:"Most-studied legal performance supplement. More strength + lean mass over time."},
-  {id:"protein",n:"Whey / Protein Powder",dose:"as needed to hit target",why:"Convenient protein to reach your daily goal. A tool, not magic."},
-  {id:"vitd",n:"Vitamin D3",dose:"1000–2000 IU (if deficient)",why:"Common deficiency; supports bone + muscle. Test levels ideally."},
-  {id:"omega3",n:"Omega-3 (fish oil)",dose:"1–2 g EPA+DHA",why:"Recovery + general health if fish intake is low."},
-  {id:"caffeine",n:"Caffeine (pre-train)",dose:"100–200 mg, ~45 min prior",why:"Reliable acute performance + focus boost. Skip late in day."},
-  {id:"electro",n:"Electrolytes",dose:"around hard/long sessions",why:"Sodium/potassium for hydration during heavy sweat sessions."},
+  {id:"creatine",n:"Creatine Monohydrate",dose:"5 g/day, any time, daily",why:"[STRONG] The best-proven supplement for strength, power + lean mass. Works great in a recomp. No loading needed — just be consistent."},
+  {id:"protein",n:"Protein Powder",dose:"as needed to hit target",why:"[STRONG] Whey isolate (low-lactose) or pea/rice/egg-white for full lactose-free. It's food, not magic — only to fill the protein gap."},
+  {id:"vitd",n:"Vitamin D3",dose:"1000–2000 IU/day",why:"[STRONG if deficient] Common shortfall with little sun. Bone, muscle + immune support — a stronger frame. Blood-test and dose if you can."},
+  {id:"omega3",n:"Omega-3 (fish / algae)",dose:"1–2 g EPA+DHA/day",why:"[MODERATE] Recovery, joints, general health. Algae oil if avoiding fish."},
+  {id:"caffeine",n:"Caffeine (pre-train)",dose:"150–200 mg, ~45 min prior",why:"[STRONG for performance] Coffee counts. Skip it if it wrecks your sleep."},
+  {id:"collagen",n:"Collagen + Vitamin C",dose:"15 g + ~50 mg C, 45–60 min PRE",why:"[EMERGING] May boost tendon/ligament collagen — worth considering for the tendon-heavy planche/lever goals on a beginner frame."},
+  {id:"magnesium",n:"Magnesium Glycinate",dose:"200–400 mg, evening",why:"[MODERATE] Sleep + muscle function; a common dietary shortfall."},
+  {id:"calcium",n:"Calcium (food first)",dose:"~1000 mg/day; supplement only if short",why:"[STRONG for bone] Fortified plant milk, canned fish w/ bones, tofu, greens. Supplement ~500 mg with a meal only if your diet is low — key if you avoid dairy."},
 ];
 
 /* stat meanings for drill-down windows */
@@ -1704,6 +1752,34 @@ function renderQuests(){
       ${SUPPS.map(sp=>{ const on=(S.supps.checks[todayStr()]||[]).includes(sp.id);
         return `<div class="quest ${on?'done':''}"><div class="qx" onclick="toggleSupp('${sp.id}')">${on?'✓':''}</div>
           <div><div class="ql">${sp.n}</div><div class="muted tiny" style="margin-top:2px">${sp.dose} · ${sp.why}</div></div></div>`;}).join("")}
+    </div>
+    <div class="panel flat">
+      <div class="panel-title"><span class="tri"></span>Nutrition &amp; Fuel<span class="sub">LACTOSE-FREE</span></div>
+      <p class="lead tiny">Recomp on near-maintenance, high protein — food + sleep drive ~90% of results. Floor: never below ~2000 kcal (lower = muscle loss + poor recovery).</p>
+      <div class="nutri-targets">
+        <div class="nt"><span class="ntk">CALS</span><span class="ntv">2300–2600</span></div>
+        <div class="nt"><span class="ntk">PROTEIN</span><span class="ntv">140–160 g</span></div>
+        <div class="nt"><span class="ntk">CARBS</span><span class="ntv">230–300 g</span></div>
+        <div class="nt"><span class="ntk">FAT</span><span class="ntv">55–70 g</span></div>
+        <div class="nt"><span class="ntk">FIBER</span><span class="ntv">30+ g</span></div>
+        <div class="nt"><span class="ntk">WATER</span><span class="ntv">3+ L</span></div>
+      </div>
+      <p class="lead tiny" style="margin-top:11px"><b>Daily fuel checklist</b> — optional, tracked like items.</p>
+      ${NUTRI_HABITS.map(hb=>{ const on=((S.nutrition.habitChecks||{})[todayStr()]||[]).includes(hb.id);
+        return `<div class="quest ${on?'done':''}"><div class="qx" onclick="toggleHabit('${hb.id}')">${on?'✓':''}</div><div class="ql">${hb.label}</div></div>`;}).join("")}
+      <details class="nutri-guide">
+        <summary>Sample lactose-free day + calcium sources</summary>
+        <div class="ng-body">
+          <p><b>Breakfast</b> — 3 whole eggs + 2 whites; oats in fortified soy milk; berries + chia.</p>
+          <p><b>Snack</b> — soy/LF yogurt + almonds + honey.</p>
+          <p><b>Lunch</b> — grilled chicken, rice, mixed veg, olive oil; edamame.</p>
+          <p><b>Pre</b> — banana + coffee. &nbsp;<b>Post</b> — whey isolate or pea/rice/egg-white shake + fruit; creatine here.</p>
+          <p><b>Dinner</b> — salmon or lean beef, sweet potato/quinoa, broccoli + kale; optional calcium-set tofu.</p>
+          <p><b>Pre-bed</b> (optional) — soy yogurt or egg-white protein (slow protein).</p>
+          <p class="ng-cal"><b>Calcium (~1000 mg/day, LF):</b> fortified plant milks + OJ · canned salmon/sardines w/ bones · calcium-set tofu, edamame · kale, bok choy, collards · almonds, chia, tahini.</p>
+          <p class="ng-skip"><b>Skip (waste for this goal):</b> BCAAs, test boosters, fat burners, glutamine, anything homeopathic.</p>
+        </div>
+      </details>
     </div>`;
 }
 function toggleQuest(id){
@@ -1719,6 +1795,19 @@ function toggleQuest(id){
 }
 function toggleSupp(id){
   const t=todayStr(); S.supps.checks[t]=S.supps.checks[t]||[]; const arr=S.supps.checks[t], i=arr.indexOf(id);
+  if(i>=0) arr.splice(i,1); else arr.push(id);
+  save(); renderQuests(); decorPanels();
+}
+const NUTRI_HABITS=[
+  {id:"protein",label:"Hit protein target (140–160 g)"},
+  {id:"cals",label:"Calories in range (recomp ~2300–2600; never under ~2000)"},
+  {id:"calcium",label:"Calcium ~1000 mg (fortified milk, canned fish, tofu, greens)"},
+  {id:"water",label:"Water 3+ L (electrolytes on heavy-sweat days)"},
+  {id:"veg",label:"Veg + 30 g fiber"},
+];
+function toggleHabit(id){
+  const t=todayStr(); S.nutrition.habitChecks=S.nutrition.habitChecks||{}; S.nutrition.habitChecks[t]=S.nutrition.habitChecks[t]||[];
+  const arr=S.nutrition.habitChecks[t], i=arr.indexOf(id);
   if(i>=0) arr.splice(i,1); else arr.push(id);
   save(); renderQuests(); decorPanels();
 }
@@ -1903,6 +1992,14 @@ function statTip(stat,val){ const b=Math.max(0,Math.floor((val-10)/3)), u=unitW(
   if(stat==="SEN") return `hold a ${1+b}s squeeze at peak contraction — quality over load.`;
   return `log every set — precise tracking sharpens the next block.`;
 }
+function loadHintFor(id){ const x=EX[id]; if(x&&x.load) return x.load;
+  if(!x) return "Pick a load with 1–3 reps left in the tank";
+  if(x.cat==="Mobility") return "Bodyweight · move through full range";
+  if(x.cat==="Conditioning") return "Bodyweight · effort over load";
+  if(x.cat==="Core") return "Bodyweight · add time or harder leverage";
+  if(x.stat==="AGI") return "Bodyweight · progress by leverage, then add a vest/belt";
+  return "Pick a load with 1–3 reps left in the tank"; }
+function holdSecs(r){ r=String(r||""); const m=r.match(/(\d+)\s*(?:–|-)?\s*(\d+)?\s*s\b/); if(!m) return 0; return parseInt(m[2]||m[1],10); }
 function exercisePage(e,idx){
   const x=EX[e.id], tag=x.stat.toLowerCase(), lastBest=lastBestFor(e.id), mac=machineFor(e.id), trk=trackFor(e.id), vid=videoFor(e.id), sv=effStats()[x.stat]||10;
   const stepFor=k=>k==="weight"?5:(k==="rpe"?0.5:1);
@@ -1917,6 +2014,8 @@ function exercisePage(e,idx){
         <div class="catline"><span class="catword cat-${x.cat.toLowerCase()}">${x.cat.toUpperCase()}</span>${lastBest?`<span class="sub2">last ${lastBest}</span>`:""}</div></div>
         <span class="tag ${tag}">${x.stat}</span></div>
       <div class="setbox"><div class="sb"><span class="sbk">SETS</span><span class="sbv">${e.sets.length}</span></div><div class="sbx">×</div><div class="sb"><span class="sbk">REPS</span><span class="sbv">${e.reps}</span></div></div>
+      <div class="loadhint"><span class="lhk">SUGGESTED LOAD</span><span class="lhv">${loadHintFor(e.id)}</span></div>
+      ${holdSecs(e.reps)?`<button class="btn full holdbtn" type="button" onclick="startRest(${holdSecs(e.reps)},'Hold — ${x.n}')">▷ Start hold timer · ${holdSecs(e.reps)}s</button>`:""}
       <div class="machine"><span class="mchip">⋈ ${mac.use}</span>${mac.free&&mac.free!=="—"?`<span class="mchip free">free-weight: ${mac.free}</span>`:""}</div>
       ${embed}
       <div class="row" style="gap:8px;flex-wrap:wrap">
