@@ -1,6 +1,8 @@
 # ASCENSION fitness
 Personal use fitness app vibecoded and developed using claude. Uses HTML for full deployment via PWA. Dependencies and cache is all local. Runs on browser as well. I can't code but I can design...
 
+
+  
 ## v5.6.8.2 — Data clean up features update
 Done:
 
