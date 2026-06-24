@@ -600,6 +600,14 @@ html[data-bars="minimal"] .resttimer .rt-bar>i{ background:rgb(var(--ac) / .72);
 .ytbtn .play{ border-left-color:#02060c; }
 .exvid .vph .play{ border-left-width:12px;border-top-width:8px;border-bottom-width:8px; }
 .vlist{ max-height:46vh; overflow:auto; margin-top:9px; -webkit-overflow-scrolling:touch; }
+.sellist{ display:flex; flex-direction:column; gap:7px; margin-top:4px; max-height:54vh; overflow:auto; -webkit-overflow-scrolling:touch; }
+.selopt{ display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; text-align:left; font-family:var(--ui); font-size:14px; color:var(--text-hi); border:1px solid var(--line); background:rgb(var(--ac) / .04); padding:13px 14px; cursor:pointer; appearance:none; -webkit-appearance:none; }
+.selopt:active{ background:rgb(var(--ac) / .1); }
+.selopt.on{ border-color:var(--accent); color:#fff; background:rgb(var(--ac) / .12); box-shadow:inset 0 0 0 1px rgb(var(--ac) / .4); }
+.selopt .selck{ font-family:var(--mono); color:var(--accent); font-size:13px; }
+.selbtn{ width:100%; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:10px; font-family:var(--ui); font-size:14px; color:var(--text-hi); border:1px solid var(--line-2); background:rgb(var(--ac) / .05); padding:11px 12px; cursor:pointer; appearance:none; -webkit-appearance:none; }
+.selbtn:active{ background:rgb(var(--ac) / .1); }
+.selbtn .caret{ font-family:var(--mono); color:var(--accent); font-size:12px; }
 .vrow{ display:flex; align-items:center; gap:8px; border:1px solid var(--line); background:rgb(var(--ac) / .03); padding:8px 10px; margin-top:6px; }
 .vrow .vn{ font-family:var(--ui); font-weight:600; color:var(--text-hi); font-size:13px; }
 .vrow .vmeta{ font-family:var(--mono); font-size:10px; color:var(--ghost); margin-top:1px; }
@@ -713,7 +721,7 @@ html[data-accent="crimson"] .lvfx .fx-crimson{ display:block; }
     <label class="fld"><span>Hunter name</span><input id="ob_name" placeholder="e.g. Kurisu" autocomplete="off"></label>
     <div class="grid2">
       <label class="fld"><span>Biological sex (for BMR)</span>
-        <select id="ob_sex"><option value="male">Male</option><option value="female">Female</option></select></label>
+        <input type="hidden" id="ob_sex" value="male"><button class="selbtn" type="button" id="ob_sex_btn" onclick="pickOb('ob_sex')"><span>Male</span><span class="caret">▾</span></button></label>
       <label class="fld"><span>Age</span><input id="ob_age" type="number" inputmode="numeric" placeholder="24"></label>
     </div>
     <label class="fld"><span>Height</span>
@@ -727,12 +735,7 @@ html[data-accent="crimson"] .lvfx .fx-crimson{ display:block; }
     </label>
 
     <label class="fld"><span>Daily activity (outside training)</span>
-      <select id="ob_act">
-        <option value="1.2">Sedentary — desk / mostly sitting</option>
-        <option value="1.375" selected>Light — on feet sometimes</option>
-        <option value="1.55">Moderate — active job / lots of walking</option>
-        <option value="1.725">Very active — physical job</option>
-      </select></label>
+      <input type="hidden" id="ob_act" value="1.375"><button class="selbtn" type="button" id="ob_act_btn" onclick="pickOb('ob_act')"><span>Light — on feet sometimes</span><span class="caret">▾</span></button></label>
 
     <h2 class="section">Equipment access</h2>
     <div class="chips" id="ob_equip">
@@ -1399,6 +1402,33 @@ function buildInput(c){
   }
 }
 function getWinInput(){ const i=w_input.querySelector("input"); return i?i.value.trim():""; }
+let _selRes=null;
+function sysSelect(big,msg,options,current){
+  return new Promise(res=>{ _selRes=res;
+    const rows=options.map(o=>{ const on=String(o.value)===String(current);
+      return `<button class="selopt${on?' on':''}" type="button" onclick="_selPick('${String(o.value).replace(/'/g,"\\'")}')">${o.label}${on?'<span class="selck">\u2713</span>':''}</button>`; }).join("");
+    renderWin({stamp:"[ SELECT ]",big,bodyHTML:(msg?`<p class="lead tiny">${msg}</p>`:"")+`<div class="sellist">${rows}</div>`,
+      actions:[{label:"Cancel",kind:"ghost",onClick:()=>hideOverlay(()=>{ const r=_selRes; _selRes=null; if(r) r(null); })}]});
+    showOverlay(); playSfx("tap");
+  });
+}
+function _selPick(v){ const r=_selRes; _selRes=null; playSfx("tap"); hideOverlay(()=>{ if(r) r(v); }); }
+const SEL_DEFS={
+  goal:{big:"GOAL MODE",cur:()=>goalMode(),apply:setGoal,after:()=>render(),opts:()=>[{value:"",label:"Use profile ("+S.profile.goal+")"},{value:"leanbulk",label:"Lean Build (+surplus)"},{value:"recomp",label:"Recomposition"},{value:"cut",label:"Cut / definition"}]},
+  accent:{big:"SYSTEM ACCENT",cur:()=>S.settings.accent||"cyan",apply:setAccent,after:()=>renderSystem(),opts:()=>[{value:"cyan",label:"System Cyan (default)"},{value:"violet",label:"Monarch Violet"},{value:"crimson",label:"Penalty Crimson"}]},
+  bars:{big:"BAR STYLE",cur:()=>S.settings.barStyle||"glow",apply:setBars,after:()=>renderSystem(),opts:()=>[{value:"glow",label:"Glow (default)"},{value:"solid",label:"Solid"},{value:"striped",label:"Striped"},{value:"minimal",label:"Minimal"}]},
+  sound:{big:"INTERFACE SOUND",cur:()=>soundOn()?"on":"off",apply:setSound,after:()=>renderSystem(),opts:()=>[{value:"on",label:"On \u2014 UI clicks"},{value:"off",label:"Off \u2014 silent"}]},
+  units:{big:"UNITS",cur:()=>S.settings.units||"imperial",apply:setUnits,after:()=>{},opts:()=>[{value:"imperial",label:"Imperial \u2014 lb \u00b7 ft/in"},{value:"metric",label:"Metric \u2014 kg \u00b7 cm"}]},
+};
+async function pickSetting(k){ const d=SEL_DEFS[k]; const v=await sysSelect(d.big,"",d.opts(),d.cur()); if(v===null) return; d.apply(v); if(d.after) d.after(); }
+function selLabel(k){ const d=SEL_DEFS[k], c=d.cur(), o=d.opts().find(x=>String(x.value)===String(c)); return o?o.label:d.opts()[0].label; }
+const OB_OPTS={
+  ob_sex:{title:"BIOLOGICAL SEX",opts:[{value:"male",label:"Male"},{value:"female",label:"Female"}]},
+  ob_act:{title:"DAILY ACTIVITY",opts:[{value:"1.2",label:"Sedentary \u2014 desk / mostly sitting"},{value:"1.375",label:"Light \u2014 on feet sometimes"},{value:"1.55",label:"Moderate \u2014 active job / lots of walking"},{value:"1.725",label:"Very active \u2014 physical job"}]},
+};
+function obLabel(id,val){ const d=OB_OPTS[id], o=d.opts.find(x=>x.value===String(val)); return o?o.label:d.opts[0].label; }
+function setObSel(id,val){ const inp=document.getElementById(id); if(inp) inp.value=String(val); const b=document.getElementById(id+"_btn"); if(b){ const s=b.querySelector("span"); if(s) s.textContent=obLabel(id,val); } }
+async function pickOb(id){ const d=OB_OPTS[id], inp=document.getElementById(id), cur=inp?inp.value:d.opts[0].value; const v=await sysSelect(d.title,"",d.opts,cur); if(v===null) return; setObSel(id,v); }
 function stepInput(inp,delta,min,max){
   let v=parseFloat(inp.value); if(isNaN(v)) v=0; v=Math.round((v+delta)*100)/100;
   if(min!=null) v=Math.max(min,v); if(max!=null) v=Math.min(max,v);
@@ -2191,12 +2221,7 @@ function renderStats(){
         ${todayNutritionSummary()}
       </div>
       <label class="fld"><span>Override goal mode</span>
-        <select onchange="setGoal(this.value)">
-          <option value="">Use profile (${S.profile.goal})</option>
-          <option value="leanbulk" ${goalMode()==='leanbulk'?'selected':''}>Lean Build (+surplus)</option>
-          <option value="recomp" ${goalMode()==='recomp'?'selected':''}>Recomposition</option>
-          <option value="cut" ${goalMode()==='cut'?'selected':''}>Cut / definition</option>
-        </select></label>
+        <button class="selbtn" type="button" onclick="pickSetting('goal')">${selLabel('goal')}<span class="caret">▾</span></button></label>
     </div>
 
     <div class="panel">
@@ -2329,21 +2354,10 @@ function renderSystem(){
   const bars=S.settings.barStyle||"glow"; const tz=S.settings.tz||{auto:true,zone:""};
   document.getElementById("s-system").innerHTML=`
     <div class="panel"><div class="panel-title"><span class="tri"></span>Settings<span class="sub">SYSTEM</span></div>
-      <label class="fld"><span>System accent</span><select onchange="setAccent(this.value)">
-        <option value="cyan" ${S.settings.accent==='cyan'?'selected':''}>System Cyan (default)</option>
-        <option value="violet" ${S.settings.accent==='violet'?'selected':''}>Monarch Violet</option>
-        <option value="crimson" ${S.settings.accent==='crimson'?'selected':''}>Penalty Crimson</option></select></label>
-      <label class="fld"><span>Bar style</span><select onchange="setBars(this.value)">
-        <option value="glow" ${bars==='glow'?'selected':''}>Glow (default)</option>
-        <option value="solid" ${bars==='solid'?'selected':''}>Solid</option>
-        <option value="striped" ${bars==='striped'?'selected':''}>Striped</option>
-        <option value="minimal" ${bars==='minimal'?'selected':''}>Minimal</option></select></label>
-      <label class="fld"><span>Interface sound</span><select onchange="setSound(this.value)">
-        <option value="on" ${soundOn()?'selected':''}>On — UI clicks</option>
-        <option value="off" ${!soundOn()?'selected':''}>Off — silent</option></select></label>
-      <label class="fld"><span>Units</span><select onchange="setUnits(this.value)">
-        <option value="imperial" ${(S.settings.units||'imperial')==='imperial'?'selected':''}>Imperial — lb · ft/in</option>
-        <option value="metric" ${S.settings.units==='metric'?'selected':''}>Metric — kg · cm</option></select></label>
+      <label class="fld"><span>System accent</span><button class="selbtn" type="button" onclick="pickSetting('accent')">${selLabel('accent')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Bar style</span><button class="selbtn" type="button" onclick="pickSetting('bars')">${selLabel('bars')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Interface sound</span><button class="selbtn" type="button" onclick="pickSetting('sound')">${selLabel('sound')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Units</span><button class="selbtn" type="button" onclick="pickSetting('units')">${selLabel('units')}<span class="caret">▾</span></button></label>
       <div class="fld-head mt">Time zone</div>
       <label class="fld checkrow"><span>Sync automatically (device time)</span><input type="checkbox" ${tz.auto?'checked':''} onchange="setTzAuto(this.checked)"></label>
       <label class="fld" ${tz.auto?'style="display:none"':''}><span>Select time zone</span><select onchange="setTzZone(this.value)">${tzOptions(tz.zone||detectTZ())}</select></label>
@@ -2556,12 +2570,12 @@ function editProfile(){
   const p=S.profile; if(!p) return;
   const {ft,inch}=cmToFtIn(p.heightCm);
   document.getElementById("ob_name").value=p.name||"";
-  document.getElementById("ob_sex").value=p.sex;
+  setObSel("ob_sex",p.sex);
   document.getElementById("ob_age").value=p.age;
   document.getElementById("ob_ft").value=ft;
   document.getElementById("ob_in").value=inch;
   document.getElementById("ob_w").value=lb1(p.weightKg);
-  document.getElementById("ob_act").value=String(p.activity);
+  setObSel("ob_act",String(p.activity));
   setChips("ob_equip",[p.equip]); setChips("ob_days",p.days.map(String)); setChips("ob_goal",[p.goal]);
   { const tz=S.settings.tz||{auto:true,zone:""}, a=document.getElementById("ob_tz_auto"), z=document.getElementById("ob_tz_zone"), wrap=document.getElementById("ob_tz_wrap");
     if(z&&!z.options.length) z.innerHTML=tzOptions(tz.zone||detectTZ()); if(z) z.value=tz.zone||detectTZ();
