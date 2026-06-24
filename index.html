@@ -238,6 +238,14 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .tag.vit{color:#7dffb0;border-color:rgb(125 255 176 / .42);} .tag.sen{color:#c98bff;border-color:rgb(201 139 255 / .42);}
 .tag.int{color:#ffce6b;border-color:rgb(255 206 107 / .42);}
 .cues{font-size:13px;color:var(--ghost);line-height:1.5;margin-top:9px;}
+.cdrow{ display:flex; align-items:center; gap:12px; border:1px solid var(--line); background:rgb(var(--ac) / .04); padding:11px 12px; margin:8px 0; }
+.cdrow .cdi{ flex:1; min-width:0; }
+.cdtimer{ font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--accent); border:1px solid var(--line-2); background:rgb(var(--ac) / .06); padding:9px 12px; cursor:pointer; white-space:nowrap; flex:0 0 auto; transition:transform .15s, background .15s, color .15s; }
+.cdtimer:active{ background:var(--accent); color:var(--void); transform:scale(.95); }
+.cdrow{ cursor:pointer; }
+.cdrow:active{ background:rgb(var(--ac) / .08); }
+.vidempty{ font-size:13px; color:var(--ghost); line-height:1.5; padding:16px 14px; border:1px dashed var(--line-2); text-align:center; }
+.vsec{ font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--ghost); text-transform:uppercase; margin:15px 0 7px; padding-top:11px; border-top:1px solid var(--line); }
 .loadhint{display:flex;align-items:center;gap:10px;margin-top:11px;padding:9px 11px;border:1px solid var(--line-2);background:rgb(var(--ac) / .05);}
 .loadhint .lhk{font-family:var(--mono);font-weight:700;font-size:9px;letter-spacing:.16em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
 .loadhint .lhv{font-size:13px;color:var(--ink);line-height:1.35;}
@@ -1898,9 +1906,9 @@ function trackFor(id){ const cat=(EX[id]&&EX[id].cat)||"default"; const arr=TRAC
 
 /* ---- video resolution + YouTube-app deep link (D3 / F2 override) ---- */
 function parseYouTubeId(u){ if(!u) return ""; const m=String(u).match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/); if(m) return m[1]; return /^[\w-]{11}$/.test(String(u))?String(u):""; }
-function videoFor(id){ const ov=(S.settings.videoOverrides||{})[id]; const search=(EX[id]&&EX[id].yt)||id;
+function videoFor(id){ const ov=(S.settings.videoOverrides||{})[id]; const cd=(typeof CDBYID!=="undefined")?CDBYID[id]:null; const search=(EX[id]&&EX[id].yt)||(cd&&cd.yt)||id;
   if(ov){ const vid=parseYouTubeId(ov), short=/shorts\//i.test(String(ov)); return {vid:vid||"", url:(!vid?ov:""), search, short}; }
-  return {vid:EMBED[id]||"", url:"", search, short:false}; }
+  return {vid:EMBED[id]||(cd&&cd.v)||"", url:"", search, short:false}; }
 function openYT(id){ const v=videoFor(id);
   const app=v.vid?("vnd.youtube://"+v.vid):("vnd.youtube://results?search_query="+encodeURIComponent(v.search));
   const web=v.url?v.url:(v.vid?("https://www.youtube.com/watch?v="+v.vid):("https://www.youtube.com/results?search_query="+encodeURIComponent(v.search)));
@@ -1920,6 +1928,34 @@ function wireTrainScroll(){ const hs=document.getElementById("hscroll"); if(!hs)
     document.querySelectorAll("#hdots i").forEach((d,di)=>d.classList.toggle("on",di===i)); },60); };
   updateTrainProgress(); }
 
+const COOLDOWN=[
+  {id:"cd_chest",n:"Doorway Chest Stretch",sec:30,m:["chest","delts"],cue:"Forearm on the frame, step through, open the chest. 30s/side.",yt:"doorway chest stretch 30 seconds",v:""},
+  {id:"cd_lat",n:"Lat Side-Reach / Hang",sec:30,m:["lats","traps"],cue:"Overhead side-reach or a relaxed bar hang; breathe into the lats. 30s/side.",yt:"lat stretch overhead side reach",v:""},
+  {id:"cd_tri",n:"Overhead Triceps Stretch",sec:30,m:["triceps","delts"],cue:"Hand down the back, gently press the elbow. 30s/side.",yt:"overhead triceps stretch tutorial",v:""},
+  {id:"cd_bi",n:"Biceps / Forearm Wall Stretch",sec:30,m:["biceps","forearms"],cue:"Palm on the wall behind you, fingers down, rotate away. 30s/side.",yt:"biceps wall stretch tutorial",v:""},
+  {id:"cd_delt",n:"Cross-Body Shoulder Stretch",sec:30,m:["delts","traps"],cue:"Draw the arm across the body, relax the shoulder down. 30s/side.",yt:"cross body shoulder stretch",v:""},
+  {id:"cd_quad",n:"Standing Quad Stretch",sec:30,m:["quads"],cue:"Heel to glute, knees together, tuck the pelvis. 30s/side.",yt:"standing quad stretch tutorial",v:""},
+  {id:"cd_ham",n:"Hamstring Forward Fold",sec:40,m:["hamstrings"],cue:"Hinge forward, soft knees, reach long, relax the neck. 30–45s.",yt:"standing hamstring forward fold stretch",v:""},
+  {id:"cd_glute",n:"Pigeon / Figure-4",sec:45,m:["glutes"],cue:"Shin across, hips square, fold forward. 45s/side.",yt:"figure 4 glute stretch tutorial",v:""},
+  {id:"cd_hip",n:"Kneeling Hip-Flexor Stretch",sec:30,m:["lowerback","quads","glutes"],cue:"Half-kneel, tuck the pelvis, shift gently forward. 30s/side.",yt:"kneeling hip flexor stretch",v:""},
+  {id:"cd_calf",n:"Calf Wall Stretch",sec:30,m:["calves"],cue:"Back leg straight, heel down, lean into the wall. 30s/side.",yt:"calf wall stretch tutorial",v:""},
+  {id:"cd_spine",n:"Cat-Cow + Child's Pose",sec:45,m:["lowerback","abs","traps"],cue:"Flow cat-cow, then settle into child's pose. Decompress the spine. 45s.",yt:"cat cow childs pose stretch",v:""},
+  {id:"cd_forearm",n:"Wrist / Forearm Flush",sec:30,m:["forearms"],cue:"Gently extend + flex the wrists, light palm presses. Vital after grip/skill work. 30s.",yt:"wrist forearm stretch tutorial",v:""},
+  {id:"cd_breathe",n:"Box Breathing — Down-Regulate",sec:60,m:[],cue:"4s in · 4s hold · 4s out · 4s hold. Shifts you into recovery mode.",yt:"box breathing 4-4-4-4 technique",v:""},
+];
+const CDBYID=Object.fromEntries(COOLDOWN.map(c=>[c.id,c]));
+function cooldownFor(ids){
+  const cnt={}; (ids||[]).forEach(id=>{ const m=MUS[id]; if(!m) return; (m.p||[]).forEach(x=>cnt[x]=(cnt[x]||0)+2); (m.s||[]).forEach(x=>cnt[x]=(cnt[x]||0)+1); });
+  let pick=COOLDOWN.filter(c=>c.m.length).map(c=>({c,score:c.m.reduce((a,x)=>a+(cnt[x]||0),0)})).filter(o=>o.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(o=>o.c);
+  if(pick.length<3){ ["cd_spine","cd_ham","cd_quad","cd_delt"].forEach(id=>{ const c=CDBYID[id]; if(c&&pick.indexOf(c)<0) pick.push(c); }); pick=pick.slice(0,4); }
+  pick.push(CDBYID["cd_breathe"]);
+  return pick;
+}
+function cooldownVideo(id){ const c=CDBYID[id]; if(!c) return; const v=videoFor(id);
+  const embed=v.vid?`<div class="exvid${v.short?' short':''}"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${v.vid}?rel=0&modestbranding=1" allow="accelerometer;encrypted-media;gyroscope;picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`:`<div class="vidempty">No clip set yet — add a short (&lt;30s) demo in Settings ▸ Form Videos ▸ Edit video links, or search below.</div>`;
+  const web=v.url||(v.vid?("https://www.youtube.com/watch?v="+v.vid):("https://www.youtube.com/results?search_query="+encodeURIComponent(v.search)));
+  detail("[ COOL-DOWN ]",c.n.toUpperCase(),`${embed}<p class="cues">${c.cue}</p><div class="row" style="gap:8px;margin-top:11px"><button class="ytbtn" onclick="openYT('${id}')"><span class="play"></span> Open in YouTube app</button><a class="ytbtn ghost" href="${web}" target="_blank" rel="noopener">Search ↗</a></div>`,[{label:"Done",kind:"ghost",onClick:()=>hideOverlay()}]);
+}
 function renderTrain(){
   const el=document.getElementById("s-train"), w=todaysWorkout(), arc=currentArc(), weeks=S.program.weeks||24, boss=isBossToday();
   if(w.rest && !boss && !(sessionDraft&&(sessionDraft.forced||sessionDraft.boss))){
@@ -1976,7 +2012,13 @@ function renderTrain(){
       <p class="lead tiny">Auto-starts when you check a set. Compounds ~2.5 min · isolation 90s · core/mobility 60s.</p>
       <div class="rt-presets"><span class="rt-preset" onclick="startRest(30,'Rest — quick')">0:30</span><span class="rt-preset" onclick="startRest(90,'Rest — isolation')">1:30</span><span class="rt-preset" onclick="startRest(120,'Rest — recover')">2:00</span><span class="rt-preset" onclick="startRest(180,'Rest — compound')">3:00</span><span class="rt-preset" onclick="startRest(240,'Rest — heavy')">4:00</span><span class="rt-preset" onclick="startRest(300,'Rest — max effort')">5:00</span></div></div>
   </div>`;
+  const cds=cooldownFor(sessionDraft.ex.map(e=>e.id));
+  const cooldown=`<div class="panel"><div class="panel-title"><span class="tri"></span>Cool-Down<span class="sub">RECOVER</span></div>
+    <p class="lead tiny">Ease down from today's Gate — these target what you trained. Hold each, breathe slow, don't bounce. Tap a stretch for a quick demo.</p>
+    ${cds.map(c=>`<div class="cdrow" onclick="cooldownVideo('${c.id}')"><div class="cdi"><div class="ql">${c.n}</div><div class="muted tiny" style="margin-top:2px">${c.cue}</div></div><button class="cdtimer" type="button" onclick="event.stopPropagation();startRest(${c.sec},'Cool-down — ${c.n.replace(/'/g,"")}')">▷ ${c.sec}s</button></div>`).join("")}
+  </div>`;
   const finish=`<div class="hpage"><div class="pageflag">FINISH</div>
+    ${cooldown}
     <div class="panel flat"><div class="panel-title"><span class="tri"></span>${sessionDraft.boss?'Defeat the Boss':'Clear the Gate'}<span class="sub">CLAIM EXP</span></div>
       <p class="lead tiny">${doneCount()} of ${totalSets} sets logged. Progressive overload: beat last time by a rep or a small load bump.</p>
       <button class="btn full mt" onclick="finishSession()">${sessionDraft.boss?'⚔ Defeat Boss — Finish &amp; Claim':'Clear Gate — Finish &amp; Claim EXP'}</button>
@@ -2356,13 +2398,15 @@ function openVideoEditor(){
     const tag = has?'<span class="vtag ov">override</span>':(emb?'<span class="vtag em">embedded</span>':'<span class="vtag se">search</span>');
     return `<div class="vrow"><div class="grow"><div class="vn">${EX[id].n}</div><div class="vmeta">${EX[id].cat}${has?' · '+esc(String(ov[id])).slice(0,40):''}</div></div>${tag}
       <button class="btn sm" onclick="editVideo('${id}')">Set</button>${has?`<button class="btn sm ghost" onclick="clearVideo('${id}')">✕</button>`:''}</div>`; }).join("");
+  const cdrows=COOLDOWN.map(c=>{ const has=!!ov[c.id]; const tag=has?'<span class="vtag ov">override</span>':'<span class="vtag se">search</span>'; return `<div class="vrow"><div class="grow"><div class="vn">${c.n}</div><div class="vmeta">Cool-Down${has?' · '+esc(String(ov[c.id])).slice(0,40):''}</div></div>${tag}<button class="btn sm" onclick="editVideo('${c.id}')">Set</button>${has?`<button class="btn sm ghost" onclick="clearVideo('${c.id}')">✕</button>`:''}</div>`; }).join("");
   detail("[ VIDEOS ]","FORM VIDEO LINKS",
-    `<p class="lead tiny">Paste a YouTube link or 11-char ID to override a movement's demo. Embedded = built-in clip · search = opens YouTube search. Blank clears it.</p><div class="vlist">${rows}</div>`,
+    `<p class="lead tiny">Paste a YouTube link or 11-char ID to override a movement's demo. Embedded = built-in clip · search = opens YouTube search. Blank clears it.</p><div class="vlist">${rows}<div class="vsec">Cool-Down stretches</div>${cdrows}</div>`,
     [{label:"Done",kind:"ghost",onClick:()=>hideOverlay()}]);
 }
 async function editVideo(id){
   const cur=(S.settings.videoOverrides||{})[id]||"";
-  const v=await sysPrompt({big:EX[id].n.toUpperCase(),msg:"YouTube link or video ID (blank = clear):",value:cur,placeholder:"https://youtu.be/…"});
+  const nm=(EX[id]&&EX[id].n)||(typeof CDBYID!=="undefined"&&CDBYID[id]&&CDBYID[id].n)||id;
+  const v=await sysPrompt({big:String(nm).toUpperCase(),msg:"YouTube link or video ID (blank = clear):",value:cur,placeholder:"https://youtu.be/…"});
   if(v===null){ openVideoEditor(); return; }
   S.settings.videoOverrides=S.settings.videoOverrides||{};
   const val=String(v).trim(); if(!val) delete S.settings.videoOverrides[id]; else S.settings.videoOverrides[id]=val;
