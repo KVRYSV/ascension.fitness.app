@@ -605,6 +605,8 @@ html[data-bars="minimal"] .resttimer .rt-bar>i{ background:rgb(var(--ac) / .72);
 .vrow .vmeta{ font-family:var(--mono); font-size:10px; color:var(--ghost); margin-top:1px; }
 .vtag{ font-family:var(--mono); font-size:8.5px; letter-spacing:.06em; padding:3px 6px; border:1px solid var(--line-2); white-space:nowrap; }
 .vtag.ov{ color:var(--green); border-color:var(--green); } .vtag.em{ color:var(--accent); } .vtag.se{ color:var(--ghost); }
+button.vtag{ appearance:none; -webkit-appearance:none; background:transparent; cursor:pointer; font-family:var(--mono); }
+button.vtag.se:active{ color:var(--accent); border-color:var(--accent); }
 .adminrow{ display:flex; justify-content:space-between; align-items:center; gap:8px; border:1px solid var(--line); padding:8px 10px; margin-top:7px; font-family:var(--mono); font-size:12px; color:var(--text-hi); }
 .adminrow b{ color:#fff; } .adminrow>div{ display:flex; gap:5px; flex:0 0 auto; }
 .exmeta2{ margin-top:7px; display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
@@ -1953,8 +1955,7 @@ function cooldownFor(ids){
 }
 function cooldownVideo(id){ const c=CDBYID[id]; if(!c) return; const v=videoFor(id);
   const embed=v.vid?`<div class="exvid${v.short?' short':''}"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${v.vid}?rel=0&modestbranding=1" allow="accelerometer;encrypted-media;gyroscope;picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`:`<div class="vidempty">No clip set yet — add a short (&lt;30s) demo in Settings ▸ Form Videos ▸ Edit video links, or search below.</div>`;
-  const web=v.url||(v.vid?("https://www.youtube.com/watch?v="+v.vid):("https://www.youtube.com/results?search_query="+encodeURIComponent(v.search)));
-  detail("[ COOL-DOWN ]",c.n.toUpperCase(),`${embed}<p class="cues">${c.cue}</p><div class="row" style="gap:8px;margin-top:11px"><button class="ytbtn" onclick="openYT('${id}')"><span class="play"></span> Open in YouTube app</button><a class="ytbtn ghost" href="${web}" target="_blank" rel="noopener">Search ↗</a></div>`,[{label:"Done",kind:"ghost",onClick:()=>hideOverlay()}]);
+  detail("[ COOL-DOWN ]",c.n.toUpperCase(),`${embed}<p class="cues">${c.cue}</p><div class="row" style="gap:8px;margin-top:11px"><button class="ytbtn" onclick="openYT('${id}')"><span class="play"></span> ${v.vid?'Open in YouTube app':'Search on YouTube'}</button></div>`,[{label:"Done",kind:"ghost",onClick:()=>hideOverlay()}]);
 }
 function renderTrain(){
   const el=document.getElementById("s-train"), w=todaysWorkout(), arc=currentArc(), weeks=S.program.weeks||24, boss=isBossToday();
@@ -2395,12 +2396,12 @@ let adminUnlocked=false;
 function openVideoEditor(){
   const ov=S.settings.videoOverrides||{};
   const rows=Object.keys(EX).map(id=>{ const has=!!ov[id], emb=EMBED[id];
-    const tag = has?'<span class="vtag ov">override</span>':(emb?'<span class="vtag em">embedded</span>':'<span class="vtag se">search</span>');
+    const tag = has?'<span class="vtag ov">override</span>':(emb?'<span class="vtag em">embedded</span>':`<button class="vtag se" type="button" onclick="openYT('${id}')">search ↗</button>`);
     return `<div class="vrow"><div class="grow"><div class="vn">${EX[id].n}</div><div class="vmeta">${EX[id].cat}${has?' · '+esc(String(ov[id])).slice(0,40):''}</div></div>${tag}
       <button class="btn sm" onclick="editVideo('${id}')">Set</button>${has?`<button class="btn sm ghost" onclick="clearVideo('${id}')">✕</button>`:''}</div>`; }).join("");
-  const cdrows=COOLDOWN.map(c=>{ const has=!!ov[c.id]; const tag=has?'<span class="vtag ov">override</span>':'<span class="vtag se">search</span>'; return `<div class="vrow"><div class="grow"><div class="vn">${c.n}</div><div class="vmeta">Cool-Down${has?' · '+esc(String(ov[c.id])).slice(0,40):''}</div></div>${tag}<button class="btn sm" onclick="editVideo('${c.id}')">Set</button>${has?`<button class="btn sm ghost" onclick="clearVideo('${c.id}')">✕</button>`:''}</div>`; }).join("");
+  const cdrows=COOLDOWN.map(c=>{ const has=!!ov[c.id]; const tag=has?'<span class="vtag ov">override</span>':`<button class="vtag se" type="button" onclick="openYT('${c.id}')">search ↗</button>`; return `<div class="vrow"><div class="grow"><div class="vn">${c.n}</div><div class="vmeta">Cool-Down${has?' · '+esc(String(ov[c.id])).slice(0,40):''}</div></div>${tag}<button class="btn sm" onclick="editVideo('${c.id}')">Set</button>${has?`<button class="btn sm ghost" onclick="clearVideo('${c.id}')">✕</button>`:''}</div>`; }).join("");
   detail("[ VIDEOS ]","FORM VIDEO LINKS",
-    `<p class="lead tiny">Paste a YouTube link or 11-char ID to override a movement's demo. Embedded = built-in clip · search = opens YouTube search. Blank clears it.</p><div class="vlist">${rows}<div class="vsec">Cool-Down stretches</div>${cdrows}</div>`,
+    `<p class="lead tiny">Paste a YouTube link or 11-char ID to override a movement's demo. Embedded = built-in clip · tap <b>search ↗</b> to find one in the YouTube app. Blank clears it.</p><div class="vlist">${rows}<div class="vsec">Cool-Down stretches</div>${cdrows}</div>`,
     [{label:"Done",kind:"ghost",onClick:()=>hideOverlay()}]);
 }
 async function editVideo(id){
