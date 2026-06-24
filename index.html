@@ -1618,7 +1618,7 @@ function mpMax(){ return 60+effStats().SEN*3; }
 
 function segTicks(cx,cy,R,len,sw,n,pct,glow){
   let s="", filled=Math.round(n*Math.min(1,Math.max(0,pct)));
-  for(let i=0;i<n;i++){ const a=(-90+i*360/n)*Math.PI/180, c=Math.cos(a), si=Math.sin(a);
+  for(let i=0;i<n;i++){ const a=(90+i*360/n)*Math.PI/180, c=Math.cos(a), si=Math.sin(a);
     const x1=(cx+c*(R-len/2)).toFixed(1), y1=(cy+si*(R-len/2)).toFixed(1), x2=(cx+c*(R+len/2)).toFixed(1), y2=(cy+si*(R+len/2)).toFixed(1), on=i<filled;
     const blur=on?(len*0.75).toFixed(1):(len*0.4).toFixed(1);
     const st=on?('animation-delay:'+(i*0.012).toFixed(3)+'s;filter:drop-shadow(0 0 '+blur+'px '+glow+')'):('filter:drop-shadow(0 0 '+blur+'px '+glow+')');
@@ -1627,7 +1627,7 @@ function segTicks(cx,cy,R,len,sw,n,pct,glow){
 }
 function levelRing(have,need,lv,rank){
   const pct=Math.min(1,need>0?have/need:0);
-  return `<div class="lvring"><svg viewBox="0 0 208 208" class="segring">${segTicks(104,104,93,11,3.4,84,pct,"var(--accent)")}</svg>
+  return `<div class="lvring"><svg viewBox="0 0 208 208" class="segring">${segTicks(104,104,94,11,2.4,112,pct,"var(--accent)")}</svg>
     <div class="lr-mid"><div class="lr-rank">${rank}-RANK</div><div class="lr-lv" id="lvnum">${lv}</div><div class="lr-lvlabel">LEVEL</div><div class="lr-exp">${have} / ${need} EXP</div></div></div>`;
 }
 function statArrowCell(k,v){ const d=statDelta(k), base=S.rpg.stats[k]||0, canUp=(S.rpg.statPoints||0)>0, canDown=base>10;
@@ -2282,7 +2282,7 @@ function renderStats(){
 }
 function ring(have,target,label,color,centerTxt,subTxt){
   const pct=Math.min(1,target>0?have/target:0);
-  return `<div class="dring"><svg viewBox="0 0 100 100" class="segring">${segTicks(50,50,40,8.5,2,54,pct,color)}
+  return `<div class="dring"><svg viewBox="0 0 100 100" class="segring">${segTicks(50,50,41,8.5,1.5,72,pct,color)}
     <text class="big" x="50" y="50" text-anchor="middle">${centerTxt}</text>
     <text class="sm" x="50" y="63" text-anchor="middle">${subTxt}</text></svg>
     <div class="rlab">${label}</div></div>`;
