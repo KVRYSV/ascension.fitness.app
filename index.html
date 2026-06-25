@@ -420,6 +420,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .screen.entering>*:nth-child(5){animation-delay:.22s;} .screen.entering>*:nth-child(6){animation-delay:.27s;}
 @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
 .screen.entering .panel>.sheen::before{animation:sheenSweep 1.1s ease forwards;}
+html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
 @keyframes sheenSweep{from{left:-40%;}to{left:140%;}}
 #s-train.entering .ex{animation:rise .4s cubic-bezier(.2,.85,.2,1) both;}
 #s-train.entering .ex:nth-child(n+5){animation-delay:.18s;}
@@ -1437,6 +1438,7 @@ const SEL_DEFS={
   bars:{big:"BAR STYLE",cur:()=>S.settings.barStyle||"glow",apply:setBars,after:()=>renderSystem(),opts:()=>[{value:"glow",label:"Glow (default)"},{value:"solid",label:"Solid"},{value:"striped",label:"Striped"},{value:"segmented",label:"Segmented (line ticks)"},{value:"minimal",label:"Minimal"}]},
   sound:{big:"INTERFACE SOUND",cur:()=>soundOn()?"on":"off",apply:setSound,after:()=>renderSystem(),opts:()=>[{value:"on",label:"On \u2014 UI clicks"},{value:"off",label:"Off \u2014 silent"}]},
   units:{big:"UNITS",cur:()=>S.settings.units||"imperial",apply:setUnits,after:()=>{},opts:()=>[{value:"imperial",label:"Imperial \u2014 lb \u00b7 ft/in"},{value:"metric",label:"Metric \u2014 kg \u00b7 cm"}]},
+  sweep:{big:"GLASS SWEEP",cur:()=>sweepOn()?"on":"off",apply:setSweep,after:()=>renderSystem(),opts:()=>[{value:"on",label:"On — panel sheen sweep"},{value:"off",label:"Off — static panels"}]},
 };
 async function pickSetting(k){ const d=SEL_DEFS[k]; const v=await sysSelect(d.big,"",d.opts(),d.cur()); if(v===null) return; d.apply(v); if(d.after) d.after(); }
 function selLabel(k){ const d=SEL_DEFS[k], c=d.cur(), o=d.opts().find(x=>String(x.value)===String(c)); return o?o.label:d.opts()[0].label; }
@@ -1626,6 +1628,7 @@ function render(){
   document.getElementById("tb_lv").textContent=S.rpg.level;
   document.documentElement.setAttribute("data-accent",S.settings.accent||"cyan");
   document.documentElement.setAttribute("data-bars",S.settings.barStyle||"glow");
+  document.documentElement.setAttribute("data-sweep",sweepOn()?"on":"off");
   renderStatus(); renderQuests(); renderTrain(); renderStats(); renderSystem();
   decorPanels();
 }
@@ -2393,6 +2396,7 @@ function renderSystem(){
     <div class="panel"><div class="panel-title"><span class="tri"></span>Settings<span class="sub">SYSTEM</span></div>
       <label class="fld"><span>System accent</span><button class="selbtn" type="button" onclick="pickSetting('accent')">${selLabel('accent')}<span class="caret">▾</span></button></label>
       <label class="fld"><span>Bar style</span><button class="selbtn" type="button" onclick="pickSetting('bars')">${selLabel('bars')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Glass sweep</span><button class="selbtn" type="button" onclick="pickSetting('sweep')">${selLabel('sweep')}<span class="caret">▾</span></button></label>
       <label class="fld"><span>Interface sound</span><button class="selbtn" type="button" onclick="pickSetting('sound')">${selLabel('sound')}<span class="caret">▾</span></button></label>
       <label class="fld"><span>Units</span><button class="selbtn" type="button" onclick="pickSetting('units')">${selLabel('units')}<span class="caret">▾</span></button></label>
       <div class="fld-head mt">Time zone</div>
@@ -2441,6 +2445,8 @@ function renderSystem(){
       <div class="creditbox"><span class="sig">// SYSTEM ADMINISTRATOR</span>Designed and tested by <b class="hi">KVRYSV</b>. Built, verified, and coded by <b class="hi">Claude</b> — your friendly neighborhood AI architect, who has never done a pull-up but has rendered a great many. Arise, Hunter. ⚔</div></div>`;
 }
 function setBars(v){ S.settings.barStyle=v; save(); document.documentElement.setAttribute("data-bars",v); }
+function sweepOn(){ return !(S&&S.settings&&S.settings.sweep===false); }
+function setSweep(v){ S.settings.sweep=(v==="on"); save(); document.documentElement.setAttribute("data-sweep", S.settings.sweep?"on":"off"); }
 function setWeeks(n){ n=Math.max(8,Math.min(104,n)); S.program.weeks=n; save(); toast(`Program set to ${n} weeks`); render(); decorPanels(); }
 let adminUnlocked=false;
 /* ---- F2: form-video link override editor ---- */
