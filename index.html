@@ -421,7 +421,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
 .screen.entering .panel>.sheen::before{animation:sheenSweep 1.1s ease forwards;}
 html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
-@keyframes sheenSweep{from{left:-40%;}to{left:140%;}}
+@keyframes sheenSweep{from{transform:translateX(0);}to{transform:translateX(375%);}}
 #s-train.entering .ex{animation:rise .4s cubic-bezier(.2,.85,.2,1) both;}
 #s-train.entering .ex:nth-child(n+5){animation-delay:.18s;}
 .pop{animation:popIn .42s cubic-bezier(.2,.9,.2,1);}
@@ -2040,7 +2040,10 @@ function renderTrain(){
     el.innerHTML=`<div class="panel"><div class="panel-title"><span class="tri"></span>Today's Gate<span class="sub">CLOSED</span></div>
       <p class="lead">No training scheduled today (<b class="gr">recovery</b>). You can still run an optional session, or do mobility + your Daily Quest.</p>
       <button class="btn full mt" onclick="forceTrain()">Open an optional session</button>
-      <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility instead</button></div>${arcCard(arc)}`;
+      <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility instead</button></div>
+    <div class="panel flat"><div class="panel-title"><span class="tri"></span>Rest Timer<span class="sub">TIMER</span></div>
+      <p class="lead tiny">Run the timer for mobility holds, breathing, or anything on your recovery day.</p>
+      <div class="rt-presets"><span class="rt-preset" onclick="startRest(10,'Timer — 10s')">0:10</span><span class="rt-preset" onclick="startRest(30,'Timer — 30s')">0:30</span><span class="rt-preset" onclick="startRest(60,'Timer — 1 min')">1:00</span><span class="rt-preset" onclick="startRest(90,'Timer — 90s')">1:30</span><span class="rt-preset" onclick="startRest(120,'Timer — 2 min')">2:00</span><span class="rt-preset" onclick="startRest(300,'Timer — 5 min')">5:00</span></div></div>${arcCard(arc)}`;
     return;
   }
   if(sessionLoggedToday() && !sessionDraft){
@@ -2088,7 +2091,7 @@ function renderTrain(){
       ${(sessionDraft.custom&&sessionDraft.custom.length)?`<div class="mt">${sessionDraft.custom.map((c,i)=>`<div class="kv"><span class="k">▹ ${esc(c)}</span><span class="v tap" onclick="rmCustomWork(${i})">✕</span></div>`).join("")}</div>`:""}</div>
     <div class="panel flat"><div class="panel-title"><span class="tri"></span>Rest Timer<span class="sub">AUTO</span></div>
       <p class="lead tiny">Auto-starts when you check a set. Compounds ~2.5 min · isolation 90s · core/mobility 60s.</p>
-      <div class="rt-presets"><span class="rt-preset" onclick="startRest(30,'Rest — quick')">0:30</span><span class="rt-preset" onclick="startRest(90,'Rest — isolation')">1:30</span><span class="rt-preset" onclick="startRest(120,'Rest — recover')">2:00</span><span class="rt-preset" onclick="startRest(180,'Rest — compound')">3:00</span><span class="rt-preset" onclick="startRest(240,'Rest — heavy')">4:00</span><span class="rt-preset" onclick="startRest(300,'Rest — max effort')">5:00</span></div></div>
+      <div class="rt-presets"><span class="rt-preset" onclick="startRest(10,'Rest — 10s')">0:10</span><span class="rt-preset" onclick="startRest(30,'Rest — quick')">0:30</span><span class="rt-preset" onclick="startRest(90,'Rest — isolation')">1:30</span><span class="rt-preset" onclick="startRest(120,'Rest — recover')">2:00</span><span class="rt-preset" onclick="startRest(180,'Rest — compound')">3:00</span><span class="rt-preset" onclick="startRest(240,'Rest — heavy')">4:00</span><span class="rt-preset" onclick="startRest(300,'Rest — max effort')">5:00</span></div></div>
   </div>`;
   const cds=cooldownFor(sessionDraft.ex.map(e=>e.id));
   const cooldown=`<div class="panel"><div class="panel-title"><span class="tri"></span>Cool-Down<span class="sub">RECOVER</span></div>
@@ -2449,7 +2452,7 @@ function renderSystem(){
       <div class="creditbox"><span class="sig">// SYSTEM ADMINISTRATOR</span>Designed and tested by <b class="hi">KVRYSV</b>. Built, verified, and coded by <b class="hi">Claude</b> — your friendly neighborhood AI architect, who has never done a pull-up but has rendered a great many. Arise, Hunter. ⚔</div></div>`;
 }
 function setBars(v){ S.settings.barStyle=v; save(); document.documentElement.setAttribute("data-bars",v); }
-function sweepOn(){ return !(S&&S.settings&&S.settings.sweep===false); }
+function sweepOn(){ return !!(S&&S.settings&&S.settings.sweep===true); }
 function setSweep(v){ S.settings.sweep=(v==="on"); save(); document.documentElement.setAttribute("data-sweep", S.settings.sweep?"on":"off"); }
 function setWeeks(n){ n=Math.max(8,Math.min(104,n)); S.program.weeks=n; save(); toast(`Program set to ${n} weeks`); render(); decorPanels(); }
 let adminUnlocked=false;
@@ -2860,17 +2863,16 @@ if("serviceWorker" in navigator && location.protocol!=="file:"){
     ac=p("--ac")||ac; ac2=p("--ac2")||ac2; }
   function resize(){ DPR=Math.min(2, window.devicePixelRatio||1); W=cv.clientWidth=window.innerWidth; H=cv.clientHeight=window.innerHeight; cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
   function rgba(c,a){ return "rgba("+c[0]+","+c[1]+","+c[2]+","+a+")"; }
-  function wave(yBase,amp,len,speed,phase,col,alpha){
+  function wave(yBase,amp,len,speed,phase,col,alpha,lw){
     ctx.beginPath();
-    for(var x=0;x<=W;x+=8){ var y=yBase + Math.sin(x/len + t*speed + phase)*amp + Math.sin(x/(len*0.5) + t*speed*0.7)*amp*0.28; if(x===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
-    ctx.strokeStyle=rgba(col,alpha); ctx.lineWidth=2.8; ctx.stroke();
+    for(var x=0;x<=W;x+=8){ var y=yBase + Math.sin(x/len + t*speed + phase)*amp + Math.sin(x/(len*0.5) + t*speed*0.7)*amp*0.3; if(x===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+    ctx.strokeStyle=rgba(col,alpha); ctx.lineWidth=lw; ctx.shadowColor=rgba(col,0.55); ctx.shadowBlur=9; ctx.stroke(); ctx.shadowBlur=0;
   }
   function frame(){ ctx.clearRect(0,0,W,H);
     var g=ctx.createLinearGradient(0,H,0,H*0.22);
     g.addColorStop(0, rgba(ac, 0.22)); g.addColorStop(0.45, rgba(ac2, 0.08)); g.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    var bands=6;
-    for(var i=0;i<bands;i++){ var f=i/(bands-1); wave(H*(0.34+f*0.58), 16+f*17, 125+f*55, 0.55+f*0.16, i*1.5, (i%2?ac2:ac), 0.14-f*0.013); }
+    wave(H*0.80,28,160,0.9,0,ac,0.5,3.4); wave(H*0.85,38,210,0.6,1.3,ac2,0.42,3.8); wave(H*0.74,22,120,1.25,2.6,ac,0.4,3); wave(H*0.90,46,270,0.42,4,ac2,0.3,4.2);
     t+=0.024; raf=requestAnimationFrame(frame);
   }
   readAccent(); resize();
