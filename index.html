@@ -1308,7 +1308,7 @@ function genDailyQuest(){
     {id:"q_squat",label:`${scale(25,1)} Bodyweight Squats`,exp:25,done:false},
     {id:"q_core",label:`${scale(20,1)} Sit-ups / Leg raises`,exp:25,done:false},
     {id:"q_hang",label:`Dead hang or plank — ${scale(20,1)}s`,exp:20,done:false},
-    {id:"q_mob",label:`5 min mobility (hips / shoulders / wrists)`,exp:20,done:false},
+    {id:"q_mob",label:"Mobility flow (~5 min)",exp:20,done:false},
   ];
   const pool=[
     {id:"b_run",label:`Run ${1+Math.round(Math.min(lv,30)/12)} miles`,exp:60},
@@ -1836,7 +1836,7 @@ function renderQuests(){
       <div class="panel-title"><span class="tri"></span>Daily Quest<span class="sub">${all?'CLEAR':'ACTIVE'}</span></div>
       <p class="lead tiny">The System's standing order. Scaled to your level — always clearable, never optional. Clear all for bonus EXP.</p>
       ${q.map(qi=>`<div class="quest ${qi.done?'done':''}"><div class="qx" onclick="toggleQuest('${qi.id}')">${qi.done?'✓':''}</div>
-        <div class="ql">${esc(qi.label)}</div><div class="qr">+${qi.exp}</div></div>`).join("")}
+        ${qi.id==="q_mob"?`<div style="cursor:pointer" onclick="mobilityRoutine()"><div class="ql">${esc(qi.label)}</div><div class="muted tiny" style="margin-top:2px">Tap to open the guided flow ›</div></div>`:`<div class="ql">${esc(qi.label)}</div>`}<div class="qr">+${qi.exp}</div></div>`).join("")}
       ${all?`<div class="banner ok">✓ Daily Quest complete. The System is satisfied.</div>`:""}
     </div>
     <div class="panel flat">
@@ -2044,6 +2044,13 @@ const WARMUP=[
 ];
 const WMBYID=Object.fromEntries(WARMUP.map(w=>[w.id,w]));
 function warmupVideo(id){ const w=WMBYID[id]; if(!w) return; if(typeof openYT==="function") openYT(w.yt||w.n); }
+const MOBILITY_FLOW=[{id:"catcow",t:"45s"},{id:"ninety",t:"45s"},{id:"couchstretch",t:"60s / side"},{id:"shoulderdis",t:"45s"},{id:"wristprep",t:"45s"},{id:"ankle",t:"30s / side"}];
+function mobilityRoutine(){
+  const rows=MOBILITY_FLOW.map(function(m){ var x=EX[m.id]; if(!x) return "";
+    return `<div class="cdrow" onclick="openYT('${x.yt}')"><div class="cdi"><div class="ql">${x.n} <span class="muted tiny">· ${m.t}</span></div><div class="muted tiny" style="margin-top:2px">${x.cues}</div></div><button class="cdtimer" type="button" onclick="event.stopPropagation();openYT('${x.yt}')">demo ↗</button></div>`;
+  }).join("");
+  const body=`<p class="lead tiny">A simple ~5-minute flow covering spine, hips, shoulders, wrists and ankles. Move slowly, breathe into each position, and never force a stretch — tap any move for a video demo.</p>${rows}`;
+  detail("[ MOBILITY ]","DAILY FLOW",body,[{label:"Mark done",onClick:function(){ hideOverlay(function(){ var qi=S.quests.items.find(function(i){return i.id==="q_mob";}); if(qi&&!qi.done) toggleQuest("q_mob"); }); }},{label:"Close",kind:"ghost",onClick:function(){ hideOverlay(); }}]); }
 function cooldownFor(ids){
   const cnt={}; (ids||[]).forEach(id=>{ const m=MUS[id]; if(!m) return; (m.p||[]).forEach(x=>cnt[x]=(cnt[x]||0)+2); (m.s||[]).forEach(x=>cnt[x]=(cnt[x]||0)+1); });
   let pick=COOLDOWN.filter(c=>c.m.length).map(c=>({c,score:c.m.reduce((a,x)=>a+(cnt[x]||0),0)})).filter(o=>o.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(o=>o.c);
