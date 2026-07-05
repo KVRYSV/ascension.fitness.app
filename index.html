@@ -340,6 +340,12 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 /* ---------- body diagram (anatomical + leader-line callouts) ---------- */
 .bodywrap{display:flex;flex-direction:column;gap:14px;margin-top:8px;}
 .bodyblock{position:relative;}
+.b3dwrap{position:relative;margin:2px 0 4px;}
+.b3dwrap canvas{display:block;width:100%;height:290px;touch-action:pan-y;cursor:grab;}
+.b3dkey{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--ghost);text-align:center;margin:2px 0 6px;}
+.b3dkey .pk{color:var(--accent);}
+.b3dkey .sk{color:rgb(var(--ac) / .45);}
+.b3dwrap .b3dhint{position:absolute;right:6px;bottom:4px;font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;color:var(--ghost-2);pointer-events:none;}
 .bodyblock .bt{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:var(--ghost);text-transform:uppercase;text-align:center;margin-bottom:2px;}
 .bodyfig{width:100%;height:auto;display:block;}
 .bodyfig .base{fill:rgb(120 150 190 / .05);stroke:var(--line);stroke-width:.7;}
@@ -521,6 +527,7 @@ html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
 .daycell .dd{ width:19px; height:19px; margin:6px auto 0; border-radius:50%; border:1px solid var(--line-2); display:grid; place-items:center; font-size:10px; color:var(--ghost-2); }
 .daycell.done .dd{ background:var(--green); border-color:var(--green); color:#02120a; box-shadow:0 0 8px var(--green); }
 .daycell.missed .dd{ border-color:var(--crimson); color:var(--crimson); }
+.daycell.exc .dd{ border-color:var(--gold); color:var(--gold); box-shadow:0 0 7px rgb(255 206 107 / .25); }
 .daycell.today{ border-color:var(--accent); box-shadow:0 0 10px rgb(var(--ac) / .25); }
 
 /* titles + debuffs */
@@ -1173,8 +1180,9 @@ function caloriesByDayWeek(){ const out=[]; for(let i=6;i>=0;i--){ const dt=toda
 function workoutsOn(date){ return S.sessions.filter(s=>s.date===date); }
 function sevenDays(){ const out=[]; for(let i=6;i>=0;i--){ const dt=todayStr(new Date(Date.now()-86400000*i));
   const ses=workoutsOn(dt), trained=ses.length>0, dow=new Date(dt+"T00:00:00").getDay();
-  const sched=S.profile&&S.profile.days.includes(dow), missed=sched&&!trained&&dt<todayStr()&&(!S.program||dt>=S.program.startDate)&&!(S.skips||[]).includes(dt);
-  out.push({date:dt,dow:DAYNAMES[dow][0],trained,sched,missed,sessions:ses,score:dayScore(dt),today:dt===todayStr()}); } return out; }
+  const exc=(S.excused||[]).find(e=>e.date===dt);
+  const sched=S.profile&&S.profile.days.includes(dow), missed=sched&&!trained&&!exc&&dt<todayStr()&&(!S.program||dt>=S.program.startDate)&&!(S.skips||[]).includes(dt);
+  out.push({date:dt,dow:DAYNAMES[dow][0],trained,sched,missed,excused:!!exc,sessions:ses,score:dayScore(dt),today:dt===todayStr()}); } return out; }
 
 /* boss fights */
 function bossRecLevel(wk){ return Math.round((wk||currentWeek())*1.8)+6; }
@@ -1209,6 +1217,7 @@ function todayStr(d){ d=d||new Date(); const z=appTZ();
 function deepMerge(base,over){ // fill missing keys without clobbering existing nested data
   const out=Array.isArray(base)?base.slice():Object.assign({},base);
   for(const k in over){
+    if(k==="__proto__"||k==="constructor"||k==="prototype") continue;
     if(over[k] && typeof over[k]==="object" && !Array.isArray(over[k]) && base[k] && typeof base[k]==="object" && !Array.isArray(base[k]))
       out[k]=deepMerge(base[k],over[k]);
     else out[k]=over[k];
@@ -1281,12 +1290,48 @@ function weekDirective(week){
 function splitForDays(n){ if(n<=3) return SPLITS[3]; if(n===4) return SPLITS[4]; if(n===5) return SPLITS[5]; return SPLITS[6]; }
 function isTrainingDay(date){ return S.profile.days.includes(date.getDay()); }
 function adjSets(base,delta){ let v=base+delta; if(base>=3) v=Math.max(2,v); else v=Math.max(1,v); return Math.min(base+1,v); }
+function focusOn(){ return ((S.settings&&S.settings.focus)||"")==="vtaper"; }
+const VT_PRIORITY=["pullup","pulldown","chinup","invrow","dbrow","row"];
+function focusIds(sl){ if(!focusOn()) return sl; const ids=sl.ids.slice().sort((a,b)=>{const ia=VT_PRIORITY.indexOf(a),ib=VT_PRIORITY.indexOf(b);return (ia<0?9:ia)-(ib<0?9:ib);}); return Object.assign({},sl,{ids}); }
+function applyFocus(list,equip){ if(!focusOn()) return;
+  const has=id=>list.some(e=>e.id===id);
+  const cats=list.map(e=>EX[e.id]&&EX[e.id].cat);
+  const add=(id,s,r)=>{ if(EX[id]&&EX[id].eq.includes(equip)&&!has(id)&&list.length<8) list.push({id,ex:EX[id],sets:s,reps:r,focus:true}); };
+  if(cats.includes("Pull")) add("latraise",3,"12\u201315");
+  if(cats.includes("Push")&&!has("latraise")) add("latraise",2,"12\u201315");
+  if(cats.includes("Push")) add("facepull",2,"12\u201315");
+  if(cats.includes("Pull")&&!has("legraise")&&!has("lsit")) add("legraise",2,"8\u201312");
+}
+function effortMod(){
+  const sb=S.program&&S.program.startDate; if(!sb||!S.profile) return {delta:0,label:"",cleared:0,sched:0};
+  const start=new Date(sb+"T00:00:00");
+  if((Date.now()-start.getTime())<7*86400000) return {delta:0,label:"",cleared:0,sched:0};
+  let sched=0,cleared=0;
+  for(let i=1;i<=7;i++){ const d=new Date(Date.now()-86400000*i), dt=todayStr(d);
+    if(dt<sb) continue;
+    if(!S.profile.days.includes(d.getDay())) continue;
+    if((S.excused||[]).some(e=>e.date===dt)) continue;
+    sched++;
+    if(S.sessions.some(s=>s.date===dt)) cleared++;
+  }
+  if(!sched) return {delta:0,label:"",cleared,sched};
+  const r=cleared/sched;
+  if(r>=0.99) return {delta:1,label:"every Gate cleared \u2014 volume +1 set this week",cleared,sched};
+  if(r>=0.6)  return {delta:0,label:"solid week \u2014 volume holding",cleared,sched};
+  return {delta:-1,label:"light week detected \u2014 volume eased \u22121 set",cleared,sched};
+}
+function effortFocusHTML(){ const e=effortMod(); let out="";
+  if(e.label) out+=`<div class="directive${e.delta<0?' deload':''}"><span class="pip"></span>SYSTEM CALIBRATION \u00b7 ${e.cleared}/${e.sched} Gates \u2014 ${e.label}</div>`;
+  if(focusOn()) out+=`<div class="directive"><span class="pip"></span>FOCUS: V-TAPER \u2014 lat-priority pulls \u00b7 side-delt + hanging-core accessories active.</div>`;
+  return out; }
 function todaysWorkout(){
   const p=S.profile, split=splitForDays(p.days.length), today=new Date();
   const wk=currentWeek(), dir=weekDirective(wk);
   if(!isTrainingDay(today)) return {rest:true,arc:currentArc(),week:wk,dir};
   const day=split[ S.program.seq % split.length ];
-  const exercises=day.slots.map(sl=>{ const id=pickEx(sl,p.equip); return {id,ex:EX[id],sets:adjSets(sl.s,dir.setDelta),reps:sl.r}; });
+  const eff=effortMod();
+  const exercises=day.slots.map(sl=>{ const id=pickEx(focusIds(sl),p.equip); return {id,ex:EX[id],sets:adjSets(sl.s,dir.setDelta+(dir.deload?0:eff.delta)),reps:sl.r}; });
+  applyFocus(exercises,p.equip);
   return {rest:false,day,exercises,arc:currentArc(),week:wk,dir};
 }
 
@@ -1437,6 +1482,7 @@ function sysSelect(big,msg,options,current){
 function _selPick(v){ const r=_selRes; _selRes=null; playSfx("tap"); hideOverlay(()=>{ if(r) r(v); }); }
 const SEL_DEFS={
   goal:{big:"GOAL MODE",cur:()=>goalMode(),apply:setGoal,after:()=>render(),opts:()=>[{value:"",label:"Use profile ("+S.profile.goal+")"},{value:"leanbulk",label:"Lean Build (+surplus)"},{value:"recomp",label:"Recomposition"},{value:"cut",label:"Cut / definition"}]},
+  focus:{big:"PHYSIQUE FOCUS",cur:()=>((S.settings&&S.settings.focus)||""),apply:setFocus,after:()=>{renderTrain();renderSystem();},opts:()=>[{value:"",label:"Balanced \u2014 program default"},{value:"vtaper",label:"V-Taper \u2014 climber aesthetic"}]},
   accent:{big:"SYSTEM ACCENT",cur:()=>S.settings.accent||"cyan",apply:setAccent,after:()=>renderSystem(),opts:()=>[{value:"cyan",label:"System Cyan (default)"},{value:"violet",label:"Monarch Violet"},{value:"crimson",label:"Penalty Crimson"}]},
   bars:{big:"BAR STYLE",cur:()=>S.settings.barStyle||"glow",apply:setBars,after:()=>renderSystem(),opts:()=>[{value:"glow",label:"Glow (default)"},{value:"solid",label:"Solid"},{value:"striped",label:"Striped"},{value:"segmented",label:"Segmented (line ticks)"},{value:"minimal",label:"Minimal"}]},
   sound:{big:"INTERFACE SOUND",cur:()=>soundLevel(),apply:setSoundLevel,after:()=>{ renderSystem(); if(soundOn()) playSfx("toggle"); },opts:()=>[{value:"off",label:"Off \u2014 silent"},{value:"25",label:"Quiet \u2014 25%"},{value:"50",label:"Low \u2014 50%"},{value:"75",label:"Medium \u2014 75%"},{value:"100",label:"Full \u2014 100%"}]},
@@ -1597,7 +1643,7 @@ function historyModal(title, rows){
 }
 function excusedRowHTML(e){ return `<div class="histday"><div class="hd"><span>${e.date.slice(5)} \u00b7 \u2298 EXCUSED</span><span class="gr">streak kept</span></div><div class="hx">${esc(e.reason)}</div></div>`; }
 function gateRowHTML(s){
-  const exs=(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||e.id; const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return `<b>${nm}</b> ${e.sets.length}×${top.w?` ${top.w}${unitW()}`:''}`; }).join(" · ")||"—";
+  const exs=(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||esc(e.id); const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return `<b>${nm}</b> ${e.sets.length}×${top.w?` ${top.w}${unitW()}`:''}`; }).join(" · ")||"—";
   const cust=(s.custom&&s.custom.length)?`<div class="hxc">▹ ${s.custom.map(c=>esc(c)).join(" · ")}</div>`:"";
   return `<div class="histday"><div class="hd"><span>${s.date.slice(5)} · ${s.name}${s.boss?' · BOSS':''}</span><span>${s.setsDone} sets · +${s.exp} EXP</span></div><div class="hx">${exs}</div>${cust}</div>`;
 }
@@ -1605,7 +1651,7 @@ function histCal(){ const rows=(S.nutrition.log||[]).map(e=>({date:e.date, html:
 function histProtein(){ const rows=(S.nutrition.log||[]).map(e=>({date:e.date, html:`<div class="kv tap" onclick="calEdit('${e.date}')"><span class="k">${fmtDate(e.date)}</span><span class="v">${e.pro}g protein · ${e.cal} kcal ›</span></div>`})); historyModal("Protein Log", rows); }
 function histWeight(){ const wl=(S.metrics&&S.metrics.weight)||[]; const rows=wl.map(w=>({date:w.date, html:`<div class="kv tap" onclick="weightEdit('${w.date}')"><span class="k">${fmtDate(w.date)}</span><span class="v">${lb1(w.kg)} ${unitW()} ›</span></div>`})); historyModal("Bodyweight", rows); }
 function histGates(){ const prLog=(S.records&&S.records.prLog)||[]; const tl=S.sessions.map(s=>({t:"s",date:s.date,s})).concat(prLog.map(p=>({t:"p",date:p.date,p}))).concat((S.excused||[]).map(e=>({t:"e",date:e.date,e}))); const rows=tl.map(it=> it.t==="s" ? {date:it.s.date, html:gateRowHTML(it.s)} : it.t==="e" ? {date:it.e.date, html:excusedRowHTML(it.e)} : {date:it.p.date, html:`<div class="histday pr"><div class="hd"><span>${it.p.date.slice(5)} · ◆ PR</span><span>${prValShort(it.p)}</span></div><div class="hx"><b>${esc(it.p.name)}</b></div></div>`}); historyModal("Gate History", rows); }
-function histPRs(){ const pr=(S.records&&S.records.pr)||{}; const rows=Object.keys(pr).map(id=>{ const r=pr[id], nm=r.n||(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):(r.hold>0?`${r.hold}s hold`:`${r.reps||0} reps`); return {date:r.date||"", html:`<div class="kv"><span class="k">${nm}</span><span class="v">${val}</span></div>`}; }); historyModal("Personal Records", rows); }
+function histPRs(){ const pr=(S.records&&S.records.pr)||{}; const rows=Object.keys(pr).map(id=>{ const r=pr[id], nm=r.n||(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):(r.hold>0?`${r.hold}s hold`:`${r.reps||0} reps`); return {date:r.date||"", html:`<div class="kv"><span class="k">${esc(nm)}</span><span class="v">${val}</span></div>`}; }); historyModal("Personal Records", rows); }
 /* ---- personal work on a Gate ---- */
 function addCustomWork(){ if(!sessionDraft) return; const el=document.getElementById("customwork"); if(!el) return; const v=(el.value||"").trim(); if(!v){ toast("Type a workout first"); return; } sessionDraft.custom=sessionDraft.custom||[]; sessionDraft.custom.push(v); S.draft=sessionDraft; save(); renderTrain(); toast("Added to today's Gate"); }
 function rmCustomWork(i){ if(!sessionDraft||!sessionDraft.custom) return; sessionDraft.custom.splice(i,1); S.draft=sessionDraft; save(); renderTrain(); }
@@ -1705,10 +1751,11 @@ function renderStatus(){
     </div>
 
     <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>This Week</div>
-      <div class="weekstrip">${days.map(d=>`<div class="daycell ${d.trained?'done':''} ${d.missed?'missed':''} ${d.today?'today':''}" onclick="openDayDetail('${d.date}')"><div class="dn">${d.dow}</div><div class="dd">${d.trained?'✓':(d.missed?'✕':'')}</div></div>`).join("")}</div>
+      <div class="panel-title"><span class="tri"></span>This Week<span class="sub" style="cursor:pointer" onclick="excuseWeek()">EXCUSE WEEK \u25b8</span></div>
+      <div class="weekstrip">${days.map(d=>`<div class="daycell ${d.trained?'done':''} ${d.missed?'missed':''} ${d.excused?'exc':''} ${d.today?'today':''}" onclick="openDayDetail('${d.date}')"><div class="dn">${d.dow}</div><div class="dd">${d.trained?'\u2713':(d.excused?'\u2298':(d.missed?'\u2715':''))}</div></div>`).join("")}</div>
     </div>
 
+    ${recoveryBodyHTML()}
     <div class="panel">
       <div class="panel-title"><span class="tri"></span>Attributes<span class="sub">${S.rpg.statPoints||0} SP TO SPEND</span></div>
       <div class="stats">${["STR","AGI","VIT","SEN","INT"].map(k=>statArrowCell(k,eff[k])).join("")}</div>
@@ -1761,10 +1808,10 @@ function todayCard(){
     <button class="btn full mt" onclick="go('train')">Enter the Boss Gate</button>`; }
   const w=todaysWorkout();
   if(w.rest) return `<p class="lead">Scheduled <b class="gr">recovery day</b> · Arc ${w.arc.n} · <span class="hi">${w.dir.phase}</span> week. Recovery is when you grow.</p>
-    <div class="directive ${w.dir.deload?'deload':''}"><span class="pip"></span>${w.dir.note}</div>
+    <div class="directive ${w.dir.deload?'deload':''}"><span class="pip"></span>${w.dir.note}</div>${effortFocusHTML()}
     <button class="btn full mt" onclick="go('quests')">Open Daily Quest</button>`;
   return `<p class="lead"><b class="hi">${w.day.name}</b> · ${w.exercises.length} movements · Arc ${w.arc.n} · <span class="am">${w.dir.phase}</span></p>
-    <div class="directive ${w.dir.deload?'deload':''}"><span class="pip"></span>${w.dir.note}</div>
+    <div class="directive ${w.dir.deload?'deload':''}"><span class="pip"></span>${w.dir.note}</div>${effortFocusHTML()}
     <button class="btn full mt" onclick="go('train')">Enter Today's Gate</button>`;
 }
 
@@ -1997,7 +2044,7 @@ function trackFor(id){ const cat=(EX[id]&&EX[id].cat)||"default"; const arr=TRAC
 /* ---- video resolution + YouTube-app deep link (D3 / F2 override) ---- */
 function parseYouTubeId(u){ if(!u) return ""; const m=String(u).match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/); if(m) return m[1]; return /^[\w-]{11}$/.test(String(u))?String(u):""; }
 function videoFor(id){ const ov=(S.settings.videoOverrides||{})[id]; const cd=(typeof CDBYID!=="undefined")?CDBYID[id]:null; const search=(EX[id]&&EX[id].yt)||(cd&&cd.yt)||id;
-  if(ov){ const vid=parseYouTubeId(ov), short=/shorts\//i.test(String(ov)); return {vid:vid||"", url:(!vid?ov:""), search, short}; }
+  if(ov){ const vid=parseYouTubeId(ov), short=/shorts\//i.test(String(ov)); const _u=String(ov).trim(); const safe=(!vid&&/^https?:\/\//i.test(_u))?_u:""; return {vid:vid||"", url:safe, search, short}; }
   return {vid:EMBED[id]||(cd&&cd.v)||"", url:"", search, short:false}; }
 function openYT(id){ const v=videoFor(id);
   const app=v.vid?("vnd.youtube://"+v.vid):("vnd.youtube://results?search_query="+encodeURIComponent(v.search));
@@ -2112,6 +2159,7 @@ function renderTrain(){
     ${sessionDraft.boss?`<div class="bossbanner"><div class="bt">⚔ BOSS GATE</div>
       <p class="lead tiny" style="margin-top:6px">An intense HIIT trial. Recommended level <b class="am">${sessionDraft.rec}</b> — you're Level <b>${lv}</b>.
       ${lv<sessionDraft.rec?` <span class="hi">Beat it under-level for +50% EXP and bonus ability points.</span>`:` Clear it to bank the reward.`}</p></div>`:""}
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Muscle Map<span class="sub">TARGETS</span></div>${bodyDiagramSmart(sessionDraft.ex.map(e=>e.id))}</div>
     <div class="panel"${sessionDraft.boss?' style="margin-top:10px"':''}>
       <div class="panel-title"><span class="tri"></span>${sessionDraft.boss?'Boss Gate':(sessionDraft.forced?'Optional Session':"Today's Gate")}<span class="sub">${sessionDraft.dayKey}</span></div>
       <div class="name mono" style="font-size:16px;color:var(--text-hi)">${sessionDraft.name}</div>
@@ -2125,7 +2173,6 @@ function renderTrain(){
       <p class="lead tiny">Prime before the Gate — raise temperature, mobilize joints, wake the muscles you’re about to load. Tap a move for a demo.</p>
       ${WARMUP.map(w=>`<div class="cdrow" onclick="warmupVideo('${w.id}')"><div class="cdi"><div class="ql">${w.n}</div><div class="muted tiny" style="margin-top:2px">${w.cue}</div></div><button class="cdtimer" type="button" onclick="event.stopPropagation();startRest(${w.sec},'Warm-up')">▷ ${w.sec}s</button></div>`).join("")}
     </div>
-    <div class="panel"><div class="panel-title"><span class="tri"></span>Muscle Map<span class="sub">TARGETS</span></div>${bodyDiagram(sessionDraft.ex.map(e=>e.id))}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Personal Work<span class="sub">FREESTYLE</span></div>
       <p class="lead tiny">Log anything extra you do today — planche holds, burpees, sprints. It's saved with this Gate's record.</p>
       <div class="row" style="gap:8px;align-items:stretch"><input id="customwork" type="text" placeholder="e.g. 3× planche 15s, 50 burpees" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomWork();}"><button class="btn" style="width:auto;padding:0 18px" onclick="addCustomWork()">Add</button></div>
@@ -2167,7 +2214,7 @@ function holdSecs(r){ r=String(r||""); const m=r.match(/(\d+)\s*(?:–|-)?\s*(\d
 function exercisePage(e,idx){
   const x=EX[e.id], tag=x.stat.toLowerCase(), lastBest=lastBestFor(e.id), mac=machineFor(e.id), trk=trackFor(e.id), vid=videoFor(e.id), sv=effStats()[x.stat]||10;
   const stepFor=k=>k==="weight"?5:(k==="rpe"?0.5:1);
-  const field=(si,k,val)=>`<div class="stp"><input id="set_${idx}_${si}_${k}" inputmode="${k==='reps'?'numeric':'decimal'}" value="${val||""}" placeholder="–" oninput="setVal(${idx},${si},'${k}',this.value)"><div class="stp-btns"><button type="button" aria-label="decrease" onclick="stepField(${idx},${si},'${k}',-${stepFor(k)})">▾</button><button type="button" aria-label="increase" onclick="stepField(${idx},${si},'${k}',${stepFor(k)})">▴</button></div></div>`;
+  const field=(si,k,val)=>`<div class="stp"><input id="set_${idx}_${si}_${k}" inputmode="${k==='reps'?'numeric':'decimal'}" value="${esc(val||"")}" placeholder="–" oninput="setVal(${idx},${si},'${k}',this.value)"><div class="stp-btns"><button type="button" aria-label="decrease" onclick="stepField(${idx},${si},'${k}',-${stepFor(k)})">▾</button><button type="button" aria-label="increase" onclick="stepField(${idx},${si},'${k}',${stepFor(k)})">▴</button></div></div>`;
   const embed = vid.vid
     ? `<div class="exvid${vid.short?' short':''}"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${vid.vid}?rel=0&modestbranding=1" allow="accelerometer;encrypted-media;gyroscope;picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`
     : `<div class="exvid"><div class="vph" onclick="openYT('${e.id}')"><span class="play"></span>Tap to find a form demo</div></div>`;
@@ -2316,6 +2363,7 @@ function renderStats(){
       </div>
       <label class="fld"><span>Override goal mode</span>
         <button class="selbtn" type="button" onclick="pickSetting('goal')">${selLabel('goal')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Physique focus</span><button class="selbtn" type="button" onclick="pickSetting('focus')">${selLabel('focus')}<span class="caret">▾</span></button></label>
     </div>
 
     <div class="panel">
@@ -2364,6 +2412,7 @@ function ring(have,target,label,color,centerTxt,subTxt){
     <div class="rlab">${label}</div></div>`;
 }
 function setGoal(v){ S.nutrition.goalOverride=v||null; save(); renderStats(); renderStatus(); decorPanels(); }
+function setFocus(v){ S.settings.focus=v||""; save(); }
 function logNutrition(){
   const cal=+document.getElementById("n_cal").value||0, pro=+document.getElementById("n_pro").value||0;
   if(!cal&&!pro){ toast("Enter calories or protein"); return; }
@@ -2472,6 +2521,7 @@ function renderSystem(){
     <div class="panel"><div class="panel-title"><span class="tri"></span>Data — Backup &amp; Restore<span class="sub">REDUNDANCY</span></div>
       <p class="lead tiny">Progress auto-saves on this device. Export a backup so a cleared cache can't wipe your climb.</p>
       <div class="grid2"><button class="btn" onclick="exportData()">Export backup</button><button class="btn" onclick="document.getElementById('importfile').click()">Import backup</button></div>
+      <button class="btn ghost full mt" onclick="restartProgram()">Restart program \u2014 keep all data</button>
       ${!storageOK?`<div class="banner">This preview can't auto-save. On your phone it will. <b>Export regularly.</b></div>`:""}
       <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button></div>
     <div class="panel flat"><div class="panel-title"><span class="tri"></span>About<span class="sub">SYSTEM GUIDE</span></div>
@@ -2649,6 +2699,7 @@ document.getElementById("importfile").addEventListener("change",function(ev){
   };
   r.readAsText(f);
 });
+async function restartProgram(){ const ok=await sysConfirm("RESTART PROGRAM","Set Week 1 to begin today. All sessions, records, weight and nutrition history are kept.","Restart"); if(!ok) return; S.program.startDate=todayStr(); S.program.seq=0; save(); toast("Program restarted \u2014 Week 1 begins today"); render(); decorPanels(); }
 async function resetAll(){
   const ok=await sysConfirm("RESET ALL PROGRESS","This permanently erases your level, sessions, stats and history on this device. This cannot be undone. Export a backup first if unsure.","Erase everything","warn");
   if(!ok) return;
@@ -2791,9 +2842,45 @@ function missedListRecent(daysBack){ const end=todayStr(new Date(Date.now()-8640
   const miss=scheduledDatesBetween(start,end).filter(dt=>!S.sessions.some(s=>s.date===dt&&!s.forced)&&!(S.skips||[]).includes(dt)&&!(S.excused||[]).some(e=>e.date===dt)).slice(-8);
   if(!miss.length) return ""; return `<div class="mt">${miss.map(dt=>`<div class="kv"><span class="k">${DAYNAMES[new Date(dt+"T00:00:00").getDay()]} · ${dt.slice(5)}</span><span class="v cr">missed</span></div>`).join("")}</div>`; }
 function openDayDetail(date){ const ses=workoutsOn(date), dow=DAYNAMES[new Date(date+"T00:00:00").getDay()];
-  const body = ses.length ? ses.map(s=>`<div class="drow"><div class="dk">${s.boss?'BOSS':s.dayKey||'GATE'}</div><div class="dv"><b>${s.name}</b><br>${s.setsDone} sets · +${s.exp} EXP<br><span class="muted tiny">${(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||e.id; const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return nm+(top.w?` ${top.w}×${top.reps}`:` ×${top.reps||e.sets.length}`); }).join(" · ")||"—"}</span></div></div>`).join("")
-    : `<p class="lead tiny center">No Gate cleared on this day.${(S.profile&&S.profile.days.includes(new Date(date+"T00:00:00").getDay())&&date<todayStr())?' <span class="cr">Missed.</span>':''}</p>`;
-  detail("[ LOG ]",`${dow} · ${date.slice(5)}`,body); }
+  const exc=(S.excused||[]).find(e=>e.date===date);
+  const sched=S.profile&&S.profile.days.includes(new Date(date+"T00:00:00").getDay());
+  const past=date<=todayStr()&&(!S.program||date>=S.program.startDate);
+  const body = ses.length ? ses.map(s=>`<div class="drow"><div class="dk">${s.boss?'BOSS':s.dayKey||'GATE'}</div><div class="dv"><b>${s.name}</b><br>${s.setsDone} sets · +${s.exp} EXP<br><span class="muted tiny">${(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||esc(e.id); const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return nm+(top.w?` ${top.w}×${top.reps}`:` ×${top.reps||e.sets.length}`); }).join(" · ")||"—"}</span></div></div>`).join("")
+    : exc ? `<p class="lead tiny center">Logged as <b class="am">${esc(exc.reason)}</b> — <span class="gr">streak kept</span>. Not a missed day.</p>`
+    : `<p class="lead tiny center">No Gate cleared on this day.${(sched&&date<todayStr())?' <span class="cr">Missed.</span>':''}</p>`;
+  const acts=[];
+  if(!ses.length&&past&&sched){
+    if(exc) acts.push({label:"Remove excuse",kind:"ghost",onClick:()=>{ S.excused=(S.excused||[]).filter(e=>e.date!==date); save(); hideOverlay(()=>{ renderStatus(); decorPanels(); if(typeof renderTrain==="function")renderTrain(); }); toast("Excuse removed"); }});
+    else acts.push({label:"Mark excused \u2014 log a reason",onClick:()=>{ hideOverlay(()=>excuseDate(date)); }});
+  }
+  acts.push({label:"Close",kind:"ghost",onClick:()=>hideOverlay()});
+  detail("[ LOG ]",`${dow} · ${date.slice(5)}`,body,acts); }
+async function pickExcuseReason(msg){
+  const opts=[{value:"Injured",label:"Injured"},{value:"Over-exhausted",label:"Over-exhausted"},{value:"DOMS / too sore",label:"DOMS / too sore"},{value:"Illness",label:"Illness"},{value:"Work week",label:"Work week"},{value:"Travel",label:"Travel"},{value:"Life / time",label:"Life / time"},{value:"__other",label:"Other (type a reason)"}];
+  let r=await sysSelect("Log a reason",msg,opts,null);
+  if(r===null) return null;
+  if(r==="__other"){ r=await sysPrompt({big:"Reason",msg:"What kept you out of the Gate?",value:"",placeholder:"e.g. tendonitis flare-up"}); if(r===null||!String(r).trim()) return null; }
+  return String(r).trim().slice(0,80); }
+async function excuseDate(date){
+  const reason=await pickExcuseReason("This day will count as handled \u2014 not missed. Streak protected.");
+  if(reason===null) return;
+  S.excused=S.excused||[]; const ex=S.excused.find(e=>e.date===date);
+  if(ex) ex.reason=reason; else S.excused.push({date,reason});
+  S.skips=(S.skips||[]).filter(d=>d!==date);
+  if(date===todayStr()&&S.draft&&S.draft.date===date){ S.draft=null; sessionDraft=null; }
+  save(); toast("Day excused \u2014 streak protected"); renderStatus(); decorPanels(); if(typeof renderTrain==="function")renderTrain(); }
+async function excuseWeek(){
+  const reason=await pickExcuseReason("Excuse the next 7 days\u2019 scheduled Gates in one move. Trained or already-excused days are untouched.");
+  if(reason===null) return;
+  S.excused=S.excused||[]; let n=0;
+  for(let i=0;i<7;i++){ const d=new Date(Date.now()+86400000*i), dt=todayStr(d);
+    if(!S.profile.days.includes(d.getDay())) continue;
+    if(workoutsOn(dt).length) continue;
+    if(S.excused.some(e=>e.date===dt)) continue;
+    S.excused.push({date:dt,reason}); n++; }
+  if(S.draft&&S.excused.some(e=>e.date===S.draft.date)){ S.draft=null; sessionDraft=null; }
+  save(); toast(n?`Week excused \u2014 ${n} day${n>1?"s":""} protected`:"Nothing to excuse this week");
+  renderStatus(); decorPanels(); if(typeof renderTrain==="function")renderTrain(); }
 function toggleTitle(id){ const t=S.rpg.titles=S.rpg.titles||{owned:[],equipped:[]}; if(!t.owned.includes(id)) return;
   const i=t.equipped.indexOf(id); if(i>=0) t.equipped.splice(i,1); else { if(t.equipped.length>=MAX_TITLES){ toast(`Max ${MAX_TITLES} titles equipped`); return; } t.equipped.push(id); }
   save(); if(typeof playSfx==="function")playSfx("tap"); openProfile(); if(typeof renderStatus==="function"){ renderStatus(); decorPanels(); } }
@@ -2814,7 +2901,7 @@ function openProfile(){
   const attrHTML=["STR","AGI","VIT","SEN","INT"].map(k=>{ const d=eff[k]-base[k]; const mm=d>0?`<div class="mm up">+${d}</div>`:(d<0?`<div class="mm dn">${d}</div>`:`<div class="mm"></div>`);
     return `<div class="prcell"><div class="k">${k}</div><div class="v">${eff[k]}</div>${mm}</div>`; }).join("");
   const pr=(S.records&&S.records.pr)||{}, prKeys=Object.keys(pr).sort((a,b)=>(pr[b].e1rm||0)-(pr[a].e1rm||0));
-  const prHTML=(prKeys.length?prKeys.slice(0,7).map(id=>{ const r=pr[id], nm=r.n||(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):(r.hold>0?`${r.hold}s hold`:`${r.reps||0} reps`); return `<div class="kv"><span class="k">${nm}</span><span class="v">${val}</span></div>`; }).join(""):`<p class="lead tiny">Log sets in the Gate to set personal records.</p>`)+(prKeys.length>7?`<button class="btn ghost full mt" onclick="histPRs()">View full history (${prKeys.length})</button>`:"");
+  const prHTML=(prKeys.length?prKeys.slice(0,7).map(id=>{ const r=pr[id], nm=r.n||(EX[id]&&EX[id].n)||id; const val=r.w>0?`${r.w} ${unitW()} × ${r.reps}`+(r.e1rm?` · e1RM ${r.e1rm}`:""):(r.hold>0?`${r.hold}s hold`:`${r.reps||0} reps`); return `<div class="kv"><span class="k">${esc(nm)}</span><span class="v">${val}</span></div>`; }).join(""):`<p class="lead tiny">Log sets in the Gate to set personal records.</p>`)+(prKeys.length>7?`<button class="btn ghost full mt" onclick="histPRs()">View full history (${prKeys.length})</button>`:"");
   const expW=expByDayWeek(), expSpark=barMini(expW.map(e=>e.val));
   const cals=caloriesByDayWeek(), calHTML=cals.map(c=>`<div class="kv"><span class="k">${c.label} · ${c.date.slice(5)}</span><span class="v">${c.cal?c.cal+' kcal · '+c.pro+'g P':'—'}</span></div>`).join("");
   const missed=missedCount(28), missList=missedListRecent(28);
@@ -2914,8 +3001,7 @@ function openArcDetail(){
 }
 
 /* ============================================================ INIT ========================================================= */
-try{ startApp(); }catch(e){ try{ document.getElementById("onboard").style.display="block"; }catch(_){} }
-bootSequence();
+window.addEventListener("DOMContentLoaded",function(){ try{ startApp(); }catch(e){ console.error(e); try{ document.getElementById("onboard").style.display="block"; }catch(_){} } bootSequence(); });
 
 /* service worker (hosted only; harmless if absent) */
 if("serviceWorker" in navigator && location.protocol!=="file:"){
@@ -2959,5 +3045,131 @@ if("serviceWorker" in navigator && location.protocol!=="file:"){
 })();
 </script>
 
+<script>
+"use strict";
+/* ================= 3D MUSCLE MAP (hand-rolled WebGL, zero deps) ================= */
+function glOK(){ try{ const c=document.createElement("canvas"); return !!(c.getContext("webgl")||c.getContext("experimental-webgl")); }catch(e){ return false; } }
+const REC_P=48, REC_S=36; /* hours to recover a primary / secondary hit */
+function muscleRecovery(){
+  const lastP={}, lastS={};
+  (S.sessions||[]).forEach(s=>{ (s.ex||[]).forEach(e=>{ const m=MUS[e.id]; if(!m) return;
+    (m.p||[]).forEach(x=>{ if(!lastP[x]||s.date>lastP[x]) lastP[x]=s.date; });
+    (m.s||[]).forEach(x=>{ if(!lastS[x]||s.date>lastS[x]) lastS[x]=s.date; }); }); });
+  const hrs=d=>(Date.now()-new Date(d+"T12:00:00").getTime())/3600000;
+  const rec=new Set(), dim=new Set();
+  Object.keys(MUS_NAMES).forEach(m=>{
+    let need=0, left=0;
+    if(lastP[m]!=null){ const r=REC_P-hrs(lastP[m]); if(r>left){ left=r; need=REC_P; } }
+    if(lastS[m]!=null){ const r=REC_S-hrs(lastS[m]); if(r>left){ left=r; need=REC_S; } }
+    if(left<=0) return;
+    if(left/need<0.34) dim.add(m); else rec.add(m); });
+  const last=(S.sessions&&S.sessions.length)?S.sessions[S.sessions.length-1]:null;
+  return {rec,dim,last};
+}
+function recoveryBodyHTML(){
+  if(!glOK()) return "";
+  const {rec,dim,last}=muscleRecovery();
+  setTimeout(()=>init3DBody(rec,dim,"body3ds"),0);
+  const lastLine=last?`<div class="kv"><span class="k">Last Gate</span><span class="v">${esc(last.name)}${last.boss?" \u00b7 BOSS":""} \u00b7 ${last.date.slice(5)} \u00b7 ${last.setsDone} sets</span></div>`:`<p class="lead tiny">No Gates cleared yet \u2014 everything reads ready.</p>`;
+  const state=rec.size?`<span class="cr">${rec.size} recovering</span>`:`<span class="gr">all systems ready</span>`;
+  return `<div class="panel flat"><div class="panel-title"><span class="tri"></span>Recovery Map<span class="sub">${rec.size+dim.size?rec.size+dim.size+" HEALING":"READY"}</span></div>
+    ${lastLine}
+    <div class="b3dwrap"><canvas id="body3ds"></canvas><span class="b3dhint">DRAG \u25b8 ROTATE</span></div>
+    <p class="b3dkey"><b class="pk">\u25a0 Pulsing</b> = recovering \u00b7 <b class="sk">\u25a0 Dim</b> = nearly ready \u00b7 dark = ready to train \u00b7 ${state}</p>
+  </div>`;
+}
+function bodyDiagramSmart(ids){
+  if(!glOK()) return bodyDiagram(ids);
+  const {p,s}=musclesFor(ids), all=[...p,...s];
+  const legend=all.length?`<div class="muslegend">${[...p].map(m=>`<span class="mustag">${MUS_NAMES[m]||m}</span>`).join("")}${[...s].map(m=>`<span class="mustag sec">${MUS_NAMES[m]||m}</span>`).join("")}</div>`:"";
+  setTimeout(()=>init3DBody(p,s,"body3d"),0);
+  return `<div class="b3dwrap"><canvas id="body3d"></canvas><span class="b3dhint">DRAG \u25b8 ROTATE</span></div><p class="b3dkey"><b class="pk">\u25a0 Pulsing</b> = primary targets \u00b7 <b class="sk">\u25a0 Dim glow</b> = secondary/assisting \u00b7 dark = not worked today.</p>${legend}`;
+}
+/* geometry: low-poly humanoid mesh (user-provided FBX, parsed + auto-segmented) */
+const BMESH={"v":[0.112,1.059,0.066,0.109,1.235,0.086,0.159,1.087,-0.008,0.154,1.235,0.016,0.112,1.048,-0.083,0.109,1.235,-0.069,0.135,1.346,0.155,0.187,1.333,0.055,0.135,1.346,-0.056,0.124,1.434,0.16,0.145,1.434,-0.039,0.102,1.525,0.131,0.155,1.543,0.067,0.102,1.524,0.004,0.055,1.603,0.08,0.078,1.588,0.04,0.055,1.574,-0.001,0.032,0.864,0.116,0.03,0.861,-0.048,0.072,0.932,0.121,0.06,0.94,-0.081,0.015,0.843,-0.002,0.127,0.948,-0.079,0.176,0.978,0.007,0.148,0.953,0.089,0.036,0.847,-0.048,0.089,0.905,-0.081,0.038,0.841,0.105,0.011,0.821,0.008,0.101,0.882,0.095,0.197,0.371,0.115,0.15,0.371,0.135,0.173,0.1,0.125,0.136,0.513,0.095,0.198,0.102,0.112,0.175,0.514,0.076,0.209,0.105,0.079,0.191,0.51,0.03,0.2,0.108,0.045,0.175,0.505,-0.016,0.176,0.109,0.031,0.136,0.5,-0.035,0.151,0.108,0.044,0.097,0.5,-0.016,0.139,0.105,0.077,0.081,0.504,0.031,0.149,0.102,0.111,0.097,0.509,0.077,0.216,0.362,0.068,0.197,0.351,0.021,0.15,0.343,0.002,0.104,0.344,0.021,0.085,0.353,0.069,0.104,0.364,0.116,0.191,0.192,0.107,0.201,0.193,0.074,0.191,0.192,0.04,0.167,0.19,0.027,0.143,0.188,0.04,0.132,0.188,0.074,0.167,0.19,0.121,0.143,0.188,0.107,0.107,0.478,0.085,0.093,0.455,0.046,0.142,0.488,0.1,0.107,0.434,0.007,0.142,0.427,-0.011,0.178,0.438,0.004,0.192,0.461,0.043,0.178,0.482,0.083,0.128,0.55,0.094,0.169,0.555,0.074,0.185,0.561,0.026,0.169,0.565,-0.022,0.128,0.565,-0.043,0.088,0.56,-0.023,0.071,0.554,0.025,0.088,0.55,0.073,0.133,0.674,0.113,0.187,0.694,0.086,0.209,0.707,0.02,0.184,0.707,-0.047,0.128,0.694,-0.075,0.073,0.675,-0.048,0.052,0.662,0.019,0.076,0.662,0.085,0.11,0.813,0.108,0.173,0.837,0.081,0.198,0.853,0.014,0.169,0.854,-0.053,0.104,0.837,-0.082,0.04,0.814,-0.054,0.013,0.795,0.013,0.044,0.797,0.08,0.409,1.215,0.1,0.383,1.185,0.115,0.496,1.013,-0.039,0.348,1.232,0.143,0.512,1.023,-0.045,0.377,1.257,0.125,0.518,1.034,-0.065,0.389,1.268,0.082,0.512,1.041,-0.089,0.377,1.257,0.039,0.496,1.038,-0.097,0.348,1.232,0.021,0.48,1.028,-0.091,0.319,1.206,0.039,0.474,1.016,-0.071,0.307,1.196,0.082,0.48,1.01,-0.05,0.319,1.206,0.125,0.42,1.23,0.059,0.409,1.221,0.016,0.383,1.194,-0.003,0.356,1.164,0.011,0.345,1.149,0.052,0.356,1.158,0.095,0.476,1.083,0.005,0.483,1.099,-0.016,0.476,1.105,-0.041,0.459,1.098,-0.053,0.442,1.082,-0.047,0.435,1.066,-0.026,0.459,1.067,0.012,0.442,1.06,-0.001,0.246,1.37,0.158,0.28,1.392,0.137,0.294,1.4,0.088,0.28,1.392,0.039,0.246,1.37,0.018,0.211,1.353,0.01,0.197,1.34,0.072,0.201,1.345,0.124,0.314,1.336,0.133,0.327,1.346,0.089,0.255,1.289,0.045,0.243,1.279,0.089,0.285,1.312,0.151,0.314,1.336,0.045,0.255,1.289,0.133,0.285,1.312,0.026,0.367,1.289,0.09,0.289,1.223,0.09,0.355,1.28,0.051,0.301,1.232,0.13,0.328,1.256,0.034,0.355,1.28,0.13,0.301,1.232,0.051,0.328,1.256,0.146,0.333,1.188,0.114,0.321,1.178,0.071,0.361,1.214,0.132,0.333,1.19,0.028,0.361,1.217,0.012,0.389,1.244,0.03,0.401,1.253,0.073,0.389,1.241,0.115,0.268,1.447,0.083,0.238,1.446,0.139,0.238,1.446,0.021,0.235,1.508,0.076,0.217,1.496,0.129,0.217,1.492,0.024,0.193,1.438,0.153,0.178,1.503,0.135,0.195,1.525,0.07,0.193,1.439,-0.011,0.178,1.501,0.007,0.175,1.334,0.004,0.168,1.278,0.032,0.154,1.285,-0.012,0.168,1.332,0.096,0.154,1.284,0.066,0.19,1.387,-0.016,0.184,1.379,0.142,0.177,0.0,0.137,0.22,0.001,0.125,0.236,0.001,0.085,0.233,0.001,0.043,0.191,0.001,0.02,0.144,0.001,0.032,0.131,0.001,0.072,0.137,0.001,0.115,0.236,0.021,-0.114,0.191,0.034,-0.135,0.143,0.033,-0.14,0.244,0.0,-0.116,0.193,0.001,-0.139,0.136,0.001,-0.145,0.185,0.058,-0.01,0.226,0.046,0.003,0.237,0.001,0.0,0.191,0.001,-0.013,0.144,0.001,-0.025,0.151,0.057,-0.019,0.222,0.042,0.051,0.145,0.042,0.042,0.214,0.038,0.131,0.173,0.036,0.142,0.223,0.045,0.086,0.135,0.045,0.076,0.135,0.038,0.122,0.192,0.017,-0.144,0.246,0.01,-0.122,0.133,0.016,-0.149,0.234,0.021,0.003,0.145,0.027,-0.02,0.188,0.046,-0.073,0.248,0.0,-0.058,0.133,0.001,-0.085,0.236,0.034,-0.056,0.192,0.001,-0.076,0.141,0.045,-0.08,0.247,0.016,-0.059,0.132,0.021,-0.085,0.05,1.667,0.072,0.07,1.642,0.026,0.05,1.618,-0.019,0.052,1.713,0.086,0.074,1.676,0.016,0.052,1.64,-0.053,0.056,1.789,0.077,0.079,1.756,0.005,0.056,1.723,-0.067,0.055,1.831,0.057,0.078,1.81,-0.003,0.055,1.789,-0.063,0.04,1.852,0.033,0.057,1.844,-0.006,0.04,1.837,-0.045,0.018,1.856,0.018,0.026,1.855,0.004,0.018,1.854,-0.009,0.515,0.937,-0.16,0.5,1.029,-0.113,0.519,0.911,-0.064,0.497,0.995,-0.041,0.537,0.94,-0.16,0.523,1.027,-0.109,0.541,0.914,-0.064,0.518,0.998,-0.043,0.512,0.954,-0.156,0.503,0.946,-0.053,0.531,0.95,-0.053,0.531,0.985,-0.138,0.476,1.005,-0.098,0.481,1.0,-0.081,0.482,0.995,-0.064,0.526,1.007,-0.06,0.529,1.015,-0.076,0.528,1.024,-0.096,0.535,0.959,-0.075,0.538,0.968,-0.095,0.536,0.977,-0.117,0.487,0.962,-0.121,0.499,0.962,-0.095,0.493,0.953,-0.075,0.52,0.893,-0.154,0.518,0.899,-0.176,0.54,0.897,-0.177,0.542,0.892,-0.156,0.516,0.861,-0.165,0.514,0.865,-0.181,0.529,0.859,-0.185,0.531,0.855,-0.169,0.513,0.841,-0.173,0.511,0.844,-0.185,0.522,0.84,-0.187,0.523,0.837,-0.176,0.52,0.921,-0.136,0.52,0.922,-0.14,0.514,0.93,-0.136,0.537,0.925,-0.14,0.537,0.924,-0.136,0.542,0.934,-0.136,0.519,0.913,-0.109,0.519,0.914,-0.113,0.515,0.924,-0.107,0.54,0.917,-0.113,0.54,0.917,-0.109,0.542,0.929,-0.107,0.519,0.912,-0.083,0.519,0.912,-0.086,0.515,0.923,-0.082,0.54,0.916,-0.086,0.54,0.915,-0.083,0.539,0.927,-0.082,0.514,0.878,-0.149,0.535,0.875,-0.15,0.536,0.869,-0.129,0.514,0.872,-0.127,0.498,0.854,-0.153,0.512,0.842,-0.158,0.515,0.838,-0.139,0.501,0.85,-0.134,0.483,0.844,-0.155,0.487,0.828,-0.16,0.489,0.822,-0.143,0.485,0.838,-0.137,0.51,0.885,-0.114,0.525,0.876,-0.118,0.526,0.871,-0.1,0.511,0.881,-0.096,0.495,0.871,-0.117,0.505,0.859,-0.121,0.506,0.856,-0.105,0.496,0.868,-0.101,0.482,0.862,-0.119,0.483,0.849,-0.122,0.485,0.847,-0.108,0.484,0.86,-0.105,0.52,0.879,-0.074,0.506,0.891,-0.072,0.509,0.896,-0.084,0.523,0.884,-0.087,0.496,0.871,-0.078,0.491,0.885,-0.075,0.493,0.888,-0.087,0.498,0.874,-0.09,0.476,0.872,-0.078,0.477,0.887,-0.075,0.477,0.889,-0.087,0.476,0.874,-0.09,0.514,0.944,-0.156,0.514,0.921,-0.061,0.538,0.924,-0.061,0.535,0.95,-0.155,0.455,0.946,-0.177,0.476,0.94,-0.181,0.477,0.932,-0.164,0.456,0.939,-0.16,0.45,0.921,-0.185,0.466,0.916,-0.19,0.467,0.91,-0.177,0.451,0.916,-0.172,0.465,0.979,-0.161,0.488,0.966,-0.168,0.485,0.957,-0.147,0.467,0.97,-0.14,0.483,1.007,-0.137,0.507,0.976,-0.155,0.481,0.964,-0.127,0.468,0.992,-0.109,0.476,0.936,-0.174,0.456,0.943,-0.169,0.467,0.913,-0.183,0.45,0.919,-0.179,0.489,0.961,-0.162,0.466,0.974,-0.151,0.501,0.964,-0.154,0.471,1.003,-0.121,0.523,0.982,-0.147,0.508,0.963,-0.155,0.507,1.022,-0.125,0.486,1.016,-0.112,0.0,1.058,0.103,0.0,1.235,0.118,-0.112,1.059,0.066,-0.109,1.235,0.086,-0.159,1.087,-0.008,-0.154,1.235,0.016,-0.112,1.048,-0.083,-0.109,1.235,-0.069,0.0,1.021,-0.114,0.0,1.235,-0.101,0.0,1.346,0.176,-0.135,1.346,0.155,-0.187,1.333,0.055,-0.135,1.346,-0.056,0.0,1.346,-0.096,0.0,1.447,0.19,-0.124,1.434,0.16,-0.145,1.434,-0.039,0.0,1.433,-0.07,0.0,1.53,0.154,-0.102,1.525,0.131,-0.155,1.543,0.067,-0.102,1.524,0.004,0.0,1.498,-0.023,0.0,1.608,0.097,-0.055,1.603,0.08,-0.078,1.588,0.04,-0.055,1.574,-0.001,0.0,1.568,-0.018,0.0,0.872,0.122,-0.032,0.864,0.116,-0.03,0.861,-0.048,0.0,0.856,-0.079,-0.072,0.932,0.121,0.0,0.94,0.141,0.0,0.939,-0.106,-0.06,0.94,-0.081,-0.015,0.843,-0.002,0.0,0.846,-0.002,-0.127,0.948,-0.079,-0.176,0.978,0.007,-0.148,0.953,0.089,-0.036,0.847,-0.048,-0.089,0.905,-0.081,-0.038,0.841,0.105,-0.011,0.821,0.008,-0.101,0.882,0.095,-0.197,0.371,0.115,-0.15,0.371,0.135,-0.173,0.1,0.125,-0.136,0.513,0.095,-0.198,0.102,0.112,-0.175,0.514,0.076,-0.209,0.105,0.079,-0.191,0.51,0.03,-0.2,0.108,0.045,-0.175,0.505,-0.016,-0.176,0.109,0.031,-0.136,0.5,-0.035,-0.151,0.108,0.044,-0.097,0.5,-0.016,-0.139,0.105,0.077,-0.081,0.504,0.031,-0.149,0.102,0.111,-0.097,0.509,0.077,-0.216,0.362,0.068,-0.197,0.351,0.021,-0.15,0.343,0.002,-0.104,0.344,0.021,-0.085,0.353,0.069,-0.104,0.364,0.116,-0.191,0.192,0.107,-0.201,0.193,0.074,-0.191,0.192,0.04,-0.167,0.19,0.027,-0.143,0.188,0.04,-0.132,0.188,0.074,-0.167,0.19,0.121,-0.143,0.188,0.107,-0.107,0.478,0.085,-0.093,0.455,0.046,-0.142,0.488,0.1,-0.107,0.434,0.007,-0.142,0.427,-0.011,-0.178,0.438,0.004,-0.192,0.461,0.043,-0.178,0.482,0.083,-0.128,0.55,0.094,-0.169,0.555,0.074,-0.185,0.561,0.026,-0.169,0.565,-0.022,-0.128,0.565,-0.043,-0.088,0.56,-0.023,-0.071,0.554,0.025,-0.088,0.55,0.073,-0.133,0.674,0.113,-0.187,0.694,0.086,-0.209,0.707,0.02,-0.184,0.707,-0.047,-0.128,0.694,-0.075,-0.073,0.675,-0.048,-0.052,0.662,0.019,-0.076,0.662,0.085,-0.11,0.813,0.108,-0.173,0.837,0.081,-0.198,0.853,0.014,-0.169,0.854,-0.053,-0.104,0.837,-0.082,-0.04,0.814,-0.054,-0.013,0.795,0.013,-0.044,0.797,0.08,-0.409,1.215,0.1,-0.383,1.185,0.115,-0.496,1.013,-0.039,-0.348,1.232,0.143,-0.512,1.023,-0.045,-0.377,1.257,0.125,-0.518,1.034,-0.065,-0.389,1.268,0.082,-0.512,1.041,-0.089,-0.377,1.257,0.039,-0.496,1.038,-0.097,-0.348,1.232,0.021,-0.48,1.028,-0.091,-0.319,1.206,0.039,-0.474,1.016,-0.071,-0.307,1.196,0.082,-0.48,1.01,-0.05,-0.319,1.206,0.125,-0.42,1.23,0.059,-0.409,1.221,0.016,-0.383,1.194,-0.003,-0.356,1.164,0.011,-0.345,1.149,0.052,-0.356,1.158,0.095,-0.476,1.083,0.005,-0.483,1.099,-0.016,-0.476,1.105,-0.041,-0.459,1.098,-0.053,-0.442,1.082,-0.047,-0.435,1.066,-0.026,-0.459,1.067,0.012,-0.442,1.06,-0.001,-0.246,1.37,0.158,-0.28,1.392,0.137,-0.294,1.4,0.088,-0.28,1.392,0.039,-0.246,1.37,0.018,-0.211,1.353,0.01,-0.197,1.34,0.072,-0.201,1.345,0.124,-0.314,1.336,0.133,-0.327,1.346,0.089,-0.255,1.289,0.045,-0.243,1.279,0.089,-0.285,1.312,0.151,-0.314,1.336,0.045,-0.255,1.289,0.133,-0.285,1.312,0.026,-0.367,1.289,0.09,-0.289,1.223,0.09,-0.355,1.28,0.051,-0.301,1.232,0.13,-0.328,1.256,0.034,-0.355,1.28,0.13,-0.301,1.232,0.051,-0.328,1.256,0.146,-0.333,1.188,0.114,-0.321,1.178,0.071,-0.361,1.214,0.132,-0.333,1.19,0.028,-0.361,1.217,0.012,-0.389,1.244,0.03,-0.401,1.253,0.073,-0.389,1.241,0.115,-0.268,1.447,0.083,-0.238,1.446,0.139,-0.238,1.446,0.021,-0.235,1.508,0.076,-0.217,1.496,0.129,-0.217,1.492,0.024,-0.193,1.438,0.153,-0.178,1.503,0.135,-0.195,1.525,0.07,-0.193,1.439,-0.011,-0.178,1.501,0.007,-0.175,1.334,0.004,-0.168,1.278,0.032,-0.154,1.285,-0.012,-0.168,1.332,0.096,-0.154,1.284,0.066,-0.19,1.387,-0.016,-0.184,1.379,0.142,-0.177,0.0,0.137,-0.22,0.001,0.125,-0.236,0.001,0.085,-0.233,0.001,0.043,-0.191,0.001,0.02,-0.144,0.001,0.032,-0.131,0.001,0.072,-0.137,0.001,0.115,-0.236,0.021,-0.114,-0.191,0.034,-0.135,-0.143,0.033,-0.14,-0.244,0.0,-0.116,-0.193,0.001,-0.139,-0.136,0.001,-0.145,-0.185,0.058,-0.01,-0.226,0.046,0.003,-0.237,0.001,0.0,-0.191,0.001,-0.013,-0.144,0.001,-0.025,-0.151,0.057,-0.019,-0.222,0.042,0.051,-0.145,0.042,0.042,-0.214,0.038,0.131,-0.173,0.036,0.142,-0.223,0.045,0.086,-0.135,0.045,0.076,-0.135,0.038,0.122,-0.192,0.017,-0.144,-0.246,0.01,-0.122,-0.133,0.016,-0.149,-0.234,0.021,0.003,-0.145,0.027,-0.02,-0.188,0.046,-0.073,-0.248,0.0,-0.058,-0.133,0.001,-0.085,-0.236,0.034,-0.056,-0.192,0.001,-0.076,-0.141,0.045,-0.08,-0.247,0.016,-0.059,-0.132,0.021,-0.085,0.0,1.677,0.091,-0.05,1.667,0.072,-0.07,1.642,0.026,-0.05,1.618,-0.019,0.0,1.608,-0.038,0.0,1.728,0.115,-0.052,1.713,0.086,-0.074,1.676,0.016,-0.052,1.64,-0.053,0.0,1.625,-0.082,0.0,1.802,0.107,-0.056,1.789,0.077,-0.079,1.756,0.005,-0.056,1.723,-0.067,0.0,1.71,-0.097,0.0,1.839,0.081,-0.055,1.831,0.057,-0.078,1.81,-0.003,-0.055,1.789,-0.063,0.0,1.78,-0.088,0.0,1.854,0.054,-0.04,1.852,0.033,-0.057,1.844,-0.006,-0.04,1.837,-0.045,0.0,1.834,-0.061,0.0,1.86,0.023,-0.018,1.856,0.018,-0.026,1.855,0.004,-0.018,1.854,-0.009,0.0,1.857,-0.014,0.0,1.858,0.004,-0.515,0.937,-0.16,-0.5,1.029,-0.113,-0.519,0.911,-0.064,-0.497,0.995,-0.041,-0.537,0.94,-0.16,-0.523,1.027,-0.109,-0.541,0.914,-0.064,-0.518,0.998,-0.043,-0.512,0.954,-0.156,-0.503,0.946,-0.053,-0.531,0.95,-0.053,-0.531,0.985,-0.138,-0.476,1.005,-0.098,-0.481,1.0,-0.081,-0.482,0.995,-0.064,-0.526,1.007,-0.06,-0.529,1.015,-0.076,-0.528,1.024,-0.096,-0.535,0.959,-0.075,-0.538,0.968,-0.095,-0.536,0.977,-0.117,-0.487,0.962,-0.121,-0.499,0.962,-0.095,-0.493,0.953,-0.075,-0.52,0.893,-0.154,-0.518,0.899,-0.176,-0.54,0.897,-0.177,-0.542,0.892,-0.156,-0.516,0.861,-0.165,-0.514,0.865,-0.181,-0.529,0.859,-0.185,-0.531,0.855,-0.169,-0.513,0.841,-0.173,-0.511,0.844,-0.185,-0.522,0.84,-0.187,-0.523,0.837,-0.176,-0.52,0.921,-0.136,-0.52,0.922,-0.14,-0.514,0.93,-0.136,-0.537,0.925,-0.14,-0.537,0.924,-0.136,-0.542,0.934,-0.136,-0.519,0.913,-0.109,-0.519,0.914,-0.113,-0.515,0.924,-0.107,-0.54,0.917,-0.113,-0.54,0.917,-0.109,-0.542,0.929,-0.107,-0.519,0.912,-0.083,-0.519,0.912,-0.086,-0.515,0.923,-0.082,-0.54,0.916,-0.086,-0.54,0.915,-0.083,-0.539,0.927,-0.082,-0.514,0.878,-0.149,-0.535,0.875,-0.15,-0.536,0.869,-0.129,-0.514,0.872,-0.127,-0.498,0.854,-0.153,-0.512,0.842,-0.158,-0.515,0.838,-0.139,-0.501,0.85,-0.134,-0.483,0.844,-0.155,-0.487,0.828,-0.16,-0.489,0.822,-0.143,-0.485,0.838,-0.137,-0.51,0.885,-0.114,-0.525,0.876,-0.118,-0.526,0.871,-0.1,-0.511,0.881,-0.096,-0.495,0.871,-0.117,-0.505,0.859,-0.121,-0.506,0.856,-0.105,-0.496,0.868,-0.101,-0.482,0.862,-0.119,-0.483,0.849,-0.122,-0.485,0.847,-0.108,-0.484,0.86,-0.105,-0.52,0.879,-0.074,-0.506,0.891,-0.072,-0.509,0.896,-0.084,-0.523,0.884,-0.087,-0.496,0.871,-0.078,-0.491,0.885,-0.075,-0.493,0.888,-0.087,-0.498,0.874,-0.09,-0.476,0.872,-0.078,-0.477,0.887,-0.075,-0.477,0.889,-0.087,-0.476,0.874,-0.09,-0.514,0.944,-0.156,-0.514,0.921,-0.061,-0.538,0.924,-0.061,-0.535,0.95,-0.155,-0.455,0.946,-0.177,-0.476,0.94,-0.181,-0.477,0.932,-0.164,-0.456,0.939,-0.16,-0.45,0.921,-0.185,-0.466,0.916,-0.19,-0.467,0.91,-0.177,-0.451,0.916,-0.172,-0.465,0.979,-0.161,-0.488,0.966,-0.168,-0.485,0.957,-0.147,-0.467,0.97,-0.14,-0.483,1.007,-0.137,-0.507,0.976,-0.155,-0.481,0.964,-0.127,-0.468,0.992,-0.109,-0.476,0.936,-0.174,-0.456,0.943,-0.169,-0.467,0.913,-0.183,-0.45,0.919,-0.179,-0.489,0.961,-0.162,-0.466,0.974,-0.151,-0.501,0.964,-0.154,-0.471,1.003,-0.121,-0.523,0.982,-0.147,-0.508,0.963,-0.155,-0.507,1.022,-0.125,-0.486,1.016,-0.112],"r":{"lats":[356,357,1,0,1,3,0,3,2,1,357,366,1,366,6,3,1,173,3,173,170,6,366,371,6,371,9,134,138,126,134,126,127,140,137,132,140,132,133,138,140,133,138,133,126,149,145,140,149,140,138,145,143,137,145,137,140,9,165,164,170,173,172,170,172,7,173,1,6,173,6,172,133,132,7,133,7,172,6,9,164,6,164,175,6,175,133,6,133,172,356,359,357,358,360,361,358,361,359,359,367,366,359,366,357,361,543,546,361,546,359,367,372,371,367,371,366,507,500,499,507,499,511,513,506,505,513,505,510,511,499,506,511,506,513,522,511,513,522,513,518,518,513,510,518,510,516,372,537,538,543,368,545,543,545,546,546,545,367,546,367,359,506,545,368,506,368,505,367,548,537,367,537,372,367,545,506,367,506,548],"lowerback":[356,1,0,356,0,19,356,19,390,0,2,23,0,23,24,19,0,24,356,358,359,356,390,389,356,389,358,358,397,396,358,396,360,389,397,358],"abs":[2,3,5,2,5,4,4,5,365,4,365,364,4,364,391,4,391,20,2,4,22,20,22,4,360,362,363,360,363,361,362,364,365,362,365,363,362,392,391,362,391,364,360,395,362,392,362,395],"chest":[5,171,169,5,169,8,365,5,8,365,8,370,370,8,10,370,10,374,374,10,13,374,13,379,137,136,131,137,131,132,141,139,129,141,129,130,136,141,130,136,130,131,148,141,136,143,136,137,13,10,167,13,167,168,8,174,167,8,167,10,169,171,170,169,170,7,171,5,3,171,3,170,169,7,132,169,132,131,8,169,131,8,131,174,363,369,542,363,542,544,365,370,369,365,369,363,370,374,373,370,373,369,374,379,378,374,378,373,510,505,504,510,504,509,514,503,502,514,502,512,509,504,503,509,503,514,521,509,514,516,510,509,378,541,540,378,540,373,369,373,540,369,540,547,542,368,543,542,543,544,544,543,361,544,361,363,542,504,505,542,505,368,369,547,504,369,504,542],"traps":[11,375,380,9,371,375,9,375,11,12,11,14,11,12,166,11,166,165,9,11,165,376,380,375,372,376,375,372,375,371,377,381,376,376,538,539,376,539,377,372,538,376],"base":[11,380,14,379,13,16,379,16,384,12,14,15,13,12,15,13,15,16,20,391,388,20,388,18,20,18,25,20,25,26,20,26,22,38,56,57,38,57,40,36,55,56,36,56,38,55,48,49,55,49,56,42,58,59,42,59,44,56,49,50,56,50,57,44,61,46,57,50,51,57,51,58,46,60,32,58,51,52,58,52,59,32,54,34,40,57,58,40,58,42,212,209,187,212,187,188,34,55,36,51,65,63,51,63,52,50,66,65,50,65,51,49,67,66,49,66,50,48,68,67,48,67,49,23,22,89,23,89,88,22,26,90,22,90,89,102,120,121,102,121,104,100,119,120,100,120,102,110,124,96,96,124,118,96,118,98,104,122,106,176,177,178,176,178,179,176,179,180,176,180,181,176,181,182,176,182,183,98,118,119,98,119,100,12,13,168,12,168,166,211,208,185,211,185,184,199,198,177,199,177,176,198,200,178,198,178,177,197,201,182,197,182,181,202,199,176,202,176,183,200,196,179,200,179,178,201,202,183,201,183,182,204,203,188,204,188,187,203,205,189,203,189,188,215,210,189,215,189,205,208,213,186,208,186,185,210,212,188,210,188,189,214,211,184,214,184,204,196,38,191,196,191,206,181,180,193,181,193,194,40,42,195,40,195,190,197,181,194,197,194,207,38,40,190,38,190,191,180,179,192,180,192,193,42,197,207,42,207,195,179,196,206,179,206,192,209,214,204,209,204,187,213,215,205,213,205,186,185,186,205,185,205,203,184,185,203,184,203,204,44,46,202,44,202,201,36,38,196,36,196,200,46,32,199,46,199,202,42,44,201,42,201,197,34,36,200,34,200,198,32,34,198,32,198,199,195,207,215,195,215,213,192,206,214,192,214,209,206,191,211,206,211,214,194,193,212,194,212,210,190,195,213,190,213,208,207,194,210,207,210,215,191,190,208,191,208,211,193,192,209,193,209,212,593,218,221,593,221,598,16,15,217,16,217,218,14,380,589,14,589,216,384,16,218,384,218,593,15,14,216,15,216,217,217,216,219,217,219,220,218,217,220,218,220,221,216,589,594,216,594,219,598,221,224,598,224,603,220,219,222,220,222,223,221,220,223,221,223,224,219,594,599,219,599,222,224,223,226,224,226,227,222,599,604,222,604,225,603,224,227,603,227,608,223,222,225,223,225,226,227,226,229,227,229,230,225,604,609,225,609,228,608,227,230,608,230,613,226,225,228,226,228,229,613,230,233,613,233,618,229,228,231,229,231,232,230,229,232,230,232,233,228,609,614,228,614,231,232,619,618,232,618,233,231,614,619,231,619,232,257,248,237,257,237,243,243,237,241,243,241,244,254,251,239,254,239,245,238,234,259,238,259,260,239,235,355,239,355,354,238,327,324,238,324,234,236,325,326,236,326,240,285,280,301,285,301,302,270,272,278,270,278,277,271,273,261,271,261,258,270,277,291,270,291,288,285,287,281,285,281,280,279,281,275,279,275,274,273,275,327,273,327,238,106,355,235,106,235,104,108,247,246,108,246,106,255,242,353,282,284,325,282,325,236,240,326,287,240,287,286,244,241,249,244,249,252,252,249,250,252,250,253,253,250,251,253,251,254,255,246,247,255,247,256,256,247,248,256,248,257,258,261,265,258,265,262,234,324,272,234,272,271,273,238,260,273,260,261,264,263,267,264,267,268,260,259,263,260,263,264,261,260,264,261,264,265,259,258,262,259,262,263,266,269,268,266,268,267,265,264,268,265,268,269,263,262,266,263,266,267,262,265,269,262,269,266,270,271,272,273,274,275,273,271,270,273,270,274,234,271,258,234,258,259,276,277,278,279,280,281,279,277,276,279,276,280,276,278,284,276,284,283,282,283,284,285,286,287,285,283,282,285,282,286,282,236,313,282,313,314,289,288,292,289,292,293,274,270,288,274,288,289,279,274,289,279,289,290,277,279,290,277,290,291,294,293,297,294,297,298,290,289,293,290,293,294,291,290,294,291,294,295,288,291,295,288,295,292,299,298,297,299,297,296,295,294,298,295,298,299,292,295,299,292,299,296,293,292,296,293,296,297,302,301,305,302,305,306,280,276,300,280,300,301,283,285,302,283,302,303,276,283,303,276,303,300,307,306,310,307,310,311,303,302,306,303,306,307,300,303,307,300,307,304,301,300,304,301,304,305,311,310,309,311,309,308,304,307,311,304,311,308,305,304,308,305,308,309,306,305,309,306,309,310,312,315,319,312,319,316,236,240,312,236,312,313,240,286,315,240,315,312,286,282,314,286,314,315,318,317,321,318,321,322,315,314,318,315,318,319,314,313,317,314,317,318,313,312,316,313,316,317,321,320,323,321,323,322,317,316,320,317,320,321,316,319,323,316,323,320,319,318,322,319,322,323,272,324,242,272,242,255,278,272,255,278,255,256,284,278,256,284,256,257,325,284,257,325,257,243,326,325,243,326,243,244,327,275,254,327,254,245,281,287,252,281,252,253,287,326,244,287,244,252,275,281,253,275,253,254,324,327,245,324,245,242,344,329,333,330,339,338,328,329,337,344,330,338,344,338,348,348,338,342,348,342,350,338,339,343,338,343,342,336,337,341,336,341,340,349,336,340,349,340,351,337,348,350,337,350,341,329,344,348,329,348,337,330,344,346,330,346,334,353,352,341,353,341,350,352,354,340,352,340,341,354,355,351,354,351,340,355,246,343,355,343,351,246,255,342,246,342,343,255,353,350,255,350,342,245,239,354,245,354,352,242,245,352,242,352,353,104,235,239,104,239,102,355,106,246,110,248,247,110,247,108,96,237,248,96,248,110,98,241,237,98,237,96,250,100,251,102,239,251,102,251,100,250,249,100,100,249,241,100,241,98,376,381,380,379,384,383,379,383,378,377,382,381,378,383,382,378,382,377,392,387,388,392,388,391,392,399,398,392,398,387,392,395,399,411,413,430,411,430,429,409,411,429,409,429,428,428,429,422,428,422,421,415,417,432,415,432,431,429,430,423,429,423,422,417,419,434,430,431,424,430,424,423,419,405,433,431,432,425,431,425,424,405,407,427,413,415,431,413,431,430,585,561,560,585,560,582,407,409,428,424,425,436,424,436,438,423,424,438,423,438,439,422,423,439,422,439,440,421,422,440,421,440,441,396,461,462,396,462,395,395,462,463,395,463,399,475,477,494,475,494,493,473,475,493,473,493,492,483,469,497,469,471,491,469,491,497,477,479,495,549,556,555,549,555,554,549,554,553,549,553,552,549,552,551,549,551,550,471,473,492,471,492,491,377,539,541,377,541,378,584,557,558,584,558,581,572,549,550,572,550,571,571,550,551,571,551,573,570,554,555,570,555,574,575,556,549,575,549,572,573,551,552,573,552,569,574,555,556,574,556,575,577,560,561,577,561,576,576,561,562,576,562,578,588,578,562,588,562,583,581,558,559,581,559,586,583,562,561,583,561,585,587,577,557,587,557,584,569,579,564,569,564,411,554,567,566,554,566,553,413,563,568,413,568,415,570,580,567,570,567,554,411,564,563,411,563,413,553,566,565,553,565,552,415,568,580,415,580,570,552,565,579,552,579,569,582,560,577,582,577,587,586,559,578,586,578,588,558,576,578,558,578,559,557,577,576,557,576,558,417,574,575,417,575,419,409,573,569,409,569,411,419,575,572,419,572,405,415,570,574,415,574,417,407,571,573,407,573,409,405,572,571,405,571,407,568,586,588,568,588,580,565,582,587,565,587,579,579,587,584,579,584,564,567,583,585,567,585,566,563,581,586,563,586,568,580,588,583,580,583,567,564,584,581,564,581,563,566,585,582,566,582,565,593,598,597,593,597,592,383,592,591,383,591,382,381,590,589,381,589,380,384,593,592,384,592,383,382,591,590,382,590,381,591,596,595,591,595,590,592,597,596,592,596,591,590,595,594,590,594,589,598,603,602,598,602,597,596,601,600,596,600,595,597,602,601,597,601,596,595,600,599,595,599,594,602,607,606,602,606,601,600,605,604,600,604,599,603,608,607,603,607,602,601,606,605,601,605,600,607,612,611,607,611,606,605,610,609,605,609,604,608,613,612,608,612,607,606,611,610,606,610,605,613,618,617,613,617,612,611,616,615,611,615,610,612,617,616,612,616,611,610,615,614,610,614,609,616,617,618,616,618,619,615,616,619,615,619,614,643,629,623,643,623,634,629,630,627,629,627,623,640,631,625,640,625,637,624,646,645,624,645,620,625,740,741,625,741,621,624,620,710,624,710,713,622,626,712,622,712,711,671,688,687,671,687,666,656,663,664,656,664,658,657,644,647,657,647,659,656,674,677,656,677,663,671,666,667,671,667,673,665,660,661,665,661,667,659,624,713,659,713,661,479,477,621,479,621,741,481,479,632,481,632,633,641,739,628,668,622,711,668,711,670,626,672,673,626,673,712,630,638,635,630,635,627,638,639,636,638,636,635,639,640,637,639,637,636,641,642,633,641,633,632,642,643,634,642,634,633,644,648,651,644,651,647,620,657,658,620,658,710,659,647,646,659,646,624,650,654,653,650,653,649,646,650,649,646,649,645,647,651,650,647,650,646,645,649,648,645,648,644,652,653,654,652,654,655,651,655,654,651,654,650,649,653,652,649,652,648,648,652,655,648,655,651,656,658,657,659,661,660,659,660,656,659,656,657,620,645,644,620,644,657,662,664,663,665,667,666,665,666,662,665,662,663,662,669,670,662,670,664,668,670,669,671,673,672,671,672,668,671,668,669,668,700,699,668,699,622,675,679,678,675,678,674,660,675,674,660,674,656,665,676,675,665,675,660,663,677,676,663,676,665,680,684,683,680,683,679,676,680,679,676,679,675,677,681,680,677,680,676,674,678,681,674,681,677,685,682,683,685,683,684,681,685,684,681,684,680,678,682,685,678,685,681,679,683,682,679,682,678,688,692,691,688,691,687,666,687,686,666,686,662,669,689,688,669,688,671,662,686,689,662,689,669,693,697,696,693,696,692,689,693,692,689,692,688,686,690,693,686,693,689,687,691,690,687,690,686,697,694,695,697,695,696,690,694,697,690,697,693,691,695,694,691,694,690,692,696,695,692,695,691,698,702,705,698,705,701,622,699,698,622,698,626,626,698,701,626,701,672,672,701,700,672,700,668,704,708,707,704,707,703,701,705,704,701,704,700,700,704,703,700,703,699,699,703,702,699,702,698,707,708,709,707,709,706,703,707,706,703,706,702,702,706,709,702,709,705,705,709,708,705,708,704,658,641,628,658,628,710,664,642,641,664,641,658,670,643,642,670,642,664,711,629,643,711,643,670,712,630,629,712,629,711,713,631,640,713,640,661,667,639,638,667,638,673,673,638,630,673,630,712,661,640,639,661,639,667,710,628,631,710,631,713,730,719,715,716,724,725,714,723,715,730,734,724,730,724,716,734,736,728,734,728,724,724,728,729,724,729,725,722,726,727,722,727,723,735,737,726,735,726,722,723,727,736,723,736,734,715,723,734,715,734,730,716,720,732,716,732,730,739,736,727,739,727,738,738,727,726,738,726,740,740,726,737,740,737,741,741,737,729,741,729,632,632,729,728,632,728,641,641,728,736,641,736,739,631,738,740,631,740,625,628,739,738,628,738,631,477,475,625,477,625,621,741,632,479,483,481,633,483,633,634,469,483,634,469,634,623,471,469,623,471,623,627,636,637,473,475,473,637,475,637,625,636,473,635,473,471,627,473,627,635],"delts":[164,165,162,164,162,159,158,159,162,158,162,161,139,128,129,160,158,161,160,161,163,165,166,161,165,161,162,168,167,160,168,160,163,166,168,163,166,163,161,127,159,158,127,158,128,164,159,127,164,127,126,128,158,160,128,160,129,129,160,167,129,167,130,131,130,167,131,167,174,133,175,164,133,164,126,537,532,535,537,535,538,531,534,535,531,535,532,512,502,501,533,536,534,533,534,531,538,535,534,538,534,539,541,536,533,541,533,540,539,534,536,539,536,541,500,501,531,500,531,532,537,499,500,537,500,532,501,502,533,501,533,531,502,503,540,502,540,533,504,547,540,504,540,503,506,499,537,506,537,548],"glutes":[390,19,17,390,17,385,17,21,394,17,394,385,21,17,27,21,27,28,29,27,17,29,17,19,19,24,29,24,23,88,24,88,87,28,27,93,28,93,92,27,29,86,27,86,93,29,24,87,29,87,86,390,385,386,390,386,389,386,385,394,386,394,393,393,401,400,393,400,386,402,389,386,402,386,400,389,402,397,397,460,461,397,461,396,401,465,466,401,466,400,400,466,459,400,459,402,402,459,460,402,460,397],"quads":[21,18,388,21,388,394,21,28,25,21,25,18,68,37,39,68,39,67,67,39,41,67,41,66,66,41,43,66,43,65,65,43,45,65,45,63,39,37,72,39,72,73,41,39,73,41,73,74,43,41,74,43,74,75,45,43,75,45,75,76,75,74,82,75,82,83,73,72,80,73,80,81,76,75,83,76,83,84,74,73,81,74,81,82,84,83,91,84,91,92,82,81,89,82,89,90,83,82,90,83,90,91,81,80,88,81,88,89,26,25,91,26,91,90,25,28,92,25,92,91,393,394,388,393,388,387,393,387,398,393,398,401,441,440,412,441,412,410,440,439,414,440,414,412,439,438,416,439,416,414,438,436,418,438,418,416,412,446,445,412,445,410,414,447,446,414,446,412,416,448,447,416,447,414,418,449,448,418,448,416,448,456,455,448,455,447,446,454,453,446,453,445,449,457,456,449,456,448,447,455,454,447,454,446,457,465,464,457,464,456,455,463,462,455,462,454,456,464,463,456,463,455,454,462,461,454,461,453,399,463,464,399,464,398,398,464,465,398,465,401],"obliques":[2,22,23,143,148,136,109,148,143,360,396,395,516,509,521,482,516,521],"calves":[54,30,48,54,48,55,44,59,61,46,61,60,32,60,54,59,52,53,59,53,61,61,53,31,61,31,60,60,31,30,60,30,54,34,54,55,53,62,64,53,64,31,52,63,62,52,62,53,30,69,68,30,68,48,31,64,69,31,69,30,427,428,421,427,421,403,417,434,432,419,433,434,405,427,433,432,434,426,432,426,425,434,433,404,434,404,426,433,427,403,433,403,404,407,428,427,426,404,437,426,437,435,425,426,435,425,435,436,403,421,441,403,441,442,404,403,442,404,442,437],"hamstrings":[64,33,35,64,35,69,69,35,37,69,37,68,35,33,70,35,70,71,63,45,47,63,47,62,62,47,33,62,33,64,72,71,79,72,79,80,47,45,76,47,76,77,33,47,77,33,77,70,37,35,71,37,71,72,78,85,93,78,93,86,77,76,84,77,84,85,71,70,78,71,78,79,70,77,85,70,85,78,80,79,87,80,87,88,85,84,92,85,92,93,79,78,86,79,86,87,437,442,408,437,408,406,442,441,410,442,410,408,408,444,443,408,443,406,436,435,420,436,420,418,435,437,406,435,406,420,445,453,452,445,452,444,420,450,449,420,449,418,406,443,450,406,450,420,410,445,444,410,444,408,451,459,466,451,466,458,450,458,457,450,457,449,444,452,451,444,451,443,443,451,458,443,458,450,453,461,460,453,460,452,458,466,465,458,465,457,452,460,459,452,459,451],"forearms":[118,94,112,118,112,119,119,112,113,119,113,120,106,122,123,106,123,108,120,113,114,120,114,121,108,123,125,108,125,110,110,125,124,125,95,124,104,121,122,124,94,118,345,331,335,345,335,347,344,333,346,331,330,334,331,334,335,329,328,332,329,332,333,347,335,334,347,334,346,330,331,339,328,337,336,345,328,336,345,336,349,339,349,351,339,351,343,331,345,349,331,349,339,332,347,346,332,346,333,328,345,347,328,347,332,491,492,485,491,485,467,492,493,486,492,486,485,479,481,496,479,496,495,493,494,487,493,487,486,481,483,498,481,498,496,483,497,498,498,497,468,477,495,494,497,491,467,731,733,721,731,721,717,730,732,719,717,721,720,717,720,716,715,719,718,715,718,714,733,732,720,733,720,721,716,725,717,714,722,723,731,735,722,731,722,714,725,729,737,725,737,735,717,725,735,717,735,731,718,719,732,718,732,733,714,718,733,714,733,731],"triceps":[152,97,99,152,99,157,157,99,101,157,101,156,123,116,117,123,117,125,135,134,127,135,127,128,125,117,95,151,109,111,151,111,150,124,95,94,150,111,97,150,97,152,147,149,138,147,138,134,142,147,134,142,134,135,101,99,147,101,147,142,99,97,149,99,149,147,111,109,143,111,143,145,97,111,145,97,145,149,117,150,152,117,152,95,116,151,150,116,150,117,94,157,156,94,156,112,95,152,157,95,157,94,525,530,472,525,472,470,530,529,474,530,474,472,496,498,490,496,490,489,508,501,500,508,500,507,498,468,490,524,523,484,524,484,482,497,467,468,523,525,470,523,470,484,520,507,511,520,511,522,515,508,507,515,507,520,474,515,520,474,520,472,472,520,522,472,522,470,484,518,516,484,516,482,470,522,518,470,518,484,490,468,525,490,525,523,489,490,523,489,523,524,467,485,529,467,529,530,468,467,530,468,530,525],"biceps":[156,101,103,156,103,155,121,114,115,121,115,122,155,103,105,155,105,154,122,115,116,122,116,123,154,105,107,154,107,153,153,107,109,153,109,151,139,135,128,148,146,141,146,144,139,146,139,141,144,142,135,144,135,139,109,107,148,103,101,142,103,142,144,105,103,144,105,144,146,107,105,146,107,146,148,115,153,151,115,151,116,114,154,153,114,153,115,113,155,154,113,154,114,112,156,155,112,155,113,529,528,476,529,476,474,494,495,488,494,488,487,528,527,478,528,478,476,495,496,489,495,489,488,527,526,480,527,480,478,526,524,482,526,482,480,512,501,508,521,514,519,519,514,512,519,512,517,517,512,508,517,508,515,482,521,480,476,517,515,476,515,474,478,519,517,478,517,476,480,521,519,480,519,478,488,489,524,488,524,526,487,488,526,487,526,527,486,487,527,486,527,528,485,486,528,485,528,529]}};
+function meshParts(){
+  const V=BMESH.v, out=[];
+  for(const key in BMESH.r){
+    const idx=BMESH.r[key], pos=[], nrm=[];
+    for(let t=0;t<idx.length;t+=3){
+      const a=idx[t]*3,b=idx[t+1]*3,c=idx[t+2]*3;
+      const ax=V[a],ay=V[a+1],az=V[a+2], bx=V[b],by=V[b+1],bz=V[b+2], cx2=V[c],cy2=V[c+1],cz2=V[c+2];
+      let nx=(by-ay)*(cz2-az)-(bz-az)*(cy2-ay), ny=(bz-az)*(cx2-ax)-(bx-ax)*(cz2-az), nz=(bx-ax)*(cy2-ay)-(by-ay)*(cx2-ax);
+      const l=Math.hypot(nx,ny,nz)||1; nx/=-l; ny/=-l; nz/=-l;
+      pos.push(ax,ay,az,bx,by,bz,cx2,cy2,cz2); nrm.push(nx,ny,nz,nx,ny,nz,nx,ny,nz);
+    }
+    const ind=[]; for(let i=0;i<pos.length/3;i++) ind.push(i);
+    out.push({m:key==="base"?null:key, geo:{pos,nrm,idx:ind}});
+  }
+  return out;
+}
+const _B3D={};
+function init3DBody(pset,sset,cid){ cid=cid||"body3d";
+  const cv=document.getElementById(cid); if(!cv) return;
+  if(_B3D[cid]&&_B3D[cid].stop) _B3D[cid].stop();
+  const gl=cv.getContext("webgl",{alpha:true,antialias:true})||cv.getContext("experimental-webgl");
+  if(!gl){ cv.closest(".b3dwrap").outerHTML=""; return; }
+  const vs=`attribute vec3 aP;attribute vec3 aN;uniform mat4 uM;uniform mat4 uVP;varying vec3 vN;varying vec3 vP;
+    void main(){ vec4 wp=uM*vec4(aP,1.0); vP=wp.xyz; vN=mat3(uM[0].xyz,uM[1].xyz,uM[2].xyz)*aN; gl_Position=uVP*wp; }`;
+  const fs=`precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uC;uniform float uE;uniform float uT;
+    void main(){ vec3 N=normalize(vN); vec3 L=normalize(vec3(.5,.85,.6)); vec3 V=normalize(vec3(0.,1.25,3.2)-vP);
+      float d=max(dot(N,L),0.0); float rim=pow(1.0-max(dot(N,V),0.0),2.2);
+      float pulse=uE>0.5?(.75+.25*sin(uT*3.2)):1.0;
+      vec3 col=uC*(0.22+0.78*d)*pulse + uC*rim*0.9 + vec3(0.02,0.05,0.09)*rim;
+      gl_FragColor=vec4(col, 1.0); }`;
+  function sh(t,src){ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(s); return s; }
+  const pr=gl.createProgram(); gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(pr); gl.useProgram(pr);
+  const loc={aP:gl.getAttribLocation(pr,"aP"),aN:gl.getAttribLocation(pr,"aN"),uM:gl.getUniformLocation(pr,"uM"),
+    uVP:gl.getUniformLocation(pr,"uVP"),uC:gl.getUniformLocation(pr,"uC"),uE:gl.getUniformLocation(pr,"uE"),uT:gl.getUniformLocation(pr,"uT")};
+  const parts=meshParts().map(p=>{ const g=p.geo;
+    const vb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,vb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(g.pos),gl.STATIC_DRAW);
+    const nb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,nb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(g.nrm),gl.STATIC_DRAW);
+    const ib=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(g.idx),gl.STATIC_DRAW);
+    return {m:p.m,vb,nb,ib,n:g.idx.length}; });
+  const acv=getComputedStyle(document.documentElement).getPropertyValue("--ac").trim().split(/\s+/).map(Number);
+  const AC=[acv[0]/255,acv[1]/255,acv[2]/255];
+  const BASE=[.10,.16,.26], SEC=[AC[0]*.42,AC[1]*.42,AC[2]*.42];
+  function persp(f,a,n,fr){ const t=1/Math.tan(f/2); return [t/a,0,0,0, 0,t,0,0, 0,0,(fr+n)/(n-fr),-1, 0,0,2*fr*n/(n-fr),0]; }
+  function mul(a,b){ const o=new Array(16); for(let r=0;r<4;r++)for(let c=0;c<4;c++){let s2=0;for(let k=0;k<4;k++)s2+=a[k*4+c]*b[r*4+k];o[r*4+c]=s2;} return o; }
+  let rotY=0.5, rotX=0.06, vel=0.004, lastTouch=0, dragging=false, px=0, py=0;
+  cv.addEventListener("pointerdown",e=>{ dragging=true; px=e.clientX; py=e.clientY; lastTouch=Date.now(); cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove",e=>{ if(!dragging) return; rotY+=(e.clientX-px)*.011; rotX=Math.max(-.4,Math.min(.4,rotX+(e.clientY-py)*.005)); px=e.clientX; py=e.clientY; lastTouch=Date.now(); });
+  cv.addEventListener("pointerup",()=>dragging=false); cv.addEventListener("pointercancel",()=>dragging=false);
+  let raf=0, dead=false; const t0=performance.now();
+  function frame(){ if(dead) return;
+    if(!cv.isConnected){ stop(); return; }
+    if(cv.offsetParent===null){ raf=requestAnimationFrame(frame); return; }
+    const DPR=Math.min(2,devicePixelRatio||1), w=cv.clientWidth, hgt=cv.clientHeight;
+    if(cv.width!==Math.round(w*DPR)||cv.height!==Math.round(hgt*DPR)){ cv.width=Math.round(w*DPR); cv.height=Math.round(hgt*DPR); }
+    gl.viewport(0,0,cv.width,cv.height);
+    gl.clearColor(0,0,0,0); gl.enable(gl.DEPTH_TEST); gl.enable(gl.CULL_FACE); gl.frontFace(gl.CW);
+    gl.disable(gl.BLEND);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    if(!dragging&&Date.now()-lastTouch>2500) rotY+=vel;
+    const cy=Math.cos(rotY),sy=Math.sin(rotY),cx=Math.cos(rotX),sx=Math.sin(rotX);
+    const RY=[cy,0,-sy,0, 0,1,0,0, sy,0,cy,0, 0,0,0,1];
+    const RX=[1,0,0,0, 0,cx,sx,0, 0,-sx,cx,0, 0,0,0,1];
+    const TR=[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,-0.95,0,1];
+    const M=mul(mul(RX,RY),TR);
+    const V=[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,-0.06,-2.55,1];
+    const PJ=persp(0.78, cv.width/cv.height, .1, 20);
+    gl.uniformMatrix4fv(loc.uVP,false,new Float32Array(mul(PJ,V)));
+    gl.uniformMatrix4fv(loc.uM,false,new Float32Array(M));
+    gl.uniform1f(loc.uT,(performance.now()-t0)/1000);
+    parts.forEach(p=>{ const pri=p.m&&pset.has(p.m), sec=p.m&&sset.has(p.m);
+      gl.uniform3fv(loc.uC, pri?AC:(sec?SEC:BASE)); gl.uniform1f(loc.uE, pri?1:0);
+      gl.bindBuffer(gl.ARRAY_BUFFER,p.vb); gl.enableVertexAttribArray(loc.aP); gl.vertexAttribPointer(loc.aP,3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ARRAY_BUFFER,p.nb); gl.enableVertexAttribArray(loc.aN); gl.vertexAttribPointer(loc.aN,3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,p.ib); gl.drawElements(gl.TRIANGLES,p.n,gl.UNSIGNED_SHORT,0); });
+    raf=requestAnimationFrame(frame); }
+  function stop(){ dead=true; cancelAnimationFrame(raf); }
+  document.addEventListener("visibilitychange",function vh(){ if(dead){ document.removeEventListener("visibilitychange",vh); return; }
+    if(document.hidden) cancelAnimationFrame(raf); else raf=requestAnimationFrame(frame); });
+  _B3D[cid]={stop};
+  raf=requestAnimationFrame(frame);
+}
+</script>
 </body>
 </html>
