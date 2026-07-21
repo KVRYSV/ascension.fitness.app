@@ -1133,15 +1133,18 @@ function titleMods(){ const eq=(S.rpg.titles&&S.rpg.titles.equipped)||[]; const 
   eq.forEach(id=>{ const def=TITLES.find(t=>t.id===id); if(def) for(const k in def.mods) m[k]+=def.mods[k]; }); return m; }
 
 /* debuffs — derived from misses / poor adherence */
-function daysSinceLastSession(){ const r=realSessions(S); if(!r.length) return null;
-  const last=r[r.length-1].date; return Math.floor((new Date(todayStr()+"T00:00:00")-new Date(last+"T00:00:00"))/86400000); }
+function debuffFloor(){ return (S.program&&S.program.freshStart)||null; }
+function daysSinceLastSession(){ const r=realSessions(S); const fs=debuffFloor();
+  let last=r.length?r[r.length-1].date:null;
+  if(fs&&(!last||last<fs)) last=fs;
+  if(!last) return null; return Math.floor((new Date(todayStr()+"T00:00:00")-new Date(last+"T00:00:00"))/86400000); }
 function scheduledDatesBetween(startStr,endStr){ const out=[]; if(!S.profile) return out;
   let d=new Date(startStr+"T00:00:00"), end=new Date(endStr+"T00:00:00");
   while(d<=end){ if(S.profile.days.includes(d.getDay())) out.push(todayStr(d)); d=new Date(d.getTime()+86400000); } return out; }
-function missedCount(daysBack){ const end=todayStr(new Date(Date.now()-86400000)); let start=todayStr(new Date(Date.now()-86400000*daysBack)); const sb=(S.program&&S.program.startDate)||start; if(start<sb) start=sb; if(start>end) return 0;
+function missedCount(daysBack){ const end=todayStr(new Date(Date.now()-86400000)); let start=todayStr(new Date(Date.now()-86400000*daysBack)); const sb=(S.program&&(S.program.freshStart||S.program.startDate))||start; if(start<sb) start=sb; if(start>end) return 0;
   let miss=0; scheduledDatesBetween(start,end).forEach(dt=>{ if(!S.sessions.some(s=>s.date===dt&&!s.forced)&&!(S.skips||[]).includes(dt)&&!(S.excused||[]).some(e=>e.date===dt)) miss++; }); return miss; }
 function nutritionFlag(){ let over=0,under=0,unlogged=0; const ct=S.profile?calorieTarget():2500;
-  for(let i=0;i<7;i++){ const dt=todayStr(new Date(Date.now()-86400000*i)); if(S.program&&dt<S.program.startDate) continue; const n=S.nutrition.log.find(x=>x.date===dt);
+  for(let i=0;i<7;i++){ const dt=todayStr(new Date(Date.now()-86400000*i)); if(S.program&&dt<(S.program.freshStart||S.program.startDate)) continue; const n=S.nutrition.log.find(x=>x.date===dt);
     if(!n){ unlogged++; continue; } if(n.cal>ct*1.3) over++; else if(n.cal>0&&n.cal<ct*0.6) under++; }
   return {over:over>=2,under:under>=2,unlogged}; }
 function activeDebuffs(){
@@ -1270,6 +1273,18 @@ function addExp(amount,reason){
   save();
   return {gained:amount,leveled};
 }
+function subExp(amount,reason){
+  amount=Math.round(amount); if(amount<=0) return;
+  S.rpg.totalExp=Math.max(0,(S.rpg.totalExp||0)-amount);
+  (S.log.exp=S.log.exp||[]).push({d:todayStr(),a:-amount,r:reason||"undo"}); if(S.log.exp.length>240) S.log.exp=S.log.exp.slice(-240);
+  S.rpg.exp-=amount;
+  while(S.rpg.exp<0 && S.rpg.level>1){
+    S.rpg.level--; S.rpg.exp+=expToNext(S.rpg.level);
+    S.rpg.statPoints=Math.max(0,S.rpg.statPoints-3); S.rpg.skillPoints=Math.max(0,S.rpg.skillPoints-1);
+  }
+  if(S.rpg.exp<0) S.rpg.exp=0;
+  save();
+}
 
 /* ============================================================ PROGRAM GEN =================================================== */
 function pickEx(slot,equip){ for(const id of slot.ids){ if(EX[id] && EX[id].eq.includes(equip)) return id; } return slot.ids[slot.ids.length-1]; }
@@ -1375,6 +1390,29 @@ function genDailyQuest(){
   S.quests={date:todayStr(),items,bonus,bonusGiven:false}; save();
 }
 function ensureDailyQuest(){ if(S.quests.date!==todayStr()) genDailyQuest(); }
+const QINFO={
+ q_push:{t:"Push-up protocol",c:["Any split counts \u2014 e.g. 4 sets spread through the day","Chest to floor, elbows ~45\u00b0, rigid plank","Too hard? Elevate hands on a table \u2014 same credit","Too easy? Slow the descent to 3s"]},
+ q_squat:{t:"Squat protocol",c:["Bodyweight only \u2014 full depth you can control","Heels down, knees track over toes","Split into sets freely (e.g. 3 sets of 10)","Hold a counter for balance if needed"]},
+ q_core:{t:"Core protocol",c:["Sit-ups, crunches, or lying leg raises \u2014 mix allowed","Move slow; no neck pulling","Split into sets freely","Lower back stays down on leg raises"]},
+ q_hang:{t:"Hang / plank protocol",c:["Accumulate the target seconds \u2014 multiple holds fine","Dead hang: active shoulders, breathe","Plank: glutes tight, ribs down, straight line"],timer:30},
+ b_run:{t:"Run protocol",c:["Outdoor or treadmill \u2014 pace does not matter","Walk breaks allowed; the distance is the goal","Track with any app or a known route"]},
+ b_push:{t:"Push-up volume",c:["Total across the whole day counts","Any variation \u2014 incline, knee, standard","Stop each set ~2 reps before failure"]},
+ b_steps:{t:"Step count",c:["10,000 steps by midnight","Phone or watch counter is the referee","Walks, errands, pacing \u2014 everything counts"]},
+ b_plank:{t:"Plank accumulation",c:["Total the target seconds across any number of holds","Front or side planks both count","Quality seconds only \u2014 sagging hips do not count"],timer:60},
+ b_mob:{t:"Full mobility flow",c:["Run the guided flow on Daily Quest 2\u20133 times through","Or 15 min of your own stretching \u2014 hips, shoulders, spine","Slow breathing, never force a stretch"]},
+ b_pull:{t:"Pull-up volume",c:["Total across the day \u2014 any grip","Band-assist or jump-negatives count","\u26a0 Elbow acting up? Skip it \u2014 bonus quests are optional"]},
+ r_hiit:{t:"HIIT Trial protocol",c:["8 rounds: 20s max effort / 10s rest (~4 min total)","Pick ONE move: burpees, mountain climbers, jump squats, or bike sprint","All-out on the work intervals \u2014 that is the trial","Warm up 2 min first; stop if form collapses"],timer:20},
+ r_burpee:{t:"100 burpees protocol",c:["100 total, for time \u2014 note your finish time","Chest to floor each rep, jump at the top","Break into sets from the start (10 sets of 10 works)","Pace over ego. Keep breathing."]},
+ r_emom:{t:"15-min EMOM protocol",c:["Every Minute On the Minute for 15 minutes:","Do 10 push-ups + 15 squats, rest until the next minute","Taking longer than ~40s? Drop to 8 + 12"],timer:60}
+};
+function questInfo(id){
+  const qi=(S.quests.items||[]).find(x=>x.id===id)||((S.quests.bonus||[]).find(x=>x.id===id)); if(!qi) return;
+  const inf=QINFO[id]||{t:"Objective",c:["Complete as written: "+qi.label,"Split the work however you like \u2014 the daily total is what counts","Unchecking a quest revokes its EXP"]};
+  const body=`<p class="lead tiny"><b class="hi">${esc(qi.label)}</b> \u00b7 <span class="am">+${qi.exp} EXP</span></p>`+
+    `<div class="statbonus">${inf.c.map(x=>`<div>\u25b8 ${x}</div>`).join("")}</div>`+
+    (inf.timer?`<button class="btn ghost full mt" onclick="startRest(${inf.timer},'Quest interval')">\u25b7 Start ${inf.timer}s interval timer</button>`:"");
+  detail("[ QUEST ]",inf.t,body,[{label:"Close",kind:"ghost",onClick:()=>hideOverlay()}]);
+}
 
 /* ============================================================ STREAK ======================================================== */
 function markActivityToday(){
@@ -1656,7 +1694,7 @@ function histPRs(){ const pr=(S.records&&S.records.pr)||{}; const rows=Object.ke
 function addCustomWork(){ if(!sessionDraft) return; const el=document.getElementById("customwork"); if(!el) return; const v=(el.value||"").trim(); if(!v){ toast("Type a workout first"); return; } sessionDraft.custom=sessionDraft.custom||[]; sessionDraft.custom.push(v); S.draft=sessionDraft; save(); renderTrain(); toast("Added to today's Gate"); }
 function rmCustomWork(i){ if(!sessionDraft||!sessionDraft.custom) return; sessionDraft.custom.splice(i,1); S.draft=sessionDraft; save(); renderTrain(); }
 /* ---- bonus quests ---- */
-function toggleBonus(id){ const b=((S.quests&&S.quests.bonus)||[]).find(x=>x.id===id); if(!b) return; if(b.done){ b.done=false; save(); renderQuests(); return; } b.done=true; const r=addExp(b.exp,"bonus"); markActivityToday(); handleLevels(r); save(); renderQuests(); toast(`Bonus cleared · +${r.gained} EXP`); }
+function toggleBonus(id){ const b=((S.quests&&S.quests.bonus)||[]).find(x=>x.id===id); if(!b) return; if(b.done){ b.done=false; subExp(b.gx!=null?b.gx:b.exp,"bonus-undo"); b.gx=null; save(); renderQuests(); renderStatus(); decorPanels(); toast("Bonus unchecked \u2014 EXP revoked"); return; } b.done=true; const r=addExp(b.exp,"bonus"); b.gx=r.gained; markActivityToday(); handleLevels(r); save(); renderQuests(); toast(`Bonus cleared · +${r.gained} EXP`); }
 /* ---- hunter rank explanations ---- */
 const RANK_INFO=[
  ["E","Awakened Novice","The weakest and most common tier. No special edge beyond raw effort and the skills you train. Every Hunter begins here — the climb starts now."],
@@ -1697,19 +1735,20 @@ function readinessPct(){ ensureDailyQuest(); const q=S.quests.items,done=q.filte
 function hpMax(){ return 80+effStats().VIT*4; }
 function mpMax(){ return 60+effStats().SEN*3; }
 
-function segTicks(cx,cy,R,len,sw,n,pct,glow){
+function segTicks(cx,cy,R,len,sw,n,pct,glow,offCol,noGlow){
   let s="", filled=Math.round(n*Math.min(1,Math.max(0,pct)));
   for(let i=0;i<n;i++){ const a=(90+i*360/n)*Math.PI/180, c=Math.cos(a), si=Math.sin(a);
     const x1=(cx+c*(R-len/2)).toFixed(1), y1=(cy+si*(R-len/2)).toFixed(1), x2=(cx+c*(R+len/2)).toFixed(1), y2=(cy+si*(R+len/2)).toFixed(1), on=i<filled;
     const blur=on?(len*0.75).toFixed(1):(len*0.4).toFixed(1);
-    const col=on?glow:"rgb(255 255 255 / .16)";
-    const st="stroke:"+col+";filter:drop-shadow(0 0 "+blur+"px "+glow+")"+(on?(";animation-delay:"+(i*0.012).toFixed(3)+"s"):"");
+    const col=on?glow:(offCol||"rgb(255 255 255 / .16)");
+    const gcol=(glow==="#ffffff")?"rgb(var(--ac))":glow;
+    const st="stroke:"+col+(noGlow?"":";filter:drop-shadow(0 0 "+blur+"px "+(on?gcol:glow)+")")+(on?(";animation-delay:"+(i*0.012).toFixed(3)+"s"):"");
     s+=`<line class="seg${on?' on':''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${sw}" stroke-linecap="round" style="${st}"/>`; }
   return s;
 }
 function levelRing(have,need,lv,rank){
   const pct=Math.min(1,need>0?have/need:0);
-  return `<div class="lvring"><svg viewBox="0 0 208 208" class="segring">${segTicks(104,104,94,11,2.4,112,pct,"var(--accent)")}</svg>
+  return `<div class="lvring"><svg viewBox="0 0 208 208" class="segring">${segTicks(104,104,94,8,1.4,168,pct,"#ffffff","rgb(var(--ac) / .14)")}</svg>
     <div class="lr-mid"><div class="lr-rank">${rank}-RANK</div><div class="lr-lv" id="lvnum">${lv}</div><div class="lr-lvlabel">LEVEL</div><div class="lr-exp">${have} / ${need} EXP</div></div></div>`;
 }
 function statArrowCell(k,v){ const d=statDelta(k), base=S.rpg.stats[k]||0, canUp=(S.rpg.statPoints||0)>0, canDown=base>10;
@@ -1878,12 +1917,12 @@ function renderQuests(){
       <button class="btn ghost full mt" onclick="logWeightPrompt()">Open weigh-in window</button></div>
     ${bn.length?`<div class="panel questbox"><div class="panel-title"><span class="tri"></span>Bonus Quests<span class="sub">SURGE</span></div>
       <p class="lead tiny">The System opened extra contracts today. Optional — clear them for bonus EXP.</p>
-      ${bn.map(b=>`<div class="quest bonusquest ${b.done?'done':''}"><div class="qx" onclick="toggleBonus('${b.id}')">${b.done?'✓':''}</div><div class="ql">${esc(b.label)}</div><div class="qr">+${b.exp}</div></div>`).join("")}</div>`:""}
+      ${bn.map(b=>`<div class="quest bonusquest ${b.done?'done':''}"><div class="qx" onclick="toggleBonus('${b.id}')">${b.done?'✓':''}</div><div style="cursor:pointer" onclick="questInfo('${b.id}')"><div class="ql">${esc(b.label)}</div><div class="muted tiny" style="margin-top:2px">Tap for the protocol \u203a</div></div><div class="qr">+${b.exp}</div></div>`).join("")}</div>`:""}
     <div class="panel questbox">
       <div class="panel-title"><span class="tri"></span>Daily Quest<span class="sub">${all?'CLEAR':'ACTIVE'}</span></div>
       <p class="lead tiny">The System's standing order. Scaled to your level — always clearable, never optional. Clear all for bonus EXP.</p>
       ${q.map(qi=>`<div class="quest ${qi.done?'done':''}"><div class="qx" onclick="toggleQuest('${qi.id}')">${qi.done?'✓':''}</div>
-        ${qi.id==="q_mob"?`<div style="cursor:pointer" onclick="mobilityRoutine()"><div class="ql">${esc(qi.label)}</div><div class="muted tiny" style="margin-top:2px">Tap to open the guided flow ›</div></div>`:`<div class="ql">${esc(qi.label)}</div>`}<div class="qr">+${qi.exp}</div></div>`).join("")}
+        ${qi.id==="q_mob"?`<div style="cursor:pointer" onclick="mobilityRoutine()"><div class="ql">${esc(qi.label)}</div><div class="muted tiny" style="margin-top:2px">Tap to open the guided flow ›</div></div>`:`<div style="cursor:pointer" onclick="questInfo('${qi.id}')"><div class="ql">${esc(qi.label)}</div><div class="muted tiny" style="margin-top:2px">Tap for the checklist \u203a</div></div>`}<div class="qr">+${qi.exp}</div></div>`).join("")}
       ${all?`<div class="banner ok">✓ Daily Quest complete. The System is satisfied.</div>`:""}
     </div>
     <div class="panel flat">
@@ -1930,10 +1969,15 @@ function renderQuests(){
 function toggleQuest(id){
   const qi=S.quests.items.find(x=>x.id===id); if(!qi) return;
   qi.done=!qi.done;
-  if(qi.done){ const r=addExp(qi.exp,"quest"); markActivityToday(); handleLevels(r); }
+  if(qi.done){ const r=addExp(qi.exp,"quest"); qi.gx=r.gained; markActivityToday(); handleLevels(r); }
+  else{ subExp(qi.gx!=null?qi.gx:qi.exp,"quest-undo"); qi.gx=null;
+    if(S.quests.bonusGiven){ S.quests.bonusGiven=false; subExp(S.quests.bonusGX!=null?S.quests.bonusGX:80,"clear-undo"); S.quests.bonusGX=null;
+      toast("Unchecked \u2014 EXP and clear bonus revoked"); }
+    else toast("Unchecked \u2014 EXP revoked"); }
   save();
   if(S.quests.items.every(i=>i.done) && !S.quests.bonusGiven){
     S.quests.bonusGiven=true; const mult=S.skills.owned.includes("ss3")?1.3:1; const r=addExp(80*mult,"quest-clear");
+    S.quests.bonusGX=r.gained;
     notify("DAILY QUEST CLEAR",`All objectives complete.<br>Bonus <b>+${r.gained} EXP</b>`); handleLevels(r);
   }
   save(); renderQuests(); renderStatus(); decorPanels();
@@ -2522,6 +2566,7 @@ function renderSystem(){
       <p class="lead tiny">Progress auto-saves on this device. Export a backup so a cleared cache can't wipe your climb.</p>
       <div class="grid2"><button class="btn" onclick="exportData()">Export backup</button><button class="btn" onclick="document.getElementById('importfile').click()">Import backup</button></div>
       <button class="btn ghost full mt" onclick="restartProgram()">Restart program \u2014 keep all data</button>
+      <button class="btn ghost full mt" onclick="freshStart()">Fresh start \u2014 carry data, clear debuffs</button>
       ${!storageOK?`<div class="banner">This preview can't auto-save. On your phone it will. <b>Export regularly.</b></div>`:""}
       <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button></div>
     <div class="panel flat"><div class="panel-title"><span class="tri"></span>About<span class="sub">SYSTEM GUIDE</span></div>
@@ -2700,6 +2745,20 @@ document.getElementById("importfile").addEventListener("change",function(ev){
   r.readAsText(f);
 });
 async function restartProgram(){ const ok=await sysConfirm("RESTART PROGRAM","Set Week 1 to begin today. All sessions, records, weight and nutrition history are kept.","Restart"); if(!ok) return; S.program.startDate=todayStr(); S.program.seq=0; save(); toast("Program restarted \u2014 Week 1 begins today"); render(); decorPanels(); }
+async function freshStart(){
+  const lv=await sysSelect("FRESH START","Weight, calories and personal records are all kept. Missed-day debuffs and readiness pressure are wiped clean. What happens to your Level?",
+    [{value:"keep",label:"Keep my Level & rank as-is"},{value:"reset",label:"Reset to Level 1 \u2014 fresh climb"}],null);
+  if(lv===null) return;
+  const t=todayStr();
+  S.program.startDate=t; S.program.freshStart=t; S.program.seq=0;
+  S.skips=[]; S.excused=[]; S.draft=null; if(typeof sessionDraft!=="undefined") sessionDraft=null;
+  S.quests.bonusGiven=false; S.quests.bonusGX=null;
+  if(lv==="reset"){ S.rpg.level=1; S.rpg.exp=0; S.rpg.totalExp=0; S.rpg.statPoints=0; S.rpg.skillPoints=0;
+    S.rpg.stats={STR:10,AGI:10,VIT:10,SEN:10,INT:10}; (S.skills||{}).owned=[]; }
+  save();
+  notify("FRESH START",`Week 1 begins today.<br>Weight, calories &amp; records <b>carried over</b>.<br>Debuffs <b>cleared</b>${lv==="reset"?" \u00b7 Level reset to <b>1</b>":""}.`);
+  render(); decorPanels();
+}
 async function resetAll(){
   const ok=await sysConfirm("RESET ALL PROGRESS","This permanently erases your level, sessions, stats and history on this device. This cannot be undone. Export a backup first if unsure.","Erase everything","warn");
   if(!ok) return;
@@ -2838,7 +2897,7 @@ function barMini(arr){ const max=Math.max(1,...arr); const W=300,H=60,n=arr.leng
   arr.forEach((v,i)=>{ const h=Math.max(2,(v/max)*(H-14)),x=gap+i*(bw+gap),y=H-h;
     b+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--accent)" style="filter:drop-shadow(0 0 4px rgb(var(--ac) / .5))"/><text x="${(x+bw/2).toFixed(1)}" y="${H-2}" text-anchor="middle" style="fill:var(--ghost);font-size:7px;font-family:var(--mono)">${v}</text>`; });
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:64px;display:block;margin-top:6px">${b}</svg>`; }
-function missedListRecent(daysBack){ const end=todayStr(new Date(Date.now()-86400000)); let start=todayStr(new Date(Date.now()-86400000*daysBack)); const sb=(S.program&&S.program.startDate)||start; if(start<sb) start=sb;
+function missedListRecent(daysBack){ const end=todayStr(new Date(Date.now()-86400000)); let start=todayStr(new Date(Date.now()-86400000*daysBack)); const sb=(S.program&&(S.program.freshStart||S.program.startDate))||start; if(start<sb) start=sb;
   const miss=scheduledDatesBetween(start,end).filter(dt=>!S.sessions.some(s=>s.date===dt&&!s.forced)&&!(S.skips||[]).includes(dt)&&!(S.excused||[]).some(e=>e.date===dt)).slice(-8);
   if(!miss.length) return ""; return `<div class="mt">${miss.map(dt=>`<div class="kv"><span class="k">${DAYNAMES[new Date(dt+"T00:00:00").getDay()]} · ${dt.slice(5)}</span><span class="v cr">missed</span></div>`).join("")}</div>`; }
 function openDayDetail(date){ const ses=workoutsOn(date), dow=DAYNAMES[new Date(date+"T00:00:00").getDay()];
