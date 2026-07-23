@@ -116,6 +116,19 @@ b,strong{font-weight:700;}
   background:linear-gradient(168deg, rgb(var(--ac) / .10), rgb(2 4 14 / .78) 60%);}
 .panel.flat>.sheen::after{opacity:.5;}
 .panel.tap{cursor:pointer;transition:transform .12s, box-shadow .25s, border-color .25s;}
+.tbseg{position:absolute;left:0;right:0;bottom:0;display:flex;gap:0;align-items:stretch;padding:0;cursor:pointer;}
+.tbseg i{flex:1;height:6px;border:none;background:rgb(var(--ac) / .10);transition:background .25s, box-shadow .25s;}
+.tbseg i.part{background:repeating-linear-gradient(45deg, rgb(var(--ac) / .55) 0 2px, transparent 2px 5px);}
+.tbseg i.full{background:var(--accent);box-shadow:0 0 6px rgb(var(--ac) / .6);}
+.tbseg i.fin{border-color:rgb(255 206 107 / .6);background:rgb(255 206 107 / .38);}
+.tbseg i.fin.full{background:var(--gold);box-shadow:0 0 8px rgb(255 206 107 / .7);}
+.panel-title.tmin{cursor:pointer;-webkit-user-select:none;user-select:none;position:relative;}
+.pdot{display:inline-block;width:7px;height:7px;margin-left:7px;vertical-align:middle;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);}
+.panel-title>.tri{display:none;}
+.panel-title.tmin>.tri{display:inline-block;}
+.panel-title .tri{transition:transform .22s;}
+.panel-title.tmin.min~*{display:none !important;}
+.panel-title.tmin.min .tri{transform:rotate(90deg);}
 .panel.tap:active{transform:scale(.985);}
 .panel.tap:hover{border-color:var(--line-2);}
 .panel-title{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--accent);text-transform:uppercase;
@@ -804,6 +817,7 @@ html[data-accent="crimson"] .lvfx .fx-crimson{ display:block; }
   <div class="topbar">
     <div class="brand" role="button" tabindex="0" style="cursor:pointer" onclick="go('status')">//ASCENSION SYSTEM<small id="tb_name">PLAYER</small></div>
     <div class="rankpill" id="tb_pill" onclick="openProfile()"><span id="tb_rank">E</span>·RANK <span class="sep">|</span> Lv <b id="tb_lv">1</b></div>
+    <div class="tbseg" id="tb_prog" style="display:none" onclick="go('train')"></div>
   </div>
   <section class="screen active" id="s-status"></section>
   <section class="screen" id="s-quests"></section>
@@ -1720,12 +1734,21 @@ function lastNSessions(n){ const t=Date.now(),out=[]; for(let i=0;i<n;i++){ cons
 
 /* ============================================================ RENDER ======================================================== */
 let activeTab="status";
+function pmin(k){ return !!(S.ui&&S.ui.min&&S.ui.min[k]); }
+function needDot(k){ try{
+  if(k==="skilltree") return S.rpg.skillPoints>0 && SKILLTREE.some(br=>br.nodes.some(nd=>!S.skills.owned.includes(nd.id)&&S.rpg.level>=nd.lv&&S.rpg.skillPoints>=nd.cost));
+  if(k==="fuel") return SUPPS.some(sp=>!((S.supps.checks[todayStr()]||[]).includes(sp.id)));
+  }catch(e){} return false; }
+function pdot(k){ return (pmin(k)&&needDot(k))?`<span class="pdot"></span>`:""; }
+function togglePanelMin(k){ S.ui=S.ui||{}; S.ui.min=S.ui.min||{}; S.ui.min[k]=!S.ui.min[k]; save(); if(typeof renderFor==="function") renderFor(activeTab); decorPanels(); }
 function render(){
   if(!S.profile) return;
   ensureDailyQuest();
   document.getElementById("tb_name").textContent=(S.profile.name||"PLAYER").toUpperCase();
   document.getElementById("tb_rank").textContent=rankFor(S.rpg.level);
   document.getElementById("tb_lv").textContent=S.rpg.level;
+  if(S.draft&&S.draft.date===todayStr()){ if(!sessionDraft) sessionDraft=S.draft; if(typeof updateTrainProgress==="function") updateTrainProgress(); }
+  else if(typeof hideTrainProgress==="function") hideTrainProgress();
   document.documentElement.setAttribute("data-accent",S.settings.accent||"cyan");
   document.documentElement.setAttribute("data-bars",S.settings.barStyle||"glow");
   document.documentElement.setAttribute("data-sweep",sweepOn()?"on":"off");
@@ -1741,15 +1764,14 @@ function hpMax(){ return 80+effStats().VIT*4; }
 function mpMax(){ return 60+effStats().SEN*3; }
 
 function segTicks(cx,cy,R,len,sw,n,pct,glow,offCol,noGlow){
-  let s="", filled=Math.round(n*Math.min(1,Math.max(0,pct)));
+  let sa="", sb="", filled=Math.round(n*Math.min(1,Math.max(0,pct)));
   for(let i=0;i<n;i++){ const a=(90+i*360/n)*Math.PI/180, c=Math.cos(a), si=Math.sin(a);
     const x1=(cx+c*(R-len/2)).toFixed(1), y1=(cy+si*(R-len/2)).toFixed(1), x2=(cx+c*(R+len/2)).toFixed(1), y2=(cy+si*(R+len/2)).toFixed(1), on=i<filled;
-    const blur=on?(len*0.75).toFixed(1):(len*0.4).toFixed(1);
-    const col=on?glow:(offCol||"rgb(255 255 255 / .16)");
-    const gcol=(glow==="#ffffff")?"rgb(var(--ac))":glow;
-    const st="stroke:"+col+(noGlow?"":";filter:drop-shadow(0 0 "+blur+"px "+(on?gcol:glow)+")")+(on?(";animation-delay:"+(i*0.012).toFixed(3)+"s"):"");
-    s+=`<line class="seg${on?' on':''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${sw}" stroke-linecap="round" style="${st}"/>`; }
-  return s;
+    if(on) sa+=`<line class="seg on" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${sw}" stroke-linecap="round" style="stroke:${glow};animation-delay:${(i*0.012).toFixed(3)}s"/>`;
+    else   sb+=`<line class="seg" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${sw}" stroke-linecap="round" style="stroke:${offCol||"rgb(255 255 255 / .16)"}"/>`; }
+  const gcol=(glow==="#ffffff")?"rgb(var(--ac))":glow;
+  const blur=(len*0.75).toFixed(1);
+  return `<g>${sb}</g><g${noGlow?"":` style="filter:drop-shadow(0 0 ${blur}px ${gcol})"`}>${sa}</g>`;
 }
 function levelRing(have,need,lv,rank){
   const pct=Math.min(1,need>0?have/need:0);
@@ -1818,7 +1840,7 @@ function renderStatus(){
     </div>
 
     <div class="panel">
-      <div class="panel-title"><span class="tri"></span>Skill Tree<span class="sub">${S.rpg.skillPoints} SP</span></div>
+      <div class="panel-title tmin ${pmin('skilltree')?'min':''}" onclick="togglePanelMin('skilltree')"><span class="tri"></span>Skill Tree${pdot('skilltree')}<span class="sub">${S.rpg.skillPoints} SP</span></div>
       <p class="lead tiny">Spend skill points (1 per level). Nodes grant EXP bonuses + unlock guidance.</p>
       <div class="tree">${SKILLTREE.map(br=>`<div class="branch"><h3>${br.br}</h3><div class="bd">${br.desc}</div>${br.nodes.map(skillNode).join("")}</div>`).join("")}</div>
     </div>
@@ -1943,7 +1965,7 @@ function renderQuests(){
           <div><div class="ql">${sp.n}</div><div class="muted tiny" style="margin-top:2px">${sp.dose} · ${sp.why}</div></div></div>`;}).join("")}
     </div>
     <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>Nutrition &amp; Fuel<span class="sub">LACTOSE-FREE</span></div>
+      <div class="panel-title tmin ${pmin('fuel')?'min':''}" onclick="togglePanelMin('fuel')"><span class="tri"></span>Nutrition &amp; Fuel${pdot('fuel')}<span class="sub">LACTOSE-FREE</span></div>
       <p class="lead tiny">Recomp on near-maintenance, high protein — food + sleep drive ~90% of results. Floor: never below ~2000 kcal (lower = muscle loss + poor recovery).</p>
       <div class="nutri-targets">
         <div class="nt"><span class="ntk">CALS</span><span class="ntv">2300–2600</span></div>
@@ -2108,7 +2130,17 @@ function updateTrainProgress(){ if(!sessionDraft) return; let tot=0,done=0;
   sessionDraft.ex.forEach((e,i)=>{ let ed=0; e.sets.forEach(s=>{ tot++; if(s.done){done++;ed++;} });
     const dot=document.getElementById("hdot_"+(i+1)); if(dot) dot.classList.toggle("done",e.sets.length>0&&ed===e.sets.length); });
   const f=document.getElementById("trainbarfill"); if(f) f.style.width=(tot?Math.round(done/tot*100):0)+"%";
-  const cnt=document.getElementById("setcount"); if(cnt) cnt.textContent=done+" / "+tot+" sets"; }
+  const cnt=document.getElementById("setcount"); if(cnt) cnt.textContent=done+" / "+tot+" sets";
+  const hp=document.getElementById("tb_prog");
+  if(hp){ if(typeof activeTab!=="undefined"&&activeTab!=="train"){ hp.style.display="none"; return; }
+    hp.style.display="flex"; let allFull=sessionDraft.ex.length>0;
+    let seg="";
+    sessionDraft.ex.forEach(e=>{ const d2=e.sets.filter(s=>s.done).length;
+      const full=e.sets.length>0&&d2===e.sets.length; if(!full) allFull=false;
+      seg+=`<i class="${full?"full":(d2>0?"part":"")}"></i>`; });
+    seg+=`<i class="fin ${allFull?"full":""}"></i>`;
+    if(hp._sig!==seg){ hp.innerHTML=seg; hp._sig=seg; } } }
+function hideTrainProgress(){ const hp=document.getElementById("tb_prog"); if(hp) hp.style.display="none"; }
 function wireTrainScroll(){ const hs=document.getElementById("hscroll"); if(!hs) return;
   hs.onscroll=()=>{ clearTimeout(hs._t); hs._t=setTimeout(()=>{ const i=Math.round(hs.scrollLeft/Math.max(1,hs.clientWidth));
     document.querySelectorAll("#hdots i").forEach((d,di)=>d.classList.toggle("on",di===i)); },60); };
@@ -2241,8 +2273,7 @@ function renderTrain(){
       <p class="lead tiny">${doneCount()} of ${totalSets} sets logged. Progressive overload: beat last time by a rep or a small load bump.</p>
       <button class="btn full mt" onclick="finishSession()">${sessionDraft.boss?'⚔ Defeat Boss — Finish &amp; Claim':'Clear Gate — Finish &amp; Claim EXP'}</button>
       <button class="btn ghost full mt" onclick="scrollTrainTo(0)">Back to start</button></div></div>`;
-  el.innerHTML=`<div class="trainbar"><i id="trainbarfill" style="width:${pct}%"></i></div>
-    <div class="hscroll" id="hscroll">${overview}${sessionDraft.ex.map((e,i)=>exercisePage(e,i)).join("")}${finish}</div>`;
+  el.innerHTML=`    <div class="hscroll" id="hscroll">${overview}${sessionDraft.ex.map((e,i)=>exercisePage(e,i)).join("")}${finish}</div>`;
   wireTrainScroll();
 }
 function statTip(stat,val){ const b=Math.max(0,Math.floor((val-10)/3)), u=unitW(), inc=u==="kg"?(2.5+b*2.5):(5+b*5);
@@ -2386,7 +2417,7 @@ function renderStats(){
     </div>
 
     <div class="panel">
-      <div class="panel-title"><span class="tri"></span>Nutrition Targets<span class="sub">${goalMode().toUpperCase()}</span></div>
+      <div class="panel-title tmin ${pmin('nutT')?'min':''}" onclick="togglePanelMin('nutT')"><span class="tri"></span>Nutrition Targets<span class="sub">${goalMode().toUpperCase()}</span></div>
       <div class="kv"><span class="k">BMR (Mifflin–St Jeor)</span><span class="v">${bmr()} kcal</span></div>
       <div class="kv"><span class="k">TDEE × activity</span><span class="v">${tdee()} kcal</span></div>
       <div class="kv"><span class="k">Daily target</span><span class="v hi">${calorieTarget()} kcal</span></div>
@@ -2424,7 +2455,7 @@ function renderStats(){
     </div>
 
     <div class="panel">
-      <div class="panel-title"><span class="tri"></span>Bodyweight<span class="sub">${wlog.length} entries · ${unitW()}</span></div>
+      <div class="panel-title tmin ${pmin('bwD')?'min':''}" onclick="togglePanelMin('bwD')"><span class="tri"></span>Bodyweight${pdot('bwD')}<span class="sub">${wlog.length} entries · ${unitW()}</span></div>
       ${wlog.length>=2 ? lineChart(wlog.map(w=>({x:w.date.slice(5),y:lb1(w.kg)})),unitW())
         : `<p class="lead tiny">Log your weight a few times to see the trend. On Lean Build, aim for a slow climb (~0.5–1 ${unitW()}/week).</p>`}
       ${wListHTML?`<div class="fld-head mt">Recent weigh-ins · tap to edit</div>${wListHTML}`:""}
@@ -2575,7 +2606,7 @@ function renderSystem(){
       <button class="btn ghost full mt" onclick="freshStart()">Fresh start \u2014 carry data, clear debuffs</button>
       ${!storageOK?`<div class="banner">This preview can't auto-save. On your phone it will. <b>Export regularly.</b></div>`:""}
       <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button></div>
-    <div class="panel flat"><div class="panel-title"><span class="tri"></span>About<span class="sub">SYSTEM GUIDE</span></div>
+    <div class="panel flat"><div class="panel-title tmin ${pmin('about')?'min':''}" onclick="togglePanelMin('about')"><span class="tri"></span>About<span class="sub">SYSTEM GUIDE</span></div>
       <p class="lead tiny">ASCENSION turns the grind toward a lean, shredded hunter's physique into a Solo-Leveling <b class="hi">System</b> — a ${S.program.weeks||24}-week (extendable) program across three Arcs, wrapped in levels, ranks, attributes, quests and boss gates. One offline file, saved to your device. Not medical advice.</p>
       <div class="fld-head mt">How it works</div>
       <ul class="guide">
@@ -2594,7 +2625,7 @@ function renderSystem(){
         <li><b>Lift heavy?</b> Not required — use whatever equipment you have; bodyweight progressions count. Just beat your last log over time.</li>
         <li><b>Lose progress?</b> Everything saves locally. Back up via Settings, and import it on a new device.</li>
       </ul>
-      <div class="creditbox"><span class="sig">// SYSTEM ADMINISTRATOR</span>Designed and tested by <b class="hi">KVRYSV</b>. Built, verified, and coded by <b class="hi">Claude</b> — your friendly neighborhood AI architect, who has never done a pull-up but has rendered a great many. Arise, Hunter. ⚔</div></div>`;
+      <div class="creditbox"><span class="sig">// SYSTEM ADMINISTRATOR</span>Built by <b class="hi">Claude</b> and <b class="hi">KVRYSV</b>. Arise, Hunter.</div></div>`;
 }
 function setBars(v){ S.settings.barStyle=v; save(); document.documentElement.setAttribute("data-bars",v); }
 function sweepOn(){ return !!(S&&S.settings&&S.settings.sweep===true); }
@@ -2807,6 +2838,8 @@ function go(t){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active","entering"));
   const sc=document.getElementById("s-"+t); sc.classList.add("active"); void sc.offsetWidth; sc.classList.add("entering");
   clearTimeout(window._entT); window._entT=setTimeout(()=>sc.classList.remove("entering"),650);
+  if(t!=="train"){ if(typeof hideTrainProgress==="function") hideTrainProgress(); }
+  else if(sessionDraft&&typeof updateTrainProgress==="function") updateTrainProgress();
   window.scrollTo(0,0);
 }
 function wireChips(id,multi){
@@ -2996,7 +3029,7 @@ function openProfile(){
       <div class="prgrid" style="grid-template-columns:1fr 1fr 1fr"><div class="prcell"><div class="k">TOTAL SCORE</div><div class="v">${totalScore}</div><div class="mm"></div></div><div class="prcell"><div class="k">EXP / WK</div><div class="v">${weekScore}</div><div class="mm"></div></div><div class="prcell"><div class="k">WK SCORE</div><div class="v">${weekProd}</div><div class="mm"></div></div></div>
       <div class="fld-head mt">EXP gained per day (this week)</div>${expSpark}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Calories / Day<span class="sub">THIS WEEK</span></div>${calHTML}</div>
-    <div class="panel"><div class="panel-title"><span class="tri"></span>Items &amp; Potions<span class="sub">USAGE</span></div><p class="lead tiny">Supplements logged as consumables — your uptake over time.</p>${suppUsage().map(u=>`<div class="kv"><span class="k">${u.n}</span><span class="v">${u.total} taken${u.week?` · ${u.week}/7 wk`:''}${u.last?` · last ${u.last.slice(5)}`:''}</span></div>`).join("")}</div>
+    <div class="panel"><div class="panel-title tmin ${pmin('pots')?'min':''}" onclick="togglePanelMin('pots')"><span class="tri"></span>Items &amp; Potions${pdot('pots')}<span class="sub">USAGE</span></div><p class="lead tiny">Supplements logged as consumables — your uptake over time.</p>${suppUsage().map(u=>`<div class="kv"><span class="k">${u.n}</span><span class="v">${u.total} taken${u.week?` · ${u.week}/7 wk`:''}${u.last?` · last ${u.last.slice(5)}`:''}</span></div>`).join("")}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Missed Days<span class="sub">LAST 28D</span></div><div class="bigval ${missed?'cr':'gr'}" style="font-size:34px">${missed}</div><p class="lead tiny center">${missed?`Scheduled Gates not cleared in the last 28 days.`:`No missed Gates in 28 days. Relentless.`}</p>${missList}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Personal Records<span class="sub">BEST SETS</span></div>${prHTML}</div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${wk}/${weeks}</span></div><div class="name mono hi" style="font-size:15px">${arc.n}</div><p class="lead tiny">${arc.desc}</p></div>
@@ -3141,7 +3174,7 @@ function recoveryBodyHTML(){
   setTimeout(()=>init3DBody(rec,dim,"body3ds"),0);
   const lastLine=last?`<div class="kv"><span class="k">Last Gate</span><span class="v">${esc(last.name)}${last.boss?" \u00b7 BOSS":""} \u00b7 ${last.date.slice(5)} \u00b7 ${last.setsDone} sets</span></div>`:`<p class="lead tiny">No Gates cleared yet \u2014 everything reads ready.</p>`;
   const state=rec.size?`<span class="cr">${rec.size} recovering</span>`:`<span class="gr">all systems ready</span>`;
-  return `<div class="panel flat"><div class="panel-title"><span class="tri"></span>Recovery Map<span class="sub">${rec.size+dim.size?rec.size+dim.size+" HEALING":"READY"}</span></div>
+  return `<div class="panel flat"><div class="panel-title tmin ${pmin('recmap')?'min':''}" onclick="togglePanelMin('recmap')"><span class="tri"></span>Recovery Map${pdot('recmap')}<span class="sub">${rec.size+dim.size?rec.size+dim.size+" HEALING":"READY"}</span></div>
     ${lastLine}
     <div class="b3dwrap"><canvas id="body3ds"></canvas><span class="b3dhint">DRAG \u25b8 ROTATE</span></div>
     <p class="b3dkey"><b class="pk">\u25a0 Pulsing</b> = recovering \u00b7 <b class="sk">\u25a0 Dim</b> = nearly ready \u00b7 dark = ready to train \u00b7 ${state}</p>
@@ -3301,7 +3334,7 @@ function init3DBody(pset,sset,cid){ cid=cid||"body3d";
 </script>
 <script>
 "use strict";
-/* ============================= SHADER FX SUITE v3 — DEPTH PLEXUS (WebGL1, zero deps) ============================= */
+/* ============================= SHADER FX SUITE v4 — WIRE TERRAIN (WebGL1, zero deps) ============================= */
 (function(){
 var RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
 function accents(){ var cs=getComputedStyle(document.documentElement);
@@ -3323,7 +3356,12 @@ function prog(gl,fsrc){
 
 /* ---------- THE VOID v3: perspective grid + layered particle network (depth) ---------- */
 var BGF=[
-"precision mediump float;varying vec2 vUv;",
+"#ifdef GL_FRAGMENT_PRECISION_HIGH",
+"precision highp float;",
+"#else",
+"precision mediump float;",
+"#endif",
+"varying vec2 vUv;",
 "uniform vec2 uR;uniform float uT;uniform vec3 uA;uniform vec3 uB;uniform float uBoot;",
 "float h11(float n){ return fract(sin(n*127.1)*43758.5453); }",
 "float h21(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }",
@@ -3359,18 +3397,20 @@ var BGF=[
 "    col+=uA*exp(-z*0.35)*0.30*reveal;",
 "  }",
 "  col+=uA*exp(-abs(uv.y-H)*140.0)*0.7*reveal;",
-"  /* DEPTH PLEXUS \u2014 4 parallax layers flying slowly toward you */",
-"  vec2 sp=(vUv-vec2(0.5,0.62)); sp.x*=uR.x/uR.y;",
-"  float sky=smoothstep(H-0.05,H+0.14,vUv.y);",
-"  for(float i=0.0;i<4.0;i++){",
-"    float fz=fract(i*0.25+t*0.028);",
-"    float depth=mix(3.2,0.55,fz);",
-"    float ca=cos(0.06*i+t*0.01), sa=sin(0.06*i+t*0.01);",
-"    vec2 q=mat2(ca,-sa,sa,ca)*sp*depth*3.0+h11(i)*40.0+vec2(0.0,t*0.05*(i+1.0));",
-"    float bright=smoothstep(0.0,0.28,fz)*smoothstep(1.0,0.72,fz);",
-"    col+=mix(uA,uB,h11(i+2.0))*layer(q,t)*bright*0.34*sky*reveal;",
+"  /* WIREFRAME WAVE TERRAIN \u2014 stacked contour lines over rolling sine hills */",
+"  float tt=t*0.55;",
+"  for(float i=0.0;i<26.0;i++){",
+"    float zf=fract(i/26.0 - tt*0.05);",
+"    float zi=mix(0.9,14.0,zf*zf);",
+"    float xw=(vUv.x-0.5)*zi*2.2;",
+"    float zw=zi+tt;",
+"    float hgt=sin(xw*0.9+zw*0.7)*0.55+sin(xw*0.45-zw*0.5+1.7)*0.8+sin(zw*0.85)*0.5+sin((xw+zw)*0.33+2.1)*0.45;",
+"    float rowY=H-0.30/zi+hgt*(0.22/zi);",
+"    float w2=0.0018+0.004/zi;",
+"    float li=smoothstep(w2,0.0,abs(vUv.y-rowY));",
+"    float fade=smoothstep(14.0,2.0,zi)*smoothstep(0.02,0.15,zf);",
+"    col+=mix(uA,uB,0.35+0.4*sin(zi*0.6))*li*fade*0.34*reveal;",
 "  }",
-"  if(uBoot>0.5){ col+=uA*exp(-abs(vUv.x-fract(t*0.45))*26.0)*0.18*step(t,2.6); }",
 "  col+=(h21(vUv*uR.xy+fract(t)*7.0)-0.5)*0.026;",
 "  col*=max(1.0-0.32*length(vUv-vec2(0.5,0.42)),0.0);",
 "  gl_FragColor=vec4(col,1.0); }"
@@ -3382,7 +3422,7 @@ function surResize(s){ var cv=document.getElementById(s.id); if(!cv||!s.gl) retu
   cv.width=Math.max(2,Math.round(cv.clientWidth*k)); cv.height=Math.max(2,Math.round(cv.clientHeight*k));
   s.gl.viewport(0,0,cv.width,cv.height); s.lw=innerWidth; s.lh=innerHeight; }
 function surStart(s,boot){ var cv=document.getElementById(s.id); if(!cv) return false;
-  if(!s.gl){ s.gl=mkgl(cv); if(!s.gl) return false; s.p=prog(s.gl,BGF); if(!s.p){ s.gl=null; return false; }
+  if(!s.gl){ s.gl=mkgl(cv); if(!s.gl) return false; s.p=prog(s.gl,BGF); if(!s.p){ s.gl=null; return false; } s.loc=null; s._A=null;
     cv.addEventListener("webglcontextlost",function(e){ e.preventDefault(); s.on=false; cancelAnimationFrame(s.raf); },false);
     cv.addEventListener("webglcontextrestored",function(){ s.gl=null; s.p=null; surStart(s,boot); },false); }
   s.on=true; s.boot=boot?1:0; if(boot) s.t0=performance.now();
@@ -3390,12 +3430,14 @@ function surStart(s,boot){ var cv=document.getElementById(s.id); if(!cv) return 
 function surFrame(s,f){ if(!s.on||!s.gl||s.gl.isContextLost()) return;
   if(innerWidth!==s.lw||innerHeight!==s.lh) surResize(s);
   var gl=s.gl; gl.useProgram(s.p);
-  gl.uniform2f(gl.getUniformLocation(s.p,"uR"),gl.drawingBufferWidth,gl.drawingBufferHeight);
-  gl.uniform1f(gl.getUniformLocation(s.p,"uT"),RM?20.0:(performance.now()-s.t0)/1000);
-  gl.uniform1f(gl.getUniformLocation(s.p,"uBoot"),s.boot||0);
-  var A=accents();
-  gl.uniform3f(gl.getUniformLocation(s.p,"uA"),A[0],A[1],A[2]);
-  gl.uniform3f(gl.getUniformLocation(s.p,"uB"),A[3],A[4],A[5]);
+  if(!s.loc) s.loc={uR:gl.getUniformLocation(s.p,"uR"),uT:gl.getUniformLocation(s.p,"uT"),uBoot:gl.getUniformLocation(s.p,"uBoot"),uA:gl.getUniformLocation(s.p,"uA"),uB:gl.getUniformLocation(s.p,"uB")};
+  gl.uniform2f(s.loc.uR,gl.drawingBufferWidth,gl.drawingBufferHeight);
+  gl.uniform1f(s.loc.uT,RM?20.0:((performance.now()-s.t0)/1000)%7200);
+  gl.uniform1f(s.loc.uBoot,s.boot||0);
+  if(!s._A||performance.now()-(s._At||0)>2000){ s._A=accents(); s._At=performance.now(); }
+  var A=s._A;
+  gl.uniform3f(s.loc.uA,A[0],A[1],A[2]);
+  gl.uniform3f(s.loc.uB,A[3],A[4],A[5]);
   gl.drawArrays(gl.TRIANGLES,0,3);
   if(!RM) s.raf=requestAnimationFrame(f);
 }
