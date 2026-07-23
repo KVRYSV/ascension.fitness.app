@@ -3385,18 +3385,7 @@ var BGF=[
 "  float gs=floor(t/9.0); float gp=fract(t/9.0);",
 "  float gw=step(gp,0.013)*step(0.35,h21(vec2(gs,3.7)));",
 "  uv.x+=(h21(vec2(floor(uv.y*40.0),gs))-0.5)*0.012*gw;",
-"  float H=0.24;",
-"  if(uv.y<H){ /* perspective grid floor */",
-"    float z=1.0/max(H-uv.y,0.004);",
-"    float x=(uv.x-0.5)*z;",
-"    float fade=exp(-z*0.10)*reveal;",
-"    float gx=abs(fract(x*0.9)-0.5), gz=abs(fract(z*0.55+t*1.1)-0.5);",
-"    float lx=smoothstep(0.05,0.0,gx)*0.8+smoothstep(0.5,0.0,gx)*0.06;",
-"    float lz=smoothstep(0.06,0.0,gz)*0.8+smoothstep(0.5,0.0,gz)*0.06;",
-"    col+=(uA*lx+uB*lz*0.8)*fade*0.5;",
-"    col+=uA*exp(-z*0.35)*0.30*reveal;",
-"  }",
-"  col+=uA*exp(-abs(uv.y-H)*140.0)*0.7*reveal;",
+"  float H=0.30;",
 "  /* WIREFRAME WAVE TERRAIN \u2014 stacked contour lines over rolling sine hills */",
 "  float tt=t*0.55;",
 "  for(float i=0.0;i<26.0;i++){",
@@ -3426,6 +3415,7 @@ function surStart(s,boot){ var cv=document.getElementById(s.id); if(!cv) return 
     cv.addEventListener("webglcontextlost",function(e){ e.preventDefault(); s.on=false; cancelAnimationFrame(s.raf); },false);
     cv.addEventListener("webglcontextrestored",function(){ s.gl=null; s.p=null; surStart(s,boot); },false); }
   s.on=true; s.boot=boot?1:0; if(boot) s.t0=performance.now();
+  s._A=accents(); s._At=performance.now();
   surResize(s); cancelAnimationFrame(s.raf); s.raf=requestAnimationFrame(function f(){ surFrame(s,f); }); return true; }
 function surFrame(s,f){ if(!s.on||!s.gl||s.gl.isContextLost()) return;
   if(innerWidth!==s.lw||innerHeight!==s.lh) surResize(s);
@@ -3434,7 +3424,8 @@ function surFrame(s,f){ if(!s.on||!s.gl||s.gl.isContextLost()) return;
   gl.uniform2f(s.loc.uR,gl.drawingBufferWidth,gl.drawingBufferHeight);
   gl.uniform1f(s.loc.uT,RM?20.0:((performance.now()-s.t0)/1000)%7200);
   gl.uniform1f(s.loc.uBoot,s.boot||0);
-  if(!s._A||performance.now()-(s._At||0)>2000){ s._A=accents(); s._At=performance.now(); }
+  var now2=performance.now();
+  if(!s._A||now2-(s._At||0)>((now2-s.t0)<1500?100:2000)){ s._A=accents(); s._At=now2; }
   var A=s._A;
   gl.uniform3f(s.loc.uA,A[0],A[1],A[2]);
   gl.uniform3f(s.loc.uB,A[3],A[4],A[5]);
@@ -3538,6 +3529,7 @@ window.fxLevelUp=function(){ fxPush(3,0.5,0.5,1700); };
 
 /* ---------- lifecycle ---------- */
 window.applyFxSetting=function(){ window.fxEnabled=(typeof fxOn!=="function")||fxOn();
+  try{ if(S&&S.settings&&S.settings.accent) document.documentElement.setAttribute("data-accent",S.settings.accent); }catch(e){}
   if(window.fxEnabled){ if(!bgStart()){ window.fxEnabled=false; } bootShader(); }
   if(!window.fxEnabled){ bgStop(); var bw=document.getElementById("bootwaves"); if(bw&&!document.getElementById("bootgl")) bw.style.display="block"; } };
 addEventListener("resize",function(){ if(bg.on) surResize(bg); if(fx.gl) fxResize(); },{passive:true});
