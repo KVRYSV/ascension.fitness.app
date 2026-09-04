@@ -598,7 +598,13 @@ html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
 .exvid.short{ aspect-ratio:9/16; width:auto; max-width:100%; max-height:72vh; margin-left:auto; margin-right:auto; }
 .exvid iframe{ width:100%; height:100%; border:0; display:block; }
 .exvid .vph{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:var(--ghost); font-family:var(--mono); font-size:11px; cursor:pointer; }
+.guidegrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:4px 0 2px; }
+.gcell{ border:1px solid var(--line); background:rgb(var(--ac) / .05); padding:9px 10px; clip-path:var(--clip-s); }
+.gk{ font-family:var(--mono); font-size:9.5px; letter-spacing:.18em; color:var(--ghost); }
+.gv{ font-family:var(--mono); font-size:17px; font-weight:700; color:var(--accent); margin:2px 0 4px; }
+.gd{ font-size:11px; color:var(--ghost); line-height:1.4; }
 .machine{ display:flex; gap:8px; flex-wrap:wrap; margin-top:11px; }
+.mchip.mchmain{ flex-basis:100%; background:rgb(var(--ac) / .14); border-color:var(--line-2); color:var(--ink-hi); font-weight:600; }
 .mchip{ font-family:var(--mono); font-size:10px; letter-spacing:.03em; padding:7px 10px; border:1px solid var(--line-2); color:var(--accent); background:var(--soft); }
 .mchip.free{ color:var(--ghost); border-color:var(--line); }
 .track{ display:flex; gap:10px; align-items:center; border:1px solid var(--line); background:rgb(var(--ac) / .04); padding:10px 12px; margin-top:11px; }
@@ -2055,36 +2061,36 @@ function sessionLoggedToday(){ const t=todayStr(); return S.sessions.some(s=>s.d
 
 /* ---- machine + free-weight per movement (D2) ---- */
 const MACHINE={
-  squat:{use:"Squat rack + barbell",free:"Goblet / DB front squat"},
-  goblet:{use:"Dumbbell or kettlebell",free:"Bodyweight squat"},
-  splitsquat:{use:"Dumbbells + bench",free:"Bodyweight, hands on hips"},
-  pistolprog:{use:"Box / bench to assist",free:"Hold a post for balance"},
-  deadlift:{use:"Barbell + plates",free:"DB / kettlebell deadlift"},
-  rdl:{use:"Barbell or dumbbells",free:"Single-leg DB RDL"},
-  hipthrust:{use:"Bench + barbell",free:"Bodyweight glute bridge"},
-  bench:{use:"Flat bench + barbell",free:"DB bench / floor press"},
-  dbpress:{use:"Dumbbells + bench",free:"Floor press / push-up"},
-  ohp:{use:"Barbell or dumbbells",free:"Pike push-up"},
-  pullup:{use:"Pull-up bar",free:"Band-assist / inverted row"},
-  pulldown:{use:"Lat-pulldown machine",free:"Pull-up / band pulldown"},
-  row:{use:"Barbell",free:"DB row / inverted row"},
-  dbrow:{use:"Dumbbell + bench",free:"Backpack row, knee on couch"},
-  invrow:{use:"Smith bar / low bar / rings",free:"Sturdy table edge"},
-  dip:{use:"Dip / parallel bars",free:"Bench dips, feet out"},
-  pushup:{use:"Floor",free:"Knees or incline to scale"},
-  pseudoplanche:{use:"Floor / parallettes",free:"Floor, lean forward"},
-  curl:{use:"Dumbbells / EZ bar",free:"Backpack or band curls"},
-  pushdown:{use:"Cable + rope",free:"Band pushdown / dips"},
-  latraise:{use:"Dumbbells",free:"Water bottles / band"},
-  facepull:{use:"Cable + rope",free:"Band face-pull on a post"},
-  calf:{use:"Calf machine / step",free:"Step edge, bodyweight"},
-  legcurl:{use:"Leg-curl machine",free:"Nordic curl / band curl"},
-  hollow:{use:"Floor / mat",free:"Tuck knees to scale"},
-  legraise:{use:"Pull-up bar / chair",free:"Lying leg raise"},
-  lsit:{use:"Parallettes / dip bars",free:"Floor, hands by hips"},
-  dragonflag:{use:"Bench to grip behind head",free:"Bend knees to scale"},
-  plank:{use:"Floor / mat",free:"—"},
-  frontleverprog:{use:"Pull-up bar / rings",free:"Tuck on any bar"},
+  squat:{use:"Squat rack + barbell",free:"Goblet / DB front squat",mch:"Hack squat machine or leg press (both compound, back-supported)"},
+  goblet:{use:"Dumbbell or kettlebell",free:"Bodyweight squat",mch:"Leg press machine"},
+  splitsquat:{use:"Dumbbells + bench",free:"Bodyweight, hands on hips",mch:"Smith machine (fixed bar path) or leg press one-leg"},
+  pistolprog:{use:"Box / bench to assist",free:"Hold a post for balance",mch:"Leg press single-leg (machine-guided)"},
+  deadlift:{use:"Barbell + plates",free:"DB / kettlebell deadlift",mch:"Seated back-extension + leg-press combo, or hip-thrust machine"},
+  rdl:{use:"Barbell or dumbbells",free:"Single-leg DB RDL",mch:"Seated leg-curl + hip-thrust machine"},
+  hipthrust:{use:"Bench + barbell",free:"Bodyweight glute bridge",mch:"Hip-thrust / glute-drive machine"},
+  bench:{use:"Flat bench + barbell",free:"DB bench / floor press",mch:"Chest-press machine (seated, plate-loaded)"},
+  dbpress:{use:"Dumbbells + bench",free:"Floor press / push-up",mch:"Chest-press machine"},
+  ohp:{use:"Barbell or dumbbells",free:"Pike push-up",mch:"Shoulder-press machine (seated)"},
+  pullup:{use:"Pull-up bar",free:"Band-assist / inverted row",mch:"Assisted pull-up machine or lat-pulldown machine"},
+  pulldown:{use:"Lat-pulldown machine",free:"Pull-up / band pulldown",mch:"Lat-pulldown machine (seated)"},
+  row:{use:"Barbell",free:"DB row / inverted row",mch:"Seated row machine (chest-supported)"},
+  dbrow:{use:"Dumbbell + bench",free:"Backpack row, knee on couch",mch:"Seated row machine or chest-supported row machine"},
+  invrow:{use:"Smith bar / low bar / rings",free:"Sturdy table edge",mch:"Seated row machine"},
+  dip:{use:"Dip / parallel bars",free:"Bench dips, feet out",mch:"Assisted dip machine or chest-press machine"},
+  pushup:{use:"Floor",free:"Knees or incline to scale",mch:"Chest-press machine"},
+  pseudoplanche:{use:"Floor / parallettes",free:"Floor, lean forward",mch:"Chest-press machine"},
+  curl:{use:"Dumbbells / EZ bar",free:"Backpack or band curls",mch:"Biceps-curl machine (seated, plate-loaded)"},
+  pushdown:{use:"Cable + rope",free:"Band pushdown / dips",mch:"Triceps-press / dip machine"},
+  latraise:{use:"Dumbbells",free:"Water bottles / band",mch:"Lateral-raise machine (seated)"},
+  facepull:{use:"Cable + rope",free:"Band face-pull on a post",mch:"Rear-delt / reverse-pec-deck machine"},
+  calf:{use:"Calf machine / step",free:"Step edge, bodyweight",mch:"Seated or standing calf-raise machine"},
+  legcurl:{use:"Leg-curl machine",free:"Nordic curl / band curl",mch:"Seated leg-curl machine"},
+  hollow:{use:"Floor / mat",free:"Tuck knees to scale",mch:"Ab-crunch machine"},
+  legraise:{use:"Pull-up bar / chair",free:"Lying leg raise",mch:"Captain's chair or ab-crunch machine"},
+  lsit:{use:"Parallettes / dip bars",free:"Floor, hands by hips",mch:"Captain's chair (vertical knee raise)"},
+  dragonflag:{use:"Bench to grip behind head",free:"Bend knees to scale",mch:"Ab-crunch machine"},
+  plank:{use:"Floor / mat",free:"—",mch:"Ab-crunch machine (weighted, if you prefer a machine)"},
+  frontleverprog:{use:"Pull-up bar / rings",free:"Tuck on any bar",mch:"Assisted pull-up machine"},
   deadhang:{use:"Pull-up bar",free:"Any sturdy bar / ledge"},
   cossack:{use:"Floor",free:"Hold support to balance"},
   deepsquathold:{use:"Floor",free:"Hold a post"},
@@ -2097,7 +2103,7 @@ const MACHINE={
   intervals:{use:"Treadmill / track",free:"Outdoor sprints"},
   burpee:{use:"Floor",free:"—"},
 };
-function machineFor(id){ return MACHINE[id]||{use:"Bodyweight / minimal kit",free:""}; }
+function machineFor(id){ return MACHINE[id]||{use:"Bodyweight / minimal kit",free:"",mch:""}; }
 
 /* ---- recommended motivational tracks per category (D4 — title + artist only) ---- */
 const TRACKS_BY_CAT={
@@ -2241,6 +2247,16 @@ function renderTrain(){
       <p class="lead tiny" style="margin-top:6px">An intense HIIT trial. Recommended level <b class="am">${sessionDraft.rec}</b> — you're Level <b>${lv}</b>.
       ${lv<sessionDraft.rec?` <span class="hi">Beat it under-level for +50% EXP and bonus ability points.</span>`:` Clear it to bank the reward.`}</p></div>`:""}
     <div class="panel"><div class="panel-title"><span class="tri"></span>Muscle Map<span class="sub">TARGETS</span></div>${bodyDiagramSmart(sessionDraft.ex.map(e=>e.id))}</div>
+    <div class="panel flat"><div class="panel-title tmin ${pmin('guide')?'min':''}" onclick="togglePanelMin('guide')"><span class="tri"></span>Session Guide<span class="sub">HOW MUCH IS ENOUGH</span></div>
+      <div class="guidegrid">
+        <div class="gcell"><div class="gk">TIME</div><div class="gv">45\u201375 min</div><div class="gd">Lifting only, warm-up separate. Past ~75 min you add fatigue, not muscle.</div></div>
+        <div class="gcell"><div class="gk">HARD SETS</div><div class="gv">15\u201325</div><div class="gd">Total for the whole session \u2014 today\u2019s Gate is already inside this range.</div></div>
+        <div class="gcell"><div class="gk">EFFORT</div><div class="gv">1\u20133 RIR</div><div class="gd">Stop each set with 1\u20133 reps in reserve. That last-rep grind is the point, not the clock.</div></div>
+        <div class="gcell"><div class="gk">REST</div><div class="gv">60\u2013120 s</div><div class="gd">Use the timer between sets. Longer for the big compound machines.</div></div>
+      </div>
+      <div class="directive good" style="margin-top:4px"><span class="pip"></span><b>Beat the logbook = enough.</b> One more rep or a little more load than last time means the session worked \u2014 even if it took 50 minutes. The empty \u201cdid I do enough\u201d feeling is the discipline working, not failing.</div>
+      <div class="cues" style="margin-top:9px">Machine-first is a valid path: seated, back-supported compound machines (leg press, chest press, row, pulldown) build the same physique with less setup risk. Each move lists its machine at the top of its page.</div>
+    </div>
     <div class="panel"${sessionDraft.boss?' style="margin-top:10px"':''}>
       <div class="panel-title"><span class="tri"></span>${sessionDraft.boss?'Boss Gate':(sessionDraft.forced?'Optional Session':"Today's Gate")}<span class="sub">${sessionDraft.dayKey}</span></div>
       <div class="name mono" style="font-size:16px;color:var(--text-hi)">${sessionDraft.name}</div>
@@ -2307,7 +2323,7 @@ function exercisePage(e,idx){
       <div class="setbox"><div class="sb"><span class="sbk">SETS</span><span class="sbv">${e.sets.length}</span></div><div class="sbx">×</div><div class="sb"><span class="sbk">REPS</span><span class="sbv">${e.reps}</span></div></div>
       <div class="loadhint"><span class="lhk">SUGGESTED LOAD</span><span class="lhv">${e.deload?'Deload \u2014 ~50% load, leave 3+ reps in reserve':loadHintFor(e.id)}</span></div>
       ${holdSecs(e.reps)?`<button class="btn full holdbtn" type="button" onclick="startRest(${holdSecs(e.reps)},'Hold — ${x.n}')">▷ Start hold timer · ${holdSecs(e.reps)}s</button>`:""}
-      <div class="machine"><span class="mchip">⋈ ${mac.use}</span>${mac.free&&mac.free!=="—"?`<span class="mchip free">free-weight: ${mac.free}</span>`:""}</div>
+      <div class="machine">${mac.mch?`<span class="mchip mchmain">▣ Machine: ${mac.mch}</span>`:""}<span class="mchip">⋈ ${mac.use}</span>${mac.free&&mac.free!=="—"?`<span class="mchip free">free-weight: ${mac.free}</span>`:""}</div>
       ${embed}
       <div class="row" style="gap:8px;flex-wrap:wrap">
         <button class="ytbtn" onclick="openYT('${e.id}')"><span class="play"></span> Open in YouTube app</button>
@@ -3388,13 +3404,14 @@ var BGF=[
 "  float H=0.30;",
 "  /* WIREFRAME WAVE TERRAIN \u2014 stacked contour lines over rolling sine hills */",
 "  float tt=t*0.55;",
-"  for(float i=0.0;i<26.0;i++){",
-"    float zf=fract(i/26.0 - tt*0.05);",
-"    float zi=mix(0.9,14.0,zf*zf);",
+"  for(float i=0.0;i<34.0;i++){",
+"    float zf=fract(i/34.0 - tt*0.05);",
+"    float zi=mix(0.62,14.0,zf*zf);",
 "    float xw=(vUv.x-0.5)*zi*2.2;",
 "    float zw=zi+tt;",
 "    float hgt=sin(xw*0.9+zw*0.7)*0.55+sin(xw*0.45-zw*0.5+1.7)*0.8+sin(zw*0.85)*0.5+sin((xw+zw)*0.33+2.1)*0.45;",
-"    float rowY=H-0.30/zi+hgt*(0.22/zi);",
+"    /* amplitude stays under the perspective drop so near rows never lift above the plane */",
+"    float rowY=H-0.62/zi+hgt*(0.115/zi);",
 "    float w2=0.0018+0.004/zi;",
 "    float li=smoothstep(w2,0.0,abs(vUv.y-rowY));",
 "    float fade=smoothstep(14.0,2.0,zi)*smoothstep(0.02,0.15,zf);",
