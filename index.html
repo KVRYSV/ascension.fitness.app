@@ -2971,8 +2971,64 @@ function openDayDetail(date){ const ses=workoutsOn(date), dow=DAYNAMES[new Date(
     if(exc) acts.push({label:"Remove excuse",kind:"ghost",onClick:()=>{ S.excused=(S.excused||[]).filter(e=>e.date!==date); save(); hideOverlay(()=>{ renderStatus(); decorPanels(); if(typeof renderTrain==="function")renderTrain(); }); toast("Excuse removed"); }});
     else acts.push({label:"Mark excused \u2014 log a reason",onClick:()=>{ hideOverlay(()=>excuseDate(date)); }});
   }
+  if(past) acts.unshift({label:ses.length?"\u002b Log another workout":"\u002b Log a workout for this day",kind:ses.length?"ghost":"",onClick:()=>{ hideOverlay(()=>manualLog(date)); }});
   acts.push({label:"Close",kind:"ghost",onClick:()=>hideOverlay()});
   detail("[ LOG ]",`${dow} · ${date.slice(5)}`,body,acts); }
+
+/* ---------- manual workout logging (searchable picker + custom text) ---------- */
+let _ml={date:"",items:[],q:""};
+function manualLog(date){ _ml={date:date,items:[],q:""}; renderManualLog(); }
+function mlExList(){ const q=_ml.q.trim().toLowerCase();
+  let ids=Object.keys(EX);
+  if(q) ids=ids.filter(id=>{ const x=EX[id]; return (x.n+" "+x.cat+" "+(x.stat||"")).toLowerCase().includes(q); });
+  return ids.slice(0,40); }
+function renderManualLog(){
+  const rows=_ml.items.map((it,i)=>`<div class="drow"><div class="dk">${i+1}</div><div class="dv"><b>${esc(it.name)}</b><br><span class="muted tiny">${it.sets} sets \u00d7 ${esc(String(it.reps))}${it.w?` \u00b7 ${it.w} ${unitW()}`:""}</span></div><button class="btn ghost sm" type="button" onclick="mlRemove(${i})">\u2715</button></div>`).join("");
+  const list=mlExList().map(id=>`<div class="selopt" onclick="mlPick('${id}')"><span class="selck">\u002b</span><span>${esc(EX[id].n)} <span class="muted tiny">\u00b7 ${EX[id].cat}</span></span></div>`).join("")
+    ||`<p class="lead tiny center">No match. Use the custom field below.</p>`;
+  const body=`<p class="lead tiny">Logging for <b class="hi">${_ml.date}</b>. Add each movement you did \u2014 search the library or type your own.</p>
+    ${rows?`<div class="mt">${rows}</div>`:""}
+    <label class="fld mt"><span>Search the library</span><input id="mlq" type="text" placeholder="e.g. press, row, squat" value="${esc(_ml.q)}" oninput="mlSearch(this.value)"></label>
+    <div class="sellist" style="max-height:190px;overflow:auto">${list}</div>
+    <label class="fld mt"><span>Or add a custom workout</span><input id="mlcustom" type="text" placeholder="e.g. Hack squat machine 4\u00d710"></label>
+    <button class="btn ghost full mt" type="button" onclick="mlAddCustom()">\u002b Add custom entry</button>`;
+  detail("[ MANUAL LOG ]",`LOG WORKOUT`,body,[
+    {label:"Save to this day",onClick:()=>mlSave()},
+    {label:"Cancel",kind:"ghost",onClick:()=>hideOverlay()}]);
+  setTimeout(()=>{ const i=document.getElementById("mlq"); if(i&&_ml.q){ i.focus(); i.setSelectionRange(i.value.length,i.value.length);} },40);
+}
+function mlSearch(v){ _ml.q=v; const l=document.querySelector(".sellist");
+  if(!l) return;
+  l.innerHTML=mlExList().map(id=>`<div class="selopt" onclick="mlPick('${id}')"><span class="selck">\u002b</span><span>${esc(EX[id].n)} <span class="muted tiny">\u00b7 ${EX[id].cat}</span></span></div>`).join("")
+    ||`<p class="lead tiny center">No match. Use the custom field below.</p>`; }
+async function mlPick(id){
+  const sets=await sysPrompt({big:esc(EX[id].n),msg:"How many sets did you do?",numeric:true,step:1,value:3});
+  if(sets===null) return;
+  const reps=await sysPrompt({big:esc(EX[id].n),msg:"Reps per set (or seconds for holds):",numeric:true,step:1,value:10});
+  if(reps===null) return;
+  const w=await sysPrompt({big:esc(EX[id].n),msg:`Weight per set in ${unitW()} (leave blank for bodyweight):`,numeric:true,step:5,value:""});
+  _ml.items.push({id:id,name:EX[id].n,sets:Math.max(1,Math.round(sets)),reps:Math.max(1,Math.round(reps)),w:w?Math.round(w*10)/10:0});
+  renderManualLog(); }
+function mlAddCustom(){ const el=document.getElementById("mlcustom"); const v=(el&&el.value||"").trim();
+  if(!v){ toast("Type a workout first"); return; }
+  _ml.items.push({id:"",name:v.slice(0,80),sets:1,reps:1,w:0,custom:true});
+  renderManualLog(); }
+function mlRemove(i){ _ml.items.splice(i,1); renderManualLog(); }
+function mlSave(){
+  if(!_ml.items.length){ toast("Add at least one workout"); return; }
+  const exRec=_ml.items.filter(it=>it.id).map(it=>({id:it.id,sets:Array.from({length:it.sets},()=>({w:it.w||0,reps:it.reps}))}));
+  const custom=_ml.items.filter(it=>!it.id).map(it=>it.name);
+  const setsDone=_ml.items.reduce((a,b)=>a+(b.id?b.sets:0),0);
+  const gained=addExp(30+setsDone*8,"manual-log");
+  S.sessions.push({date:_ml.date,dayKey:"MANUAL",name:"Logged Session",forced:true,boss:false,setsDone,exp:gained.gained,ex:exRec,custom:custom,manual:true});
+  S.sessions.sort((a,b)=>a.date<b.date?-1:1);
+  S.excused=(S.excused||[]).filter(e=>e.date!==_ml.date);
+  S.skips=(S.skips||[]).filter(d=>d!==_ml.date);
+  if(exRec.length) updatePRs(exRec);
+  markActivityToday&&(_ml.date===todayStr())&&markActivityToday();
+  save(); handleLevels(gained);
+  hideOverlay(()=>{ renderStatus(); decorPanels(); if(typeof renderTrain==="function") renderTrain(); });
+  toast(`Workout logged \u00b7 +${gained.gained} EXP`); }
 async function pickExcuseReason(msg){
   const opts=[{value:"Injured",label:"Injured"},{value:"Over-exhausted",label:"Over-exhausted"},{value:"DOMS / too sore",label:"DOMS / too sore"},{value:"Illness",label:"Illness"},{value:"Work week",label:"Work week"},{value:"Travel",label:"Travel"},{value:"Life / time",label:"Life / time"},{value:"__other",label:"Other (type a reason)"}];
   let r=await sysSelect("Log a reason",msg,opts,null);
