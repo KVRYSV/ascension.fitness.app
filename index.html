@@ -2785,18 +2785,67 @@ function exportData(){
     toast("Backup exported");
   }catch(e){ toast("Export failed on this device"); }
 }
+function prepareBackup(data){
+  const object=v=>v!==null && typeof v==="object" && !Array.isArray(v);
+  const invalid=path=>{ throw new Error("Invalid backup field: "+path); };
+  // Missing fields still receive defaults so older backups remain importable.
+  function check(value,shape,path){
+    if(Array.isArray(shape)){ if(!Array.isArray(value)) invalid(path); }
+    else if(object(shape)){
+      if(!object(value)) invalid(path);
+      for(const key of Object.keys(shape)){
+        if(Object.prototype.hasOwnProperty.call(value,key)) check(value[key],shape[key],path+"."+key);
+      }
+    } else if(shape!==null && (typeof value!==typeof shape || (typeof value==="number" && !Number.isFinite(value)))) invalid(path);
+  }
+  if(!object(data) || !object(data.rpg) || !object(data.profile)) invalid("root");
+  const defaults=defaultState();
+  check(data,defaults,"backup");
+  check(data.profile,{name:"",sex:"",age:0,heightCm:0,weightKg:0,activity:0,equip:"",days:[],goal:""},"profile");
+  if(!Array.isArray(data.profile.days) || !data.profile.days.length ||
+     data.profile.days.some(d=>!Number.isInteger(d)||d<0||d>6)) invalid("profile.days");
+  const candidate=deepMerge(defaults,data);
+  candidate.sessions.forEach((s,i)=>{
+    const path="sessions["+i+"]";
+    check(s,{date:"",name:"",setsDone:0,exp:0,ex:[],custom:[]},path);
+    if(typeof s.date!=="string" || typeof s.name!=="string") invalid(path);
+    (s.ex||[]).forEach((e,j)=>{
+      check(e,{id:"",sets:[]},path+".ex["+j+"]");
+      if(typeof e.id!=="string" || !Array.isArray(e.sets) || e.sets.some(set=>!object(set))) invalid(path+".ex");
+    });
+  });
+  return candidate;
+}
+function restoreBackup(candidate){
+  if(!storageOK) throw new Error("Storage is unavailable");
+  const previous=S, previousDraft=sessionDraft;
+  // Rendering can call save(); suppress those writes until the candidate works.
+  storageOK=false;
+  try{
+    S=candidate; sessionDraft=null;
+    bootUI();
+    localStorage.setItem(KEY,JSON.stringify(S));
+  }catch(e){
+    S=previous; sessionDraft=previousDraft;
+    try{ bootUI(); }catch(_){}
+    throw e;
+  }finally{ storageOK=true; }
+}
 document.getElementById("importfile").addEventListener("change",function(ev){
   const f=ev.target.files&&ev.target.files[0]; if(!f) return;
   const r=new FileReader();
   r.onload=async ()=>{
     let data; try{ data=JSON.parse(r.result); }catch(e){ toast("That file isn't valid JSON"); ev.target.value=""; return; }
-    if(!data || !data.rpg || !data.profile){ toast("Not an ASCENSION backup"); ev.target.value=""; return; }
+    let candidate;
+    try{ candidate=prepareBackup(data); }
+    catch(e){ toast("Invalid backup. Your current progress was not changed."); ev.target.value=""; return; }
     const ok=await sysConfirm("RESTORE BACKUP","This replaces your current progress on this device with the backup file. Continue?","Restore","warn");
     ev.target.value="";
     if(!ok) return;
-    S=deepMerge(defaultState(),data); sessionDraft=null; save();
-    bootUI(); toast("Backup restored");
+    try{ restoreBackup(candidate); toast("Backup restored"); }
+    catch(e){ toast("Backup could not be restored. Your current progress was kept."); }
   };
+  r.onerror=()=>{ toast("Could not read the backup file"); ev.target.value=""; };
   r.readAsText(f);
 });
 async function restartProgram(){ const ok=await sysConfirm("RESTART PROGRAM","Set Week 1 to begin today. All sessions, records, weight and nutrition history are kept.","Restart"); if(!ok) return; S.program.startDate=todayStr(); S.program.seq=0; save(); toast("Program restarted \u2014 Week 1 begins today"); render(); decorPanels(); }
