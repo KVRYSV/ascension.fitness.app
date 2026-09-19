@@ -3187,6 +3187,48 @@ function exportData(){
     toast("Backup exported");
   }catch(e){ toast("Export failed on this device"); }
 }
+/* ---- backup safety: check every field before anything is written ---- */
+const BK_ARR=["sessions","skips"];
+const BK_OBJ=["rpg","program","settings","quests","metrics","nutrition","records","skills","log","supps","streak"];
+function isObj(v){ return v&&typeof v==="object"&&!Array.isArray(v); }
+function validateState(s){
+  if(!isObj(s)) return "the file is not an object";
+  for(const k of BK_ARR) if(!Array.isArray(s[k])) return k+" must be a list";
+  for(const k of BK_OBJ) if(!isObj(s[k])) return k+" must be an object";
+  if(s.profile!==null&&!isObj(s.profile)) return "profile is damaged";
+  if(s.profile&&!Array.isArray(s.profile.days)) return "profile.days must be a list";
+  if(!isObj(s.rpg.stats)) return "rpg.stats is damaged";
+  for(const k of ["level","exp","totalExp","statPoints","skillPoints"])
+    if(!Number.isFinite(+s.rpg[k])) return "rpg."+k+" must be a number";
+  if(!Array.isArray(s.quests.items)) return "quests.items must be a list";
+  if(s.quests.bonus!==undefined&&!Array.isArray(s.quests.bonus)) return "quests.bonus must be a list";
+  if(!Array.isArray(s.metrics.weight)) return "metrics.weight must be a list";
+  if(!Array.isArray(s.nutrition.log)) return "nutrition.log must be a list";
+  if(!Array.isArray(s.records.prLog)) return "records.prLog must be a list";
+  if(!isObj(s.records.pr)) return "records.pr is damaged";
+  if(!Array.isArray(s.skills.owned)) return "skills.owned must be a list";
+  if(!Array.isArray(s.log.exp)) return "log.exp must be a list";
+  if(!isObj(s.supps.checks)) return "supps.checks is damaged";
+  if(s.excused!==undefined&&!Array.isArray(s.excused)) return "excused must be a list";
+  if(s.recovery!==undefined&&!isObj(s.recovery)) return "recovery is damaged";
+  if(s.ui!==undefined&&!isObj(s.ui)) return "ui is damaged";
+  if(s.run!==undefined&&!isObj(s.run)) return "run is damaged";
+  if(s.draft!==null&&s.draft!==undefined){
+    if(!isObj(s.draft)||!Array.isArray(s.draft.ex)) return "the saved workout is damaged"; }
+  if(!isObj(s.rpg.titles)||!Array.isArray(s.rpg.titles.owned)) return "rpg.titles is damaged";
+  if(!Array.isArray(s.rpg.bossesBeaten)) return "rpg.bossesBeaten must be a list";
+  if(!isObj(s.settings.videoOverrides)) return "settings.videoOverrides is damaged";
+  for(const r of s.sessions) if(!isObj(r)||typeof r.date!=="string") return "a session entry is damaged";
+  return null;
+}
+/* run the read paths that touch imported data; any throw rejects the file */
+function smokeTest(){
+  try{
+    sevenDays(); activeDebuffs(); missedCount(); realSessions(S);
+    if(S.profile) todaysWorkout();
+    return true;
+  }catch(e){ console.error("backup smoke test failed",e); return false; }
+}
 document.getElementById("importfile").addEventListener("change",function(ev){
   const f=ev.target.files&&ev.target.files[0]; if(!f) return;
   const r=new FileReader();
@@ -3196,8 +3238,13 @@ document.getElementById("importfile").addEventListener("change",function(ev){
     const ok=await sysConfirm("RESTORE BACKUP","This replaces your current progress on this device with the backup file. Continue?","Restore","warn");
     ev.target.value="";
     if(!ok) return;
-    S=deepMerge(defaultState(),data); sessionDraft=null; save();
-    bootUI(); toast("Backup restored");
+    const cand=deepMerge(defaultState(),data);
+    const bad=validateState(cand);
+    if(bad){ toast("Backup rejected \u2014 "+bad); return; }
+    const keep=S, keepDraft=sessionDraft;
+    S=cand; sessionDraft=null;
+    if(!smokeTest()){ S=keep; sessionDraft=keepDraft; toast("Backup rejected \u2014 the app cannot read it"); return; }
+    save(); bootUI(); toast("Backup restored");
   };
   r.readAsText(f);
 });
