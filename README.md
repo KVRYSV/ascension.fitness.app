@@ -1,124 +1,31 @@
 # ASCENSION fitness
 Personal use fitness app vibecoded and developed using claude. Uses HTML for full deployment via PWA. Dependencies and cache is all local. Runs on browser as well. I can't code but I can design...
 
+# ASCENSION v7 Changelog
 
-  
-## v5.6.8.2 — Data clean up features update
-Done:
+## HAMR / PACER test (v7.0 – v7.1)
+- 20 m shuttle run with the official audio.
+- Shows a sweeping line, the level as "8 - 10", a READY countdown, and a 0 to 20 m scale.
+- Grid flashes each beep. Drag the bar to seek.
+- Logs your final level. Clears the Gate.
 
-- **Full-history popups (grouped by month, scrollable) for any list past 7 entries** — Calorie Log, Bodyweight (Data), Personal Records + Gate History (Profile). Inline capped at 7 with a "View full history (N)" button
-- **Personal Work panel on Train** — type extras (planche, burpees, sprints), saved into that day's Gate record and shown in Gate History.
-- **Sets/reps box** — SETS [n] × REPS [range] split box replaces 3 × 8-12.
-- **Highlighted muscle word** — category chip (LEGS/PUSH/PULL/CORE…) on each exercise card.
-- **Background** — glow now rises from the bottom, brighter, theme-colored; waves faster + more dynamic.
-- **Nutrition spacing** — boxed "Today's running total" (field included), more breathing room.
-- **Rest presets on Gates** — added 0:30, 4:00, 5:00 (now 0:30/1:30/2:00/3:00/4:00/5:00); usable for personal work too.
-- **Bar style fix** — solid/striped/glow/minimal now apply to all horizontal bars incl. HP/MP (which keep their red/blue).
-- **Header** → //ASCENSION SYSTEM.
-- **Rank explanations** — tap the rank ladder on Status → E→Monarch modal, your current rank marked.
-- **Random bonus quests** — extra contracts sometimes appear atop the Daily Quest (~50% one bonus, ~10% a rare ⚔ HIIT/boss trial), claimable for EXP, refresh daily.
+## Run pacer (v7.2 – v7.4)
+- Timed run with a track diagram. It is a page, not a window, so progress is saved.
+- 3 pace markers show where you must be: Field House (outer), 400 m (middle), custom (inner).
+- Field House lane takes its turns 9x faster, to match the real hangar track.
+- Markers fill the lane, with a thin front line and a fading trail.
+- Lap start line at the top left. Inner oval flashes each lap.
+- Lap counters in the centre and in the legend.
+- Rest allowance = maximum time − goal time. Unused seconds are banked.
+- Editable distance, goal time, and maximum time.
+- Header bar shows the 400 m laps.
+- Logs the run. Clears the Gate.
 
-## v5.4 polish pass (peer-feedback round)
-- **Attributes are SP-bound again.** The ▴ / ▾ arrows spend and refund ability points earned per Gate; arrows **grey out** when you have no SP (▴) or are back at base 10 (▾). Unlimited editing now lives only in the Settings → Admin panel. Tapping a stat brings back its **full explanation**, and attributes now **affect the workout** — a per-exercise System tip scales load jumps, bonus reps, rest, or tempo to the governing stat, and session EXP scales slightly with it.
-- **Hunter profile cleanup.** Removed the rank-ladder text line and the cropped header glow; the level number is the EXP-to-next bar.
-- **Real transparency.** Backdrop blur cut ~40% across panels, nav, modals and the profile screen so the live background reads through instead of fogging to opaque.
-- **Edgier nav.** Status button is a **smaller, sharp-cornered diamond** with a thin **white dragon-eye** icon; the "Status" label sits lower; the floating bar keeps its glowing polygonal edge.
-- **Crimson is black + red.** Deep-red secondary + warm-red ink ramp; the modal/prompt no longer reads blue or purple on any theme.
-- **YouTube Shorts** embeds now render vertically (9:16) without spilling sideways; regular clips stay 16:9.
-- **Bigger, finger-friendly inputs** — larger steppers, weight/rep fields and check buttons; the exercise name and **sets × reps** target are now large and obvious.
-- **Cohesive glyphs** — the 🛠 machine emoji is now `⋈`, the 🔒 locked-title marker is `∅`.
-- **Reset all progress** is a red-striped warning button; the Admin "NO PASSWORD" label is gone.
-- **Imperial / Metric toggle** in Settings (lb·ft/in ⇄ kg·cm) across the body card, charts, PRs and the weight log.
-- **Low Health / Mana Exhaustion** debuffs: recovery now drops with consecutive training days — low HP subtracts VIT, low MP (untouched Daily Quest) subtracts AGI, both clearing as the bars recover.
-- **Skip a training day** with a confirm prompt — *confirm (no status debuff)* / *cancel* — no missed-day penalty.
-- **My own mark.** New app logo + boot sigil: an inverted-V chevron with a dragon eye, accent-coloured on black; PWA icons regenerated to match.
-- **New background** — replaced the laggy perspective grid + node-network + breathing glow with a cheap flowing PlayStation-style wave field (no O(n²), no shadow-blur, no breathing).
-- **Hidden scrollbars** app-wide; gentler one-card-per-swipe in the Train deck.
-- **Regimen reviewed** — 41 exercises, balanced across all muscle groups + mobility + conditioning; no gaps, left as-is.
----
-
-## v5.3 polish pass
-- **Stats start on your real start date.** Week count and every derived stat (missed days, debuffs, nutrition flags) track from the program start, so starting today never hands you phantom penalties. Settings now shows **start date + estimated end** and lets you **set the start date**.
-- **More glass.** Floating nav and panels are ~20% more transparent with stronger bokeh blur, so the live background reads through every window.
-- **Edgier nav.** The floating bar is now **polygonal** with a **glowing edge** (no solid outline); the centre Status button is a **diamond**.
-- **Free attributes.** Tap any attribute to set it to **any value** (arrows still nudge ±1) — no point economy.
-- **Distinct bar styles** — glow / solid / striped / minimal now actually look different (not just sized differently).
-- **Cohesive theming.** Crimson is properly **red** now, and the whole text ramp + live background re-hue to the active accent instead of staying blue.
-- **Current Arc** shows a **progress bar to the next Arc** instead of duplicated advice (advice now lives only on Today's Gate).
-- **Cleaner Train:** removed the page-dots indicator; gentler one-card-per-swipe snapping.
-- **Cleaner Profile:** the level number is now an **EXP-to-next bar**.
-- **Supplements = items/potions:** logged as consumables and **tracked in Profile + Data** (uptake, weekly count, last taken).
-- **Body window** now draws the **weight trend chart**.
-- **About** rewritten as a quirky summary, crediting Claude as coder, designer & builder.
-Cache is now `ascension-v5.4.0`.
- 
----
-
-# ASCENSION — v5.0 update notes
-
-A self-contained, offline-first fitness PWA with a Solo-Leveling "System" interface. Everything below ships inside the single `index.html` (no external dependencies). Old saves migrate automatically — nothing is wiped.
-
-Interface
-- **Full-bleed header** that runs edge to edge.
-- **Levitating, frosted bottom nav** with stronger glass blur and glow.
-- **Status is now the centre of the nav** as a large, raised, highlighted button — it's the focus.
-- Tabs renamed: **Stats → Data**, **System → Settings**.
-
-Status screen
-- **Giant LEVEL** number sitting inside a **circular EXP ring** (the ring fills as you approach the next level).
-- **Attributes with ▴▾ arrows** — raise or lower STR / AGI / VIT / SEN / INT freely to match your training focus.
-- **7-day tracker strip** — tap any day to see the workouts you logged that day (stored locally).
-- **Current Arc** panel now appears **before** Today's Gate.
-- **Skill tree moved here**, into Status.
-- HP / MP bars, rank ladder, equipped-title line, and active-debuff warnings.
-
-Profile (tap the level / rank badge in the header)
-- **Massive Hunter rank** (E … S … Monarch) with the rank ladder.
-- **Attributes** showing base + modifiers (effective values).
-- **Equippable Titles** (RPG-style, 3 slots) that change your modifiers — e.g. **[Dumbbell Slayer]** +2 STR, **[Demon Lord]** +2 STR / +2 AGI, **[Shadow Monarch]** +3 to all. Titles unlock from milestones.
-- **Debuffs** from missed workouts or missed goals — **[Muscle Atrophy]**, **[Weakness]**, **[Sluggish]**, **[Poisoned]**, **[Famished]**, **[Unaccounted]** — each applies a negative modifier.
-- **PR records**, **total + weekly EXP / score**, **calories per day this week**, a **missed-days tracker**, and a **per-day Gate history** you can scroll back through.
-
-Train screen
-- **Horizontal swipe deck** — overview → one movement per screen → finish, so you focus on one thing at a time. Pager dots + a **top progress bar** that fills as you complete sets (dots turn green per finished movement).
-- Each movement shows the **machine to use** plus an **optional free-weight** alternative.
-- **Embedded form video** in-card, **plus** a separate **"Open in YouTube app"** button (Android deep link, web fallback) and a redundant **"Form video ↗"** link.
-- A **recommended track** (title + artist) per movement for motivation.
-
-Boss fights
-- Every **4th week's** training day becomes a **Boss Gate** (until cleared) — an **intense HIIT trial**.
-- The banner shows the **recommended level**. Beat it **under-level** for **+50% EXP, bonus ability points, and the Giant Slayer title**.
-
-Data screen
-- Activity and training-volume charts are now **line graphs** (alongside the bodyweight trend).
-
-Settings (settings-only now)
-- **Bar style** selector — glow / solid / striped / minimal.
-- **Program length** — extend the climb (+4 / +8 weeks, or reset to 24).
-- **Form-video link editor** — override any movement's demo with your own YouTube link or ID.
-- **Admin editor** (no password, confirm to enter) — directly edit level, attributes, EXP, ability/skill points, and grant/revoke titles.
-- Accent, interface sound, profile/schedule edit, backup export/import, full reset.
-
-
-______________________________________________________________________________________________________
- 
-ASCENSION — v2 update (splash, glass UI, sound, muscle map, rest timer)
-=======================================================================
-
-NEW IN THIS VERSION
-  - Longer animated boot/splash (~4s) with system readout
-  - Glassmorphism across panels, nav, header, and notifications
-  - Bigger logo + larger framed rank pill
-  - Interface sound effects (embedded, offline) + haptic vibration
-    toggle in System > Settings > Interface sound + haptics
-  - Muscle Map on the Train screen: front/back body that highlights the
-    muscles each session targets (bright = primary, dim = secondary)
-  - Rest timer: auto-starts when you check off a set (scaled to movement),
-    plus manual 0:60 / 1:30 / 2:00 / 3:00 presets
-  - Fixed the Stats calorie/protein input alignment
-  - More entrance animations (number pop-ins, panel sheen sweep)
-
-_________________________________________________________________________________________________
+## Visual
+- Theme colours for the markers. Red theme uses yellow, red, and orange.
+- Rising light streaks in the background.
+- Track drawing 20% smaller, to fit a phone.
+- Sharper font for the timer.
 
 
 ASCENSION — installable PWA bundle
@@ -126,26 +33,13 @@ ASCENSION — installable PWA bundle
 
 OPTION A — Run it now (offline, no install)
   Open index.html in a browser. Works fully offline; progress saves on-device.
-  On Android Chrome: menu > Add to Home screen for an app shortcut.
 
 OPTION B — Install as a real "lite app" (PWA)
-  Host this folder on any free static host so it has an https:// URL:
-    - GitHub Pages, Netlify (drag-and-drop), Cloudflare Pages, or Firebase Hosting.
-  Open that URL in Chrome on Android > menu > "Install app".
+  Open https://kvrysv.github.io/ascension.fitness.app/ in Chrome 
+  Android Chrome > menu > "Install app".
   It launches standalone (no address bar), with its own icon, and runs offline
   via the service worker (sw.js).
-
-OPTION C — Turn it into a sideloadable .apk / Play Store .aab
-  1. Host the folder (Option B) so it has an https:// URL.
-  2. Go to https://www.pwabuilder.com and enter that URL.
-  3. It validates the manifest + service worker, then under "Package for stores"
-     choose Android > Generate. You get a zip with:
-        - a signed .apk  (sideload directly onto your phone for testing)
-        - an .aab        (for Google Play submission)
-     PWABuilder uses Bubblewrap/TWA + a cloud Android build box, so you need
-     NO local Android SDK.
-  4. (Optional, to hide the address bar fully) add the assetlinks.json that
-     PWABuilder gives you to /.well-known/ on your host.
+  IOS Chrome or Safari: menu > Add to Home screen as an app shortcut.
 
 Files
   index.html              the entire app (UI + logic + data)
