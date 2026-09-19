@@ -381,9 +381,9 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 /* ---------- modal engine ---------- */
 .overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
   background:radial-gradient(circle at 50% 50%, rgb(8 8 12 / .44), rgb(2 3 6 / .86));
-  backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15);padding:24px;}
+  backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15);padding:14px 14px calc(14px + env(safe-area-inset-bottom));}
 .overlay.show{display:flex;}
-.win{width:100%;max-width:392px;max-height:86vh;overflow-y:auto;
+.win{width:100%;max-width:392px;max-height:calc(100dvh - 28px);overflow-y:auto;overscroll-behavior:contain;
   background:linear-gradient(168deg, rgb(var(--ac) / .10), rgb(2 4 14 / .78) 60%);
   backdrop-filter:blur(13px) saturate(1.25);-webkit-backdrop-filter:blur(13px) saturate(1.25);border:1px solid var(--accent);
   box-shadow:0 0 44px rgb(var(--ac) / .5), 0 22px 64px rgb(0 0 0 / .62), inset 0 0 30px rgb(var(--ac) / .08), inset 0 1px 0 rgb(255 255 255 / .12);
@@ -590,6 +590,20 @@ html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
 .daycell .dd{ width:19px; height:19px; margin:6px auto 0; border-radius:50%; border:1px solid var(--line-2); display:grid; place-items:center; font-size:10px; color:var(--ghost-2); }
 .daycell.done .dd{ background:var(--green); border-color:var(--green); color:#02120a; box-shadow:0 0 8px var(--green); }
 .daycell.missed .dd{ border-color:var(--crimson); color:var(--crimson); }
+.drow{position:relative;}
+.drowx{position:absolute;top:6px;right:4px;border:none;background:none;color:var(--ghost-2);font-size:13px;padding:4px 7px;cursor:pointer;}
+.drowx:active{color:var(--crimson);}
+.dphead{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;color:var(--ink-hi);margin:4px 0 8px;}
+.dpnav{border:1px solid var(--line-2);background:rgb(var(--ac) / .1);color:var(--ink-hi);font-size:15px;line-height:1;padding:4px 11px;cursor:pointer;clip-path:var(--clip-s);}
+.dpgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.dpdow span{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ghost-2);text-align:center;padding-bottom:3px;}
+.dpc{display:flex;align-items:center;justify-content:center;aspect-ratio:1;font-family:var(--mono);font-size:12px;color:var(--ink);border:1px solid rgb(var(--ac) / .13);background:rgb(2 3 14 / .5);cursor:pointer;}
+.dpc.off{border:none;background:none;cursor:default;}
+.dpc.dis{color:var(--ghost-2);opacity:.35;cursor:default;}
+.dpc.has{border-color:rgb(var(--ac) / .5);color:var(--ink-hi);}
+.dpc.exc{border-color:rgb(255 206 107 / .55);color:var(--gold);}
+.dpc.now{box-shadow:inset 0 0 0 1px rgb(var(--ac) / .55);}
+.dpc.sel{background:rgb(var(--ac) / .3);border-color:var(--accent);color:var(--ink-hi);box-shadow:0 0 9px rgb(var(--ac) / .4);}
 .gaterow{position:relative;cursor:pointer;padding-right:26px;}
 .rowx{position:absolute;right:0;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--ghost-2);font-size:12px;padding:4px 6px;cursor:pointer;}
 .rowx:active{color:var(--crimson);}
@@ -756,7 +770,7 @@ input[type=date]{color-scheme:dark;}
 .setbox .sbx{ display:flex; align-items:center; padding:0 6px; font-family:var(--display); font-size:18px; color:var(--ghost); background:rgb(var(--ac) / .05); }
 .histmonth{ font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--accent); text-transform:uppercase; margin:14px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--line); }
 .histmonth:first-child{ margin-top:2px; }
-.histscroll{ max-height:62vh; overflow-y:auto; }
+.histscroll{ max-height:min(68dvh,720px); overflow-y:auto; overscroll-behavior:contain; }
 .bonusquest{ border-left:3px solid var(--accent); }
 .bonusquest .qr{ color:var(--accent); }
 .hxc{ font-family:var(--mono); font-size:11px; color:var(--accent); margin-top:5px; opacity:.92; }
@@ -1887,7 +1901,7 @@ function renderStatus(){
 
     <div class="panel flat">
       <div class="panel-title"><span class="tri"></span>This Week<span class="sub" style="cursor:pointer" onclick="excuseWeek()">EXCUSE WEEK \u25b8</span></div>
-      <div class="weekstrip">${days.map(d=>`<div class="daycell ${d.trained?'done':''} ${d.missed?'missed':''} ${d.excused?'exc':''} ${d.today?'today':''}" onclick="openDayDetail('${d.date}')"><div class="dn">${d.dow}</div><div class="dd">${d.trained?'\u2713':(d.excused?'\u2298':(d.missed?'\u2715':''))}</div>${d.trained?`<button class="cellx" type="button" onclick="event.stopPropagation();deleteDay('${d.date}')">\u2715</button>`:""}</div>`).join("")}</div>
+      <div class="weekstrip">${days.map(d=>`<div class="daycell ${d.trained?'done':''} ${d.missed?'missed':''} ${d.excused?'exc':''} ${d.today?'today':''}" onclick="openDayDetail('${d.date}')"><div class="dn">${d.dow}</div><div class="dd">${d.trained?'\u2713':(d.excused?'\u2298':(d.missed?'\u2715':''))}</div></div>`).join("")}</div>
     </div>
 
     ${recoveryBodyHTML()}
@@ -2908,6 +2922,7 @@ function renderStats(){
     <div class="panel flat">
       <div class="panel-title"><span class="tri"></span>Recent Gates<span class="sub">TAP TO EDIT</span></div>
       ${S.sessions.map((s,i)=>({s,i})).slice(-6).reverse().map(o=>`<div class="kv gaterow" onclick="openDayDetail('${o.s.date}')"><span class="k">${o.s.date.slice(5)} · ${esc(o.s.name||"Gate")}</span><span class="v">${o.s.setsDone} sets · +${o.s.exp}</span><button class="rowx" type="button" onclick="event.stopPropagation();deleteSession('${o.s.date}',${o.i})">\u2715</button></div>`).join("")||`<p class="lead tiny">No sessions yet.</p>`}
+      <button class="btn ghost full mt" onclick="logPastDay()">\u002b Log a workout for another day</button>
       <button class="btn ghost full mt" onclick="histGates()">Open Gate history${S.sessions.length?` (${S.sessions.length})`:""}</button>
     </div>`;
   // animate ring sweeps after insert
@@ -2967,10 +2982,58 @@ function calEdit(date){
     {label:"Delete",kind:"warn",onClick:()=>{ S.nutrition.log=S.nutrition.log.filter(x=>x.date!==date); save(); hideOverlay(()=>{renderStats();renderStatus();decorPanels();}); toast("Entry removed"); }},
     {label:"Cancel",kind:"ghost",onClick:()=>hideOverlay()}]);
 }
+async function logPastDay(){
+  const d=await sysDate("LOG ANOTHER DAY","Pick any past day. You can log a workout for it.",todayStr());
+  if(!d) return; manualLog(d);
+}
+/* ---- themed calendar picker ---- */
+let _dpRes=null, _dpView="", _dpSel="", _dpMax="";
+function sysDate(big,msg,initial,maxDate){
+  return new Promise(res=>{ _dpRes=res;
+    _dpSel=initial||todayStr(); _dpView=_dpSel.slice(0,7); _dpMax=maxDate||todayStr();
+    _dpRender(big,msg); });
+}
+function _dpShift(n){ const [y,m]=_dpView.split("-").map(Number);
+  const d=new Date(y,m-1+n,1); _dpView=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  _dpRender(_dpBig,_dpMsg); }
+function _dpPick(dt){ _dpSel=dt; _dpRender(_dpBig,_dpMsg); }
+let _dpBig="",_dpMsg="";
+function _dpRender(big,msg){
+  _dpBig=big; _dpMsg=msg;
+  const [y,m]=_dpView.split("-").map(Number);
+  const first=new Date(y,m-1,1), last=new Date(y,m,0);
+  const lead=first.getDay(), n=last.getDate();
+  const label=first.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  let cells="";
+  for(let i=0;i<lead;i++) cells+=`<span class="dpc off"></span>`;
+  for(let d=1;d<=n;d++){
+    const dt=y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+    const dis=_dpMax&&dt>_dpMax;
+    const trained=(S.sessions||[]).some(s=>s.date===dt);
+    const exc=(S.excused||[]).some(e=>e.date===dt);
+    cells+=`<span class="dpc${dt===_dpSel?" sel":""}${dt===todayStr()?" now":""}${dis?" dis":""}${trained?" has":""}${exc?" exc":""}"${dis?"":` onclick="_dpPick('${dt}')"`}>${d}</span>`;
+  }
+  const body=`${msg?`<p class="lead tiny">${msg}</p>`:""}
+    <div class="dphead"><button class="dpnav" type="button" onclick="_dpShift(-1)">\u2039</button>
+      <span>${esc(label)}</span>
+      <button class="dpnav" type="button" onclick="_dpShift(1)">\u203a</button></div>
+    <div class="dpgrid dpdow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+    <div class="dpgrid">${cells}</div>
+    <p class="tiny center" style="margin-top:8px">Selected: <b class="hi">${esc(_dpSel)}</b></p>`;
+  detail("[ CALENDAR ]",big,body,[
+    {label:"Use this date",onClick:()=>{ const r=_dpRes; _dpRes=null; hideOverlay(()=>{ if(r) r(_dpSel); }); }},
+    {label:"Cancel",kind:"ghost",onClick:()=>{ const r=_dpRes; _dpRes=null; hideOverlay(()=>{ if(r) r(null); }); }}]);
+}
+let _caDraft=null;
+function calPickDate(){
+  _caDraft={date:document.getElementById("ca_date").value,cal:document.getElementById("ca_cal").value,pro:document.getElementById("ca_pro").value};
+  hideOverlay(()=>{ sysDate("PICK A DATE","",_caDraft.date).then(d=>{ if(d) _caDraft.date=d; calAddPast(); }); });
+}
 function calAddPast(){
-  const body=`<label class="fld"><span>Date</span><input id="ca_date" type="date" value="${todayStr()}" max="${todayStr()}"></label>
-    <label class="fld"><span>Calories (kcal)</span><input id="ca_cal" type="number" inputmode="numeric" placeholder="e.g. 2600"></label>
-    <label class="fld"><span>Protein (g)</span><input id="ca_pro" type="number" inputmode="numeric" placeholder="e.g. 150"></label>`;
+  const p=_caDraft||{date:todayStr(),cal:"",pro:""}; _caDraft=null;
+  const body=`<label class="fld"><span>Date</span><button class="selbtn" type="button" onclick="calPickDate()"><span>${esc(p.date)}</span><span class="caret">\u25be</span></button><input id="ca_date" type="hidden" value="${esc(p.date)}"></label>
+    <label class="fld"><span>Calories (kcal)</span><input id="ca_cal" type="number" inputmode="numeric" placeholder="e.g. 2600" value="${esc(p.cal)}"></label>
+    <label class="fld"><span>Protein (g)</span><input id="ca_pro" type="number" inputmode="numeric" placeholder="e.g. 150" value="${esc(p.pro)}"></label>`;
   detail("[ INTAKE ]","ADD / EDIT A DAY",body,[
     {label:"Save",onClick:()=>{ const d=document.getElementById("ca_date").value; if(!d){toast("Pick a date");return;} const cal=+document.getElementById("ca_cal").value||0, pro=+document.getElementById("ca_pro").value||0; if(!cal&&!pro){toast("Enter calories or protein");return;}
       const ex=S.nutrition.log.find(x=>x.date===d); if(ex){ex.cal=cal;ex.pro=pro;} else S.nutrition.log.push({date:d,cal,pro}); S.nutrition.log.sort((a,b)=>a.date<b.date?-1:1);
@@ -2987,10 +3050,16 @@ function weightEdit(date){
     {label:"Delete",kind:"warn",onClick:()=>{ S.metrics.weight=S.metrics.weight.filter(w=>w.date!==date); save(); hideOverlay(()=>{renderStats();renderStatus();decorPanels();}); toast("Entry removed"); }},
     {label:"Cancel",kind:"ghost",onClick:()=>hideOverlay()}]);
 }
+let _waDraft=null;
+function wtPickDate(){
+  _waDraft={date:document.getElementById("wa_date").value,val:document.getElementById("wa_val").value};
+  hideOverlay(()=>{ sysDate("PICK A DATE","",_waDraft.date).then(d=>{ if(d) _waDraft.date=d; weightAddPast(); }); });
+}
 function weightAddPast(){
   const metric=(S.settings.units==="metric");
-  const body=`<label class="fld"><span>Date</span><input id="wa_date" type="date" value="${todayStr()}" max="${todayStr()}"></label>
-    <label class="fld"><span>Weight (${unitW()})</span><input id="wa_val" type="number" inputmode="decimal" step="0.1" placeholder="${metric?'74.0':'163.0'}"></label>`;
+  const p=_waDraft||{date:todayStr(),val:""}; _waDraft=null;
+  const body=`<label class="fld"><span>Date</span><button class="selbtn" type="button" onclick="wtPickDate()"><span>${esc(p.date)}</span><span class="caret">\u25be</span></button><input id="wa_date" type="hidden" value="${esc(p.date)}"></label>
+    <label class="fld"><span>Weight (${unitW()})</span><input id="wa_val" type="number" inputmode="decimal" step="0.1" placeholder="${metric?'74.0':'163.0'}" value="${esc(p.val)}"></label>`;
   detail("[ BODY ]","ADD / EDIT WEIGH-IN",body,[
     {label:"Save",onClick:()=>{ const d=document.getElementById("wa_date").value, val=parseFloat(document.getElementById("wa_val").value); if(!d){toast("Pick a date");return;} if(!val){toast("Enter a weight");return;}
       const kg=metric?val:lbToKg(val); const ex=S.metrics.weight.find(w=>w.date===d); if(ex)ex.kg=kg; else S.metrics.weight.push({date:d,kg}); S.metrics.weight.sort((a,b)=>a.date<b.date?-1:1); if(d===todayStr())S.profile.weightKg=kg;
@@ -3424,7 +3493,7 @@ function openDayDetail(date){ const ses=workoutsOn(date), dow=DAYNAMES[new Date(
   const sched=S.profile&&S.profile.days.includes(new Date(date+"T00:00:00").getDay());
   const past=date<=todayStr()&&(!S.program||date>=S.program.startDate);
   const loggable=date<=todayStr();
-  const body = ses.length ? ses.map(s=>`<div class="drow"><div class="dk">${s.boss?'BOSS':s.dayKey||'GATE'}</div><div class="dv"><b>${s.name}</b><br>${s.setsDone} sets · +${s.exp} EXP<br><span class="muted tiny">${(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||esc(e.id); const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return nm+(top.w?` ${top.w}×${top.reps}`:` ×${top.reps||e.sets.length}`); }).join(" · ")||"—"}</span></div></div>`).join("")
+  const body = ses.length ? ses.map(s=>`<div class="drow"><div class="dk">${s.boss?'BOSS':s.dayKey||'GATE'}</div><button class="drowx" type="button" onclick="deleteSession('${date}',${S.sessions.indexOf(s)})">\u2715</button><div class="dv"><b>${esc(s.name||"Gate")}</b><br>${s.setsDone} sets · +${s.exp} EXP<br><span class="muted tiny">${(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||esc(e.id); const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return nm+(top.w?` ${top.w}×${top.reps}`:` ×${top.reps||e.sets.length}`); }).join(" · ")||"—"}</span></div></div>`).join("")
     : exc ? `<p class="lead tiny center">Logged as <b class="am">${esc(exc.reason)}</b> — <span class="gr">streak kept</span>. Not a missed day.</p>`
     : `<p class="lead tiny center">No Gate cleared on this day.${(sched&&date<todayStr())?' <span class="cr">Missed.</span>':(sched?'':' <span class="muted">Rest day \u2014 you can still log anything you did.</span>')}</p>`;
   const acts=[];
@@ -3439,8 +3508,9 @@ function openDayDetail(date){ const ses=workoutsOn(date), dow=DAYNAMES[new Date(
 /* ---------- manual workout logging (searchable picker + custom text) ---------- */
 let _ml={date:"",items:[],q:""};
 function manualLog(date){ _ml={date:date,items:[],q:""}; renderManualLog(); }
+const ML_HIDE=["hamr","runpace"];   /* logged by their own tools, not by sets and reps */
 function mlExList(){ const q=_ml.q.trim().toLowerCase();
-  let ids=Object.keys(EX);
+  let ids=Object.keys(EX).filter(id=>ML_HIDE.indexOf(id)<0);
   if(q) ids=ids.filter(id=>{ const x=EX[id]; return (x.n+" "+x.cat+" "+(x.stat||"")).toLowerCase().includes(q); });
   return ids.slice(0,40); }
 function renderManualLog(){
@@ -3450,7 +3520,7 @@ function renderManualLog(){
   const body=`<p class="lead tiny">Logging for <b class="hi">${_ml.date}</b>. Add each movement you did \u2014 search the library or type your own.</p>
     ${rows?`<div class="mt">${rows}</div>`:""}
     <label class="fld mt"><span>Search the library</span><input id="mlq" type="text" placeholder="e.g. press, row, squat" value="${esc(_ml.q)}" oninput="mlSearch(this.value)"></label>
-    <div class="sellist" style="max-height:190px;overflow:auto">${list}</div>
+    <div class="sellist" style="max-height:min(46dvh,460px);overflow:auto;overscroll-behavior:contain">${list}</div>
     <label class="fld mt"><span>Or add a custom workout</span><input id="mlcustom" type="text" placeholder="e.g. Hack squat machine 4\u00d710"></label>
     <button class="btn ghost full mt" type="button" onclick="mlAddCustom()">\u002b Add custom entry</button>`;
   detail("[ MANUAL LOG ]",`LOG WORKOUT`,body,[
