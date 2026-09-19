@@ -590,6 +590,12 @@ html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
 .daycell .dd{ width:19px; height:19px; margin:6px auto 0; border-radius:50%; border:1px solid var(--line-2); display:grid; place-items:center; font-size:10px; color:var(--ghost-2); }
 .daycell.done .dd{ background:var(--green); border-color:var(--green); color:#02120a; box-shadow:0 0 8px var(--green); }
 .daycell.missed .dd{ border-color:var(--crimson); color:var(--crimson); }
+.gaterow{position:relative;cursor:pointer;padding-right:26px;}
+.rowx{position:absolute;right:0;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--ghost-2);font-size:12px;padding:4px 6px;cursor:pointer;}
+.rowx:active{color:var(--crimson);}
+.daycell{position:relative;}
+.cellx{position:absolute;top:-6px;right:-4px;border:1px solid var(--line);background:rgb(2 3 14 / .92);color:var(--ghost-2);font-size:8.5px;line-height:1;padding:2px 3px;cursor:pointer;border-radius:2px;}
+.cellx:active{color:var(--crimson);border-color:var(--crimson);}
 .daycell.exc .dd{ border-color:var(--gold); color:var(--gold); box-shadow:0 0 7px rgb(255 206 107 / .25); }
 .daycell.today{ border-color:var(--accent); box-shadow:0 0 10px rgb(var(--ac) / .25); }
 
@@ -1642,7 +1648,11 @@ function soundOn(){ return !(S&&S.settings&&S.settings.sound===false); }
 function soundVol(){ var v=S&&S.settings&&S.settings.soundVol; return (typeof v==="number"&&v>=0&&v<=1)?v:1; }
 function soundLevel(){ if(!soundOn()) return "off"; return String(Math.round(soundVol()*100)); }
 function setSoundLevel(v){ if(v==="off"){ S.settings.sound=false; } else { S.settings.sound=true; S.settings.soundVol=(parseInt(v,10)||100)/100; } save(); }
-function playSfx(kind){ if(!soundOn()) return; initAudio(); var vol=soundVol()*0.5; if(_acPlay(kind,vol)) return; const el=document.getElementById("sfx_"+kind); if(!el||!el.src) return;
+const _sfxAt={};
+function playSfx(kind){ if(!soundOn()) return;
+  if(kind!=="timer"){ const n=(window.performance&&performance.now)?performance.now():Date.now();
+    if(_sfxAt[kind]&&n-_sfxAt[kind]<140) return; _sfxAt[kind]=n; }
+  initAudio(); var vol=soundVol()*0.5; if(_acPlay(kind,vol)) return; const el=document.getElementById("sfx_"+kind); if(!el||!el.src) return;
   try{ el.volume=vol; el.currentTime=0; const p=el.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
 let _timerPlays=0;
 function _timerEnded(){ const el=document.getElementById("sfx_timer"); if(!el) return; if(_timerPlays<2){ _timerPlays++; el.currentTime=0; const p=el.play(); if(p&&p.catch)p.catch(()=>{}); } else { el.removeEventListener("ended",_timerEnded); } }
@@ -1877,7 +1887,7 @@ function renderStatus(){
 
     <div class="panel flat">
       <div class="panel-title"><span class="tri"></span>This Week<span class="sub" style="cursor:pointer" onclick="excuseWeek()">EXCUSE WEEK \u25b8</span></div>
-      <div class="weekstrip">${days.map(d=>`<div class="daycell ${d.trained?'done':''} ${d.missed?'missed':''} ${d.excused?'exc':''} ${d.today?'today':''}" onclick="openDayDetail('${d.date}')"><div class="dn">${d.dow}</div><div class="dd">${d.trained?'\u2713':(d.excused?'\u2298':(d.missed?'\u2715':''))}</div></div>`).join("")}</div>
+      <div class="weekstrip">${days.map(d=>`<div class="daycell ${d.trained?'done':''} ${d.missed?'missed':''} ${d.excused?'exc':''} ${d.today?'today':''}" onclick="openDayDetail('${d.date}')"><div class="dn">${d.dow}</div><div class="dd">${d.trained?'\u2713':(d.excused?'\u2298':(d.missed?'\u2715':''))}</div>${d.trained?`<button class="cellx" type="button" onclick="event.stopPropagation();deleteDay('${d.date}')">\u2715</button>`:""}</div>`).join("")}</div>
     </div>
 
     ${recoveryBodyHTML()}
@@ -2896,8 +2906,9 @@ function renderStats(){
       ${suppUsage().map(u=>`<div class="kv"><span class="k">${u.n}</span><span class="v ${u.week>=5?'gr':(u.week?'':'muted')}">${u.week}/7 days${u.total?` · ${u.total} total`:''}</span></div>`).join("")}
     </div>
     <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>Recent Gates</div>
-      ${S.sessions.slice(-6).reverse().map(s=>`<div class="kv"><span class="k">${s.date.slice(5)} · ${s.name}</span><span class="v">${s.setsDone} sets · +${s.exp}</span></div>`).join("")||`<p class="lead tiny">No sessions yet.</p>`}
+      <div class="panel-title"><span class="tri"></span>Recent Gates<span class="sub">TAP TO EDIT</span></div>
+      ${S.sessions.map((s,i)=>({s,i})).slice(-6).reverse().map(o=>`<div class="kv gaterow" onclick="openDayDetail('${o.s.date}')"><span class="k">${o.s.date.slice(5)} · ${esc(o.s.name||"Gate")}</span><span class="v">${o.s.setsDone} sets · +${o.s.exp}</span><button class="rowx" type="button" onclick="event.stopPropagation();deleteSession('${o.s.date}',${o.i})">\u2715</button></div>`).join("")||`<p class="lead tiny">No sessions yet.</p>`}
+      <button class="btn ghost full mt" onclick="histGates()">Open Gate history${S.sessions.length?` (${S.sessions.length})`:""}</button>
     </div>`;
   // animate ring sweeps after insert
   document.querySelectorAll("#s-stats .ringval").forEach(c=>{ const off=c.getAttribute("data-off"); requestAnimationFrame(()=>{ c.style.strokeDashoffset=off; }); });
@@ -3497,14 +3508,49 @@ async function excuseWeek(){
   const reason=await pickExcuseReason("Excuse the next 7 days\u2019 scheduled Gates in one move. Trained or already-excused days are untouched.");
   if(reason===null) return;
   S.excused=S.excused||[]; let n=0;
-  for(let i=0;i<7;i++){ const d=new Date(Date.now()+86400000*i), dt=todayStr(d);
-    if(!S.profile.days.includes(d.getDay())) continue;
-    if(workoutsOn(dt).length) continue;
-    if(S.excused.some(e=>e.date===dt)) continue;
-    S.excused.push({date:dt,reason}); n++; }
+  const span=sevenDays().map(x=>x.date);                    /* the days this panel shows */
+  for(let i=0;i<7;i++) span.push(todayStr(new Date(Date.now()+86400000*i)));
+  const sb=(S.program&&(S.program.freshStart||S.program.startDate))||"";
+  span.forEach(dt=>{
+    const d=new Date(dt+"T00:00:00");
+    if(!S.profile.days.includes(d.getDay())) return;
+    if(sb&&dt<sb) return;
+    if(workoutsOn(dt).length) return;
+    if(S.excused.some(e=>e.date===dt)) return;
+    S.excused.push({date:dt,reason}); n++; });
   if(S.draft&&S.excused.some(e=>e.date===S.draft.date)){ S.draft=null; sessionDraft=null; }
   save(); toast(n?`Week excused \u2014 ${n} day${n>1?"s":""} protected`:"Nothing to excuse this week");
   renderStatus(); decorPanels(); if(typeof renderTrain==="function")renderTrain(); }
+async function deleteSession(date,idx){
+  const s=(S.sessions||[])[idx];
+  if(!s||s.date!==date){ toast("That entry is no longer there"); return; }
+  const ok=await sysConfirm("DELETE GATE","Remove <b>"+esc(s.name||"this Gate")+"</b> from "+esc(date.slice(5))+"?<br>Its EXP is taken back. This cannot be undone.","Delete","warn");
+  if(!ok) return;
+  if(s.exp&&typeof subExp==="function") subExp(s.exp,"gate-delete");
+  S.sessions.splice(idx,1);
+  if(S.draft&&S.draft.date===date){ S.draft=null; sessionDraft=null; }
+  save();
+  renderStatus(); renderStats(); decorPanels();
+  if(typeof renderTrain==="function") renderTrain();
+  toast("Gate deleted");
+}
+async function deleteDay(date){
+  const list=sessionsOn(date);
+  if(!list.length){ toast("Nothing logged that day"); return; }
+  if(list.length===1) return deleteSession(date,list[0].i);
+  const ok=await sysConfirm("DELETE GATES","Remove all <b>"+list.length+"</b> Gates logged on "+esc(date.slice(5))+"?<br>Their EXP is taken back.","Delete all","warn");
+  if(!ok) return;
+  let back=0; list.forEach(o=>{ back+=o.s.exp||0; });
+  if(back&&typeof subExp==="function") subExp(back,"gate-delete");
+  S.sessions=(S.sessions||[]).filter(s=>s.date!==date);
+  if(S.draft&&S.draft.date===date){ S.draft=null; sessionDraft=null; }
+  save(); renderStatus(); renderStats(); decorPanels();
+  if(typeof renderTrain==="function") renderTrain();
+  toast(list.length+" Gates deleted");
+}
+function sessionsOn(date){ return (S.sessions||[]).map((s,i)=>({s,i})).filter(o=>o.s.date===date); }
+/* open the day editor from anywhere */
+function editGate(date){ hideOverlay(()=>openDayDetail(date)); }
 function toggleTitle(id){ const t=S.rpg.titles=S.rpg.titles||{owned:[],equipped:[]}; if(!t.owned.includes(id)) return;
   const i=t.equipped.indexOf(id); if(i>=0) t.equipped.splice(i,1); else { if(t.equipped.length>=MAX_TITLES){ toast(`Max ${MAX_TITLES} titles equipped`); return; } t.equipped.push(id); }
   save(); if(typeof playSfx==="function")playSfx("tap"); openProfile(); if(typeof renderStatus==="function"){ renderStatus(); decorPanels(); } }
