@@ -43,8 +43,5 @@ OPTION B — Install as a real "lite app" (PWA)
   via the service worker (sw.js).
   IOS Chrome or Safari: menu > Add to Home screen as an app shortcut.
 
-Files
-  index.html              the entire app (UI + logic + data)
-  manifest.webmanifest    app metadata for install
-  sw.js                   offline caching service worker
-  icons/                  app icons (192, 512, maskable, apple-touch)
+OPTION C - Download APK
+  The APK is just a chrome container. It's not a standalone app. It needs to connect online once to sync with this repo. Clear chrome cache, force close it, and restart the app for new updates to take effect. 
