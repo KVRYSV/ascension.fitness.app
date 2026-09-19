@@ -423,6 +423,55 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .resttimer .rt-num{font-family:var(--display);font-weight:700;font-size:28px;color:#fff;text-shadow:0 0 14px var(--accent);min-width:78px;letter-spacing:.02em;}
 .resttimer .rt-mid{flex:1;}
 .resttimer .rt-label{font-family:var(--mono);font-size:9px;letter-spacing:.17em;color:var(--ghost);text-transform:uppercase;margin-bottom:6px;}
+.trkwrap{position:relative;margin:0 0 4px;}
+.trkwrap svg{width:80%;height:auto;display:block;margin:0 auto;overflow:visible;}
+.trklane{fill:none;stroke:rgb(var(--ac) / .34);stroke-width:1.4;}
+:root{ --rn1:#38e1ff; --rn2:#b06bff; --rn3:#45ff8f; }
+html[data-accent="violet"]{ --rn1:#c084fc; --rn2:#ff2bd6; --rn3:#38e1ff; }
+html[data-accent="crimson"]{ --rn1:#ffd23a; --rn2:#ff2d3f; --rn3:#ff7a18; }
+.trkstart{stroke:rgb(var(--ac) / .55);stroke-width:1.1;stroke-linecap:butt;}
+.trkflash{fill:rgb(var(--ac) / .6);opacity:0;pointer-events:none;}
+.trkflash.on{animation:trkfl .6s ease-out;}
+@keyframes trkfl{0%{opacity:.9}100%{opacity:0}}
+.trktrail{fill:none;stroke-width:12.6;stroke-linecap:butt;stroke-linejoin:round;pointer-events:none;}
+.trkhead{fill:none;stroke-width:1.4;stroke-linecap:butt;pointer-events:none;}
+.rnico{width:20px;height:20px;display:block;margin:0 auto;fill:currentColor;}
+.trkmid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.trkmid .lb{font-family:var(--mono);font-size:9px;letter-spacing:.3em;color:var(--ghost);}
+.trkmid .big{font-family:var(--display);font-size:46px;font-weight:800;color:var(--ink-hi);text-shadow:0 0 10px rgb(var(--ac) / .8),0 0 26px rgb(var(--ac) / .45);line-height:1;letter-spacing:-.01em;}
+.trkmid .sm{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ghost);margin-top:3px;}
+.trkmid .dv{font-family:var(--mono);font-size:11px;font-weight:700;margin-top:4px;}
+.trkkey{display:flex;flex-direction:column;gap:5px;margin:4px 0 10px;}
+.trkkey span{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink);cursor:pointer;border-bottom:1px dashed rgb(var(--ac) / .14);padding-bottom:4px;}
+.trkkey b{margin-left:auto;font-family:var(--display);font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--ink-hi);white-space:nowrap;}
+.trkkey i{width:11px;height:11px;border-radius:50%;flex:0 0 auto;}
+.trkrow{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);padding:8px 11px;clip-path:var(--clip-s);background:rgb(2 3 14 / .55);margin-bottom:8px;}
+.trkrow .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--ghost);}
+.trkrow .v{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink-hi);}
+.trkrow .v.tap{cursor:pointer;border-bottom:1px dashed rgb(var(--ac) / .6);}
+.hamrgrid{position:relative;height:190px;border:1px solid var(--line-2);background:rgb(2 3 14 / .6);overflow:hidden;clip-path:var(--clip-s);
+  background-image:linear-gradient(rgb(var(--ac) / .16) 1px,transparent 1px),linear-gradient(90deg,rgb(var(--ac) / .16) 1px,transparent 1px);
+  background-size:calc(100% / 9) calc(100% / 6);}
+.hamrgrid.flash{animation:hamrflash .5s ease-out;}
+@keyframes hamrflash{0%{background-color:rgb(var(--ac) / .75);}100%{background-color:rgb(2 3 14 / .6);}}
+.hamrline{position:absolute;top:0;bottom:0;left:0;width:4px;background:var(--accent);
+  box-shadow:0 0 6px var(--accent),0 0 16px rgb(var(--ac) / .7);will-change:transform;}
+.hamrlv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.hamrlv .lb{font-family:var(--mono);font-size:12px;letter-spacing:.34em;color:var(--ink-hi);}
+.hamrlv .nb{font-family:var(--display);font-size:62px;font-weight:800;line-height:1;color:var(--accent);text-shadow:0 0 18px rgb(var(--ac) / .65);}
+.hamrfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;border:1px solid var(--line);padding:9px 12px;clip-path:var(--clip-s);background:rgb(2 3 14 / .55);}
+.hamrfoot .fl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ghost);}
+.hamrfoot .fv{font-family:var(--mono);font-size:30px;font-weight:800;color:var(--ink-hi);text-shadow:0 0 12px rgb(var(--ac) / .5);}
+.hamrtop{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.hamrtop .tl{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--ghost);white-space:nowrap;}
+.hamrbar{position:relative;flex:1;height:5px;background:rgb(8 14 26 / .8);border:1px solid var(--line);cursor:pointer;touch-action:none;padding:0;}
+.hamrbar>b{position:absolute;top:50%;left:0;width:11px;height:11px;margin:-6px 0 0 -5px;background:var(--accent);box-shadow:0 0 8px var(--accent);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);}
+.hamrbar>i{display:block;height:100%;width:0;background:var(--accent);box-shadow:0 0 4px var(--accent),0 0 10px var(--accent);}
+.hamrpp{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ink-hi);cursor:pointer;white-space:nowrap;border:1px solid var(--line-2);background:rgb(var(--ac) / .14);padding:5px 9px;clip-path:var(--clip-s);min-width:56px;text-align:center;}
+.hamrmeters{position:relative;display:flex;justify-content:space-between;margin-top:5px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ghost);}
+.hamrmeters em{position:absolute;left:50%;transform:translateX(-50%);top:12px;font-style:normal;font-size:8px;letter-spacing:.3em;color:var(--ghost-2);}
+.hamrmeters span{position:relative;}
+.hamrmeters span::before{content:"";position:absolute;left:50%;top:-5px;width:1px;height:4px;background:rgb(var(--ac) / .5);}
 .resttimer .rt-bar{height:5px;background:rgb(8 14 26 / .8);border:1px solid var(--line);overflow:visible;}
 .resttimer .rt-bar>i{display:block;height:100%;background:var(--accent);box-shadow:0 0 4px var(--accent),0 0 10px var(--accent),0 0 17px rgb(var(--ac) / .3);width:100%;}
 .resttimer .rt-x{font-family:var(--mono);font-size:11px;color:var(--ghost);border:1px solid var(--line);padding:10px 11px;cursor:pointer;background:transparent;}
@@ -604,7 +653,8 @@ html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
 .gv{ font-family:var(--mono); font-size:17px; font-weight:700; color:var(--accent); margin:2px 0 4px; }
 .gd{ font-size:11px; color:var(--ghost); line-height:1.4; }
 .machine{ display:flex; gap:8px; flex-wrap:wrap; margin-top:11px; }
-.mchip.mchmain{ flex-basis:100%; background:rgb(var(--ac) / .14); border-color:var(--line-2); color:var(--ink-hi); font-weight:600; }
+.mchip.mchmain{ flex-basis:100%; display:flex; align-items:center; gap:10px; background:rgb(var(--ac) / .14); border-color:var(--line-2); color:var(--ink-hi); font-weight:600; }
+.msvg{ width:58px; height:47px; flex:0 0 auto; color:var(--accent); filter:drop-shadow(0 0 5px rgb(var(--ac) / .45)); }
 .mchip{ font-family:var(--mono); font-size:10px; letter-spacing:.03em; padding:7px 10px; border:1px solid var(--line-2); color:var(--accent); background:var(--soft); }
 .mchip.free{ color:var(--ghost); border-color:var(--line); }
 .track{ display:flex; gap:10px; align-items:center; border:1px solid var(--line); background:rgb(var(--ac) / .04); padding:10px 12px; margin-top:11px; }
@@ -898,6 +948,8 @@ const DAYNAMES=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
 /* ===== Exercise database — real, evidence-based movements ===== */
 const EX = {
+  runpace:{n:"Timed Run",cat:"Cond",stat:"VIT",eq:["gym","home","minimal","calisthenics"],yt:"running pacing strategy",cues:"Hold an even pace. Use the track pacer to stay on your goal split."},
+  hamr:{n:"HAMR / PACER Test",cat:"Cond",stat:"VIT",eq:["gym","home","minimal","calisthenics"],yt:"HAMR PACER test air force",cues:"20 m shuttle run. Reach the far line before each beep. Stop when you cannot hold the pace."},
   squat:{n:"Back Squat",cat:"Legs",stat:"STR",eq:["gym"],yt:"barbell back squat proper form beginner",cues:"Brace core, sit between hips, knees track toes, drive through midfoot. Depth = hip crease below knee.",load:"Empty bar (45 lb) or 25 lb goblet"},
   goblet:{n:"Goblet Squat",cat:"Legs",stat:"STR",eq:["gym","home","minimal"],yt:"goblet squat form",cues:"Hold dumbbell at chest, elbows inside knees at bottom, tall chest.",load:"Start 25 lb DB"},
   splitsquat:{n:"Bulgarian Split Squat",cat:"Legs",stat:"STR",eq:["gym","home","minimal","calisthenics"],yt:"bulgarian split squat form",cues:"Rear foot elevated, front shin near vertical, control the descent.",load:"Bodyweight → hold 10–20 lb DBs"},
@@ -1753,7 +1805,8 @@ function render(){
   document.getElementById("tb_name").textContent=(S.profile.name||"PLAYER").toUpperCase();
   document.getElementById("tb_rank").textContent=rankFor(S.rpg.level);
   document.getElementById("tb_lv").textContent=S.rpg.level;
-  if(S.draft&&S.draft.date===todayStr()){ if(!sessionDraft) sessionDraft=S.draft; if(typeof updateTrainProgress==="function") updateTrainProgress(); }
+  if(runLive()){ if(typeof runHeader==="function") runHeader(); }
+  else if(S.draft&&S.draft.date===todayStr()){ if(!sessionDraft) sessionDraft=S.draft; if(typeof updateTrainProgress==="function") updateTrainProgress(); }
   else if(typeof hideTrainProgress==="function") hideTrainProgress();
   document.documentElement.setAttribute("data-accent",S.settings.accent||"cyan");
   document.documentElement.setAttribute("data-bars",S.settings.barStyle||"glow");
@@ -2103,6 +2156,42 @@ const MACHINE={
   intervals:{use:"Treadmill / track",free:"Outdoor sprints"},
   burpee:{use:"Floor",free:"—"},
 };
+const MSVG={
+ legpress:'<path d="M6 40h34M10 40V30M36 40V30"/><path d="M8 30h30l6-10H14z"/><path d="M44 20l12-9M44 26l12-9"/><rect x="54" y="6" width="6" height="24" rx="1"/>',
+ hacksquat:'<path d="M6 42h40"/><path d="M12 42L38 14"/><path d="M20 42L46 14"/><path d="M34 18l10 6"/><circle cx="46" cy="26" r="3"/><path d="M40 10h10"/>',
+ chestpress:'<path d="M10 42h28"/><path d="M16 42V22a4 4 0 014-4h6"/><path d="M26 18h6v10h-6z"/><path d="M32 22h12M32 30h12"/><circle cx="46" cy="22" r="2.5"/><circle cx="46" cy="30" r="2.5"/>',
+ shoulderpress:'<path d="M10 42h26"/><path d="M16 42V24a4 4 0 014-4h6"/><path d="M26 20h8v10h-8z"/><path d="M28 20V10M40 20V10"/><circle cx="28" cy="8" r="2.5"/><circle cx="40" cy="8" r="2.5"/><path d="M34 24h8"/>',
+ latpulldown:'<path d="M8 44h32"/><path d="M14 44V26M50 44V6"/><path d="M50 8H26v6"/><path d="M18 12h16"/><path d="M22 26h14v4H22z"/><path d="M26 30v6"/>',
+ seatedrow:'<path d="M8 42h34"/><path d="M14 42V26a4 4 0 014-4h8"/><path d="M26 20v10"/><path d="M28 24h14"/><circle cx="46" cy="24" r="3"/><path d="M50 16v18"/>',
+ assistedpullup:'<path d="M10 46h36"/><path d="M14 46V8h28v38"/><path d="M18 12h20"/><path d="M24 30h10v5H24z"/><path d="M22 12v8M36 12v8"/>',
+ legcurl:'<path d="M8 40h36"/><path d="M12 40V30h24v10"/><path d="M36 30l10-6"/><circle cx="48" cy="22" r="3"/><path d="M14 30V22h8"/>',
+ legext:'<path d="M8 42h32"/><path d="M14 42V24h14v8"/><path d="M28 32l10 6"/><circle cx="40" cy="40" r="3"/><path d="M14 24V16h8"/>',
+ calfraise:'<path d="M8 44h40"/><path d="M12 44V34h28"/><path d="M18 34V20h16"/><path d="M20 20h14v5H20z"/><path d="M40 34l6-6"/>',
+ pecdeck:'<path d="M10 42h26"/><path d="M16 42V22a4 4 0 014-4h6"/><path d="M26 18h6v12h-6z"/><path d="M26 22L14 12M32 22l12-10"/><circle cx="12" cy="10" r="2.5"/><circle cx="46" cy="10" r="2.5"/>',
+ curlmach:'<path d="M8 42h30"/><path d="M14 42V26a4 4 0 014-4h6"/><path d="M26 22l10-8"/><path d="M34 14h12"/><circle cx="48" cy="14" r="2.5"/>',
+ dipmach:'<path d="M10 46h32"/><path d="M16 46V14M40 46V14"/><path d="M16 20h-8M40 20h8"/><path d="M20 14h16"/>',
+ abcrunch:'<path d="M8 42h30"/><path d="M14 42V24a4 4 0 014-4h8"/><path d="M26 20v-8"/><path d="M22 12h14"/><path d="M26 30h12"/>',
+ captains:'<path d="M12 46h28"/><path d="M18 46V10h16v36"/><path d="M18 24h-6M34 24h6"/><path d="M22 14h8"/>',
+ hipthrust:'<path d="M6 40h40"/><path d="M12 40V30h26v10"/><path d="M16 24h22v6H16z"/><path d="M20 24v-6M34 24v-6"/><circle cx="20" cy="14" r="3"/><circle cx="34" cy="14" r="3"/>',
+ smith:'<path d="M10 46h36"/><path d="M16 46V6M40 46V6"/><path d="M12 24h32"/><circle cx="10" cy="24" r="3"/><circle cx="46" cy="24" r="3"/>',
+ bike:'<circle cx="16" cy="36" r="8"/><circle cx="44" cy="36" r="8"/><path d="M16 36l10-16h10l8 16"/><path d="M26 20h-6"/><path d="M36 20V10h6"/>',
+ bench:'<path d="M8 42h36"/><path d="M14 42V32h24v10"/><path d="M12 32h28v-5H12z"/>'
+};
+function machineIcon(txt){ const t=(txt||"").toLowerCase(); let k="";
+  if(/leg press/.test(t)) k="legpress"; else if(/hack squat/.test(t)) k="hacksquat";
+  else if(/chest-press|chest press/.test(t)) k="chestpress"; else if(/shoulder-press|shoulder press/.test(t)) k="shoulderpress";
+  else if(/pulldown/.test(t)) k="latpulldown"; else if(/row machine|seated row/.test(t)) k="seatedrow";
+  else if(/assisted pull|pull-up machine/.test(t)) k="assistedpullup"; else if(/leg-curl|leg curl/.test(t)) k="legcurl";
+  else if(/leg-extension|leg extension/.test(t)) k="legext"; else if(/calf/.test(t)) k="calfraise";
+  else if(/pec-deck|pec deck|rear-delt|reverse-pec|lateral-raise/.test(t)) k="pecdeck";
+  else if(/curl machine|biceps-curl|biceps curl/.test(t)) k="curlmach";
+  else if(/dip|triceps/.test(t)) k="dipmach"; else if(/crunch/.test(t)) k="abcrunch";
+  else if(/captain/.test(t)) k="captains"; else if(/hip-thrust|hip thrust|glute-drive/.test(t)) k="hipthrust";
+  else if(/smith/.test(t)) k="smith"; else if(/bike|cycle|treadmill|row erg/.test(t)) k="bike";
+  else if(/bench|back-extension/.test(t)) k="bench";
+  if(!k) return "";
+  return `<svg class="msvg" viewBox="0 0 64 52" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${MSVG[k]}</svg>`;
+}
 function machineFor(id){ return MACHINE[id]||{use:"Bodyweight / minimal kit",free:"",mch:""}; }
 
 /* ---- recommended motivational tracks per category (D4 — title + artist only) ---- */
@@ -2198,6 +2287,7 @@ function cooldownVideo(id){ const c=CDBYID[id]; if(!c) return; const v=videoFor(
 }
 function renderTrain(){
   const el=document.getElementById("s-train"), w=todaysWorkout(), arc=currentArc(), weeks=S.program.weeks||24, boss=isBossToday();
+  if(runLive()){ el.innerHTML=runPageHTML(); runTick(); return; }
   if(w.rest && !boss && !(sessionDraft&&(sessionDraft.forced||sessionDraft.boss))){
     el.innerHTML=`<div class="panel"><div class="panel-title"><span class="tri"></span>Today's Gate<span class="sub">CLOSED</span></div>
       <p class="lead">No training scheduled today (<b class="gr">recovery</b>). You can still run an optional session, or do mobility + your Daily Quest.</p>
@@ -2205,7 +2295,7 @@ function renderTrain(){
       <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility instead</button></div>
     <div class="panel flat"><div class="panel-title"><span class="tri"></span>Rest Timer<span class="sub">TIMER</span></div>
       <p class="lead tiny">Run the timer for mobility holds, breathing, or anything on your recovery day.</p>
-      <div class="rt-presets"><span class="rt-preset" onclick="startRest(10,'Timer — 10s')">0:10</span><span class="rt-preset" onclick="startRest(30,'Timer — 30s')">0:30</span><span class="rt-preset" onclick="startRest(60,'Timer — 1 min')">1:00</span><span class="rt-preset" onclick="startRest(90,'Timer — 90s')">1:30</span><span class="rt-preset" onclick="startRest(120,'Timer — 2 min')">2:00</span><span class="rt-preset" onclick="startRest(300,'Timer — 5 min')">5:00</span></div></div>${arcCard(arc)}`;
+      <div class="rt-presets"><span class="rt-preset" onclick="startRest(10,'Timer — 10s')">0:10</span><span class="rt-preset" onclick="startRest(30,'Timer — 30s')">0:30</span><span class="rt-preset" onclick="startRest(60,'Timer — 1 min')">1:00</span><span class="rt-preset" onclick="startRest(90,'Timer — 90s')">1:30</span><span class="rt-preset" onclick="startRest(120,'Timer — 2 min')">2:00</span><span class="rt-preset" onclick="startRest(300,'Timer — 5 min')">5:00</span></div></div>${hamrCard()}${arcCard(arc)}`;
     return;
   }
   if(sessionLoggedToday() && !sessionDraft){
@@ -2213,7 +2303,7 @@ function renderTrain(){
       <div class="bigval gr" style="font-size:30px">✓</div>
       <p class="lead center">Today's Gate is cleared. Recovery now compounds your gains.</p>
       <button class="btn ghost full mt" onclick="forceTrain()">Run an extra optional session</button>
-      <button class="btn full mt" onclick="go('stats')">View your data</button></div>${arcCard(arc)}`;
+      <button class="btn full mt" onclick="go('stats')">View your data</button></div>${hamrCard()}${arcCard(arc)}`;
     return;
   }
   if((S.excused||[]).some(e=>e.date===todayStr()) && !sessionDraft){
@@ -2221,14 +2311,14 @@ function renderTrain(){
     el.innerHTML=`<div class="panel"><div class="panel-title"><span class="tri"></span>Today\u2019s Gate<span class="sub">EXCUSED</span></div>
       <p class="lead">Logged as <b class="am">${esc(_ex)}</b>. <b class="gr">Your streak is protected</b> \u2014 this counts as a day handled, not skipped. Recover well, return stronger.</p>
       <button class="btn full mt" onclick="unexcuseToday()">Undo \u2014 train anyway</button>
-      <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility</button></div>${arcCard(arc)}`;
+      <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility</button></div>${hamrCard()}${arcCard(arc)}`;
     return;
   }
   if((S.skips||[]).includes(todayStr()) && !sessionDraft){
     el.innerHTML=`<div class="panel"><div class="panel-title"><span class="tri"></span>Today's Gate<span class="sub">SKIPPED</span></div>
       <p class="lead">You skipped today's Gate. <b class="gr">No status penalty.</b> Rest is a valid move — return stronger.</p>
       <button class="btn full mt" onclick="unskipToday()">Undo skip — train anyway</button>
-      <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility</button></div>${arcCard(arc)}`;
+      <button class="btn ghost full mt" onclick="go('quests')">Daily Quest + mobility</button></div>${hamrCard()}${arcCard(arc)}`;
     return;
   }
   if(!sessionDraft){
@@ -2247,6 +2337,7 @@ function renderTrain(){
       <p class="lead tiny" style="margin-top:6px">An intense HIIT trial. Recommended level <b class="am">${sessionDraft.rec}</b> — you're Level <b>${lv}</b>.
       ${lv<sessionDraft.rec?` <span class="hi">Beat it under-level for +50% EXP and bonus ability points.</span>`:` Clear it to bank the reward.`}</p></div>`:""}
     <div class="panel"><div class="panel-title"><span class="tri"></span>Muscle Map<span class="sub">TARGETS</span></div>${bodyDiagramSmart(sessionDraft.ex.map(e=>e.id))}</div>
+    ${hamrCard()}
     <div class="panel flat"><div class="panel-title tmin ${pmin('guide')?'min':''}" onclick="togglePanelMin('guide')"><span class="tri"></span>Session Guide<span class="sub">HOW MUCH IS ENOUGH</span></div>
       <div class="guidegrid">
         <div class="gcell"><div class="gk">TIME</div><div class="gv">45\u201375 min</div><div class="gd">Lifting only, warm-up separate. Past ~75 min you add fatigue, not muscle.</div></div>
@@ -2323,7 +2414,7 @@ function exercisePage(e,idx){
       <div class="setbox"><div class="sb"><span class="sbk">SETS</span><span class="sbv">${e.sets.length}</span></div><div class="sbx">×</div><div class="sb"><span class="sbk">REPS</span><span class="sbv">${e.reps}</span></div></div>
       <div class="loadhint"><span class="lhk">SUGGESTED LOAD</span><span class="lhv">${e.deload?'Deload \u2014 ~50% load, leave 3+ reps in reserve':loadHintFor(e.id)}</span></div>
       ${holdSecs(e.reps)?`<button class="btn full holdbtn" type="button" onclick="startRest(${holdSecs(e.reps)},'Hold — ${x.n}')">▷ Start hold timer · ${holdSecs(e.reps)}s</button>`:""}
-      <div class="machine">${mac.mch?`<span class="mchip mchmain">▣ Machine: ${mac.mch}</span>`:""}<span class="mchip">⋈ ${mac.use}</span>${mac.free&&mac.free!=="—"?`<span class="mchip free">free-weight: ${mac.free}</span>`:""}</div>
+      <div class="machine">${mac.mch?`<span class="mchip mchmain">${machineIcon(mac.mch)}<span>▣ Machine: ${mac.mch}</span></span>`:""}<span class="mchip">⋈ ${mac.use}</span>${mac.free&&mac.free!=="—"?`<span class="mchip free">free-weight: ${mac.free}</span>`:""}</div>
       ${embed}
       <div class="row" style="gap:8px;flex-wrap:wrap">
         <button class="ytbtn" onclick="openYT('${e.id}')"><span class="play"></span> Open in YouTube app</button>
@@ -2395,6 +2486,317 @@ function lastBestFor(id){
     if(e&&e.sets.length){ const best=e.sets.reduce((a,b)=>(b.w*100+b.reps)>(a.w*100+a.reps)?b:a); return best.w?`${best.w} lb × ${best.reps}`:`${best.reps} reps`; } }
   return null;
 }
+/* ===================== HAMR / PACER TEST ===================== */
+const HAMR_B=[10.25,19.11,28.08,37.05,45.98,54.95,63.91,72.73,81.11,89.05,97.01,104.98,112.95,120.91,128.85,136.8,144.55,152.08,159.58,167.15,174.68,182.21,189.78,197.3,204.57,211.73,218.9,226.07,233.23,240.4,247.53,254.7,261.82,268.77,275.6,282.37,289.23,296.0,302.83,309.67,316.5,323.28,329.9,336.4,342.87,349.37,355.87,362.37,368.9,375.37,381.85,388.23,394.4,400.6,406.8,413.0,419.23,425.43,431.63,437.83,444.05,450.13,456.07,462.03,467.97,473.93,479.9,485.87,491.8,497.73,503.72,509.5,515.23,520.93,526.67,532.37,538.07,543.77,549.53,555.23,560.93,566.65,572.23,577.73,583.23,588.73,594.23,599.7,605.17,610.63,616.13,621.63,627.12,632.5,637.77,643.07,648.33,653.63,658.9,664.17,669.47,674.7,680.0,685.3,690.62,696.1,701.2,706.27,711.37,716.47,721.57,726.67,731.73,736.83,741.93,747.0,752.08,757.13,762.07,766.97,771.9,776.8,781.73,786.67,791.57,796.5,801.37,806.27,811.2,816.15,820.97,825.73,830.53,835.27,840.03,844.77,849.53,854.27,859.03,863.77,868.53,873.27,878.02,882.7,887.3,891.9,896.5,901.1,905.7,910.3,914.9,919.47,924.07,928.7,933.27,937.85,942.4,946.9,951.33,955.8,960.23,964.73,969.17,973.57,978.03,982.5,986.93,991.4,995.83,1000.28,1004.73,1009.03,1013.37,1017.7,1022.0,1026.37,1030.63,1034.93,1039.27,1043.6,1047.9,1052.23,1056.53,1060.82,1065.13,1069.33,1073.5,1077.7,1081.87,1086.03,1090.2,1094.37,1098.57,1102.77,1106.93,1111.13,1115.33,1119.5,1123.65,1127.87,1131.93,1136.03,1140.1,1144.17,1148.23,1152.27,1156.37,1160.4,1164.43,1168.53,1172.6,1176.7,1180.7,1184.75,1188.97,1192.9,1196.87,1200.83,1204.77,1208.77,1212.73,1216.67,1220.63,1224.57,1228.53,1232.47,1236.4,1240.37,1244.3,1248.22,1252.17,1256.0,1259.83,1263.67,1267.53,1271.4,1275.23,1279.07,1282.93,1286.77,1290.6,1294.43,1298.27,1302.13,1305.97,1311.82];
+const HAMR_IDX=[0,7,15,23,32,41,50,60,70,81,92,104,116,129,142,155,169,183,198,213,229];
+const HAMR_INTRO=5.9;          /* spoken briefing ends; countdown starts */
+const HAMR_SRC="hamr-audio.mp3";
+const HAMR_M=20;               /* shuttle length in metres */
+let _hm=null;
+function hamrCard(){
+  const best=(S.records&&S.records.pr&&S.records.pr.hamr)||null;
+  return `<div class="panel flat"><div class="panel-title tmin ${pmin('hamr')?'min':''}" onclick="togglePanelMin('hamr')"><span class="tri"></span>Fitness Tests<span class="sub">OPTIONAL</span></div>
+    <p class="lead tiny">${HAMR_M} m shuttle run to the official cadence, or a timed run with a track pacer. Either one clears today\u2019s Gate.</p>
+    ${best?`<div class="kv"><span class="k">Best level</span><span class="v">${esc(String(best.reps||0))}</span></div>`:""}
+    <div class="grid2 mt"><button class="btn" onclick="hamrOpen()">\u25b7 HAMR test</button><button class="btn" onclick="runStart()">\u25b7 Run</button></div></div>`;
+}
+function hamrFmt(s){ s=Math.max(0,Math.ceil(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function hamrLevelOf(sh){ let L=0; for(let i=0;i<HAMR_IDX.length;i++){ if(sh>=HAMR_IDX[i]) L=i; } return L; }
+function hamrOpen(){
+  const marks=[0,5,10,15,20].map(m=>`<span>${m}</span>`).join("");
+  const body=`<div class="hamrtop"><span class="tl">PACER TEST</span>
+      <span class="hamrbar" id="hm_seek"><i id="hm_bar"></i><b id="hm_knob"></b></span>
+      <span class="hamrpp" id="hm_pp">PLAY</span></div>
+    <div class="hamrgrid" id="hm_grid"><div class="hamrline" id="hm_line"></div>
+      <div class="hamrlv"><span class="lb" id="hm_lb">INTRO</span><span class="nb" id="hm_lv">\u2014</span></div></div>
+    <div class="hamrmeters">${marks}<em>METRES</em></div>
+    <div class="hamrfoot"><span class="fl" id="hm_fl">SPOKEN BRIEFING</span><span class="fv" id="hm_t">0:00</span></div>`;
+  detail("[ FITNESS TEST ]","HAMR / PACER TEST",body,[
+    {label:"Finish test",onClick:()=>hamrFinish(false)},
+    {label:"Cancel",kind:"ghost",onClick:()=>hamrCancel()}]);
+  const a=new Audio(HAMR_SRC); a.preload="auto";
+  _hm={a:a,raf:0,sh:-1,done:false,busy:false};
+  a.addEventListener("ended",()=>hamrFinish(true));
+  a.addEventListener("error",()=>toast("Audio not found \u2014 upload hamr-audio.mp3 beside index.html"));
+  hamrWire();
+  hamrPlay();
+  _hm.raf=requestAnimationFrame(hamrFrame);
+}
+function hamrPlay(){ if(!_hm||_hm.busy) return; _hm.busy=true;
+  const p=_hm.a.play();
+  if(p&&p.catch) p.then(()=>{_hm&&(_hm.busy=false);}).catch(()=>{ if(_hm){_hm.busy=false;} toast("Tap PLAY to start"); });
+  else _hm.busy=false; }
+function hamrToggle(){ if(!_hm) return;
+  if(_hm.a.paused) hamrPlay(); else { _hm.a.pause(); _hm.busy=false; }
+  playSfx("tap"); }
+function hamrWire(){
+  const pp=document.getElementById("hm_pp");
+  if(pp) pp.addEventListener("click",e=>{ e.preventDefault(); e.stopPropagation(); hamrToggle(); });
+  const g=document.getElementById("hm_grid");
+  if(g) g.addEventListener("click",e=>{ e.stopPropagation(); hamrToggle(); });
+  const bar=document.getElementById("hm_seek"); if(!bar) return;
+  const seek=e=>{ if(!_hm) return; const r=bar.getBoundingClientRect();
+    const p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
+    const d=_hm.a.duration; if(d&&isFinite(d)){ _hm.a.currentTime=p*d; _hm.sh=-1; } };
+  bar.addEventListener("pointerdown",e=>{ e.stopPropagation(); try{bar.setPointerCapture(e.pointerId);}catch(_){} bar._drag=true; seek(e); playSfx("tap"); });
+  bar.addEventListener("pointermove",e=>{ if(bar._drag){ e.stopPropagation(); seek(e); } });
+  bar.addEventListener("pointerup",()=>bar._drag=false);
+  bar.addEventListener("pointercancel",()=>bar._drag=false);
+}
+function hamrFrame(){
+  if(!_hm||_hm.done) return;
+  _hm.raf=requestAnimationFrame(hamrFrame);
+  const g=document.getElementById("hm_grid"); if(!g){ hamrStop(); return; }
+  const ct=_hm.a.currentTime, dur=_hm.a.duration||1314;
+  const b=document.getElementById("hm_bar"); if(b) b.style.width=(ct/dur*100).toFixed(2)+"%";
+  const kn=document.getElementById("hm_knob"); if(kn) kn.style.left=(ct/dur*100).toFixed(2)+"%";
+  const pp=document.getElementById("hm_pp"); if(pp) pp.textContent=_hm.a.paused?"PLAY":"PAUSE";
+  const line=document.getElementById("hm_line");
+  const lb=document.getElementById("hm_lb"), nb=document.getElementById("hm_lv");
+  const fl=document.getElementById("hm_fl"), tl=document.getElementById("hm_t");
+  if(ct<HAMR_B[0]){
+    const pre=ct<HAMR_INTRO;
+    if(lb) lb.textContent=pre?"INTRO":"READY";
+    if(nb) nb.textContent=pre?"\u2014":String(Math.max(0,Math.ceil(HAMR_B[0]-ct)));
+    if(fl) fl.textContent=pre?"SPOKEN BRIEFING":"TIME TO START:";
+    if(tl) tl.textContent=hamrFmt(HAMR_B[0]-ct);
+    if(line) line.style.transform="translateX(0px)";
+    _hm.sh=-1; return;
+  }
+  let i=0; for(let k=0;k<HAMR_B.length-1;k++){ if(ct>=HAMR_B[k]) i=k; }
+  const t0=HAMR_B[i], t1=HAMR_B[i+1], span=Math.max(0.2,t1-t0);
+  const ph=Math.max(0,Math.min(1,(ct-t0)/span));
+  const pos=(i%2)?(1-ph):ph;
+  if(line) line.style.transform="translateX("+(pos*(g.clientWidth-4)).toFixed(1)+"px)";
+  const L=hamrLevelOf(i), lv=L+1, sub=i-HAMR_IDX[L]+1;
+  if(lb) lb.textContent="LEVEL";
+  if(nb) nb.textContent=lv+" - "+sub;
+  if(fl) fl.textContent="TIME LEFT FOR LEVEL:";
+  if(tl) tl.textContent=hamrFmt(t1-ct);
+  if(i!==_hm.sh){ const newLv=(sub===1&&_hm.sh>=0); _hm.sh=i;
+    g.classList.remove("flash"); void g.offsetWidth; g.classList.add("flash");
+    if(newLv) playSfx("done"); }
+}
+function hamrStop(){ if(!_hm) return; _hm.done=true; cancelAnimationFrame(_hm.raf);
+  try{ _hm.a.pause(); _hm.a.removeAttribute("src"); _hm.a.load(); }catch(e){} _hm=null; }
+function hamrCancel(){ hamrStop(); hideOverlay(); toast("HAMR test cancelled \u2014 nothing logged"); }
+async function hamrFinish(auto){
+  if(!_hm) return;
+  const sh=_hm.sh, lv=sh<0?0:hamrLevelOf(sh)+1, sub=sh<0?0:sh-HAMR_IDX[lv-1]+1;
+  try{ _hm.a.pause(); }catch(e){}
+  if(!auto){
+    if(lv<1){ const q=await sysConfirm("FINISH TEST","The run has not started. Close the test without a log?","Close");
+      if(!q){ hamrPlay(); return; } hamrCancel(); return; }
+    const ok=await sysConfirm("FINISH TEST","Stop now and log <b>Level "+lv+" - "+sub+"</b>?","Finish");
+    if(!ok){ hamrPlay(); return; }
+  }
+  hamrStop();
+  const gained=addExp(40+lv*12,"hamr");
+  S.sessions.push({date:todayStr(),dayKey:"HAMR",name:"HAMR / PACER Test",forced:false,boss:false,
+    setsDone:1,exp:gained.gained,ex:[{id:"hamr",sets:[{w:0,reps:lv}]}],
+    custom:["HAMR level "+lv+" - "+sub+" \u00b7 shuttle "+(sh+1)+" total \u00b7 "+((sh+1)*HAMR_M)+" m"],manual:true});
+  S.sessions.sort((x,y)=>x.date<y.date?-1:1);
+  if(typeof updatePRs==="function") updatePRs([{id:"hamr",sets:[{w:0,reps:lv}]}]);
+  if(typeof markActivityToday==="function") markActivityToday();
+  save(); handleLevels(gained);
+  hideOverlay(()=>{ renderTrain(); renderStatus(); decorPanels(); });
+  toast("HAMR logged \u00b7 Level "+lv+" - "+sub+" \u00b7 +"+gained.gained+" EXP");
+}
+/* ===================== RUN (track pacer page) ===================== */
+const MI=1609.344;
+const RUN_DIST=[["1.5 mi",1.5*MI],["2 mi",2*MI],["3 mi",3*MI],["5 K",5000]];
+const RN_TRAIL=42, RN_HALF=6.3;   /* trail length in viewBox units (~60-70 screen px) */
+const RN_PLAY='<svg class="rnico" viewBox="0 0 24 24"><path d="M8 5l12 7-12 7z"/></svg>';
+const RN_PAUSE='<svg class="rnico" viewBox="0 0 24 24"><rect x="7" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>';
+let _rnRaf=0, _rnLap=[-1,-1,-1];
+function runFlash(){ const f=document.getElementById("rn_fl"); if(!f) return;
+  f.classList.remove("on"); void f.getBoundingClientRect(); f.classList.add("on"); playSfx("done"); }
+function runState(){ S.run=S.run||{};
+  if(!S.run.dist) S.run.dist=2*MI;
+  if(!S.run.goal) S.run.goal=14*60+35;
+  if(!S.run.max) S.run.max=S.run.goal+90;
+  if(!S.run.custom) S.run.custom=300;
+  return S.run; }
+function runLive(){ const r=S.run&&S.run.ses; return !!(r&&r.date===todayStr()); }
+function mmss(s){ const neg=s<0; s=Math.abs(Math.round(s));
+  return (neg?"-":"")+Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function runDistLabel(){ const d=runState().dist;
+  const f=RUN_DIST.find(x=>Math.abs(x[1]-d)<1); return f?f[0]:(Math.round(d)+" m"); }
+function runTracks(){ const st=runState();
+  return [{name:"400 m track",len:400,col:"var(--rn1)",r:61,ts:1},
+          {name:"0.4 mi Field House",len:0.4*MI,col:"var(--rn2)",r:75,ts:9},
+          {name:"Custom "+st.custom+" m",len:st.custom,col:"var(--rn3)",r:47,ts:1}]; }
+/* stadium geometry — dots ride the middle of each lane band */
+function trkPos(R,f,ts){
+  ts=ts||1;                                   /* how much faster the bends are taken */
+  const cx=110, cy=146, S=90, B=Math.PI*R/ts; /* B = bend length in lap-time units */
+  const P=2*S+2*B;
+  let d=(((f%1)+1)%1*P + S + B) % P;          /* lap 0 starts at the top of the left straight */
+  if(d<S) return {x:cx+R, y:cy+S/2-d};
+  d-=S;
+  if(d<B){ const a=d/B*Math.PI; return {x:cx+R*Math.cos(a), y:cy-S/2-R*Math.sin(a)}; }
+  d-=B;
+  if(d<S) return {x:cx-R, y:cy-S/2+d};
+  d-=S; const a=d/B*Math.PI;
+  return {x:cx-R*Math.cos(a), y:cy+S/2+R*Math.sin(a)}; }
+function trkPath(R){ const cx=110, cy=146, S=90;
+  return `M ${cx+R} ${cy+S/2} L ${cx+R} ${cy-S/2} A ${R} ${R} 0 0 0 ${cx-R} ${cy-S/2} L ${cx-R} ${cy+S/2} A ${R} ${R} 0 0 0 ${cx+R} ${cy+S/2} Z`; }
+/* session */
+function runStart(){ const st=runState();
+  st.ses={date:todayStr(),acc:0,t0:0,run:false,rest:Math.max(0,st.max-st.goal),restEnd:0};
+  save(); go("train"); }
+function runElapsed(){ const r=runState().ses; if(!r) return 0;
+  return (r.acc+(r.run?(Date.now()-r.t0):0))/1000; }
+function runRestLeft(){ const r=runState().ses; if(!r) return 0;
+  return r.restEnd?Math.max(0,(r.restEnd-Date.now())/1000):r.rest; }
+function runToggle(){ const r=runState().ses; if(!r) return;
+  if(r.run){ r.acc+=Date.now()-r.t0; r.run=false; } else { r.t0=Date.now(); r.run=true; }
+  save(); playSfx("tap"); runTick(); }
+function runRestBank(){ const r=runState().ses; if(!r||!r.restEnd) return;
+  r.rest=Math.max(0,(r.restEnd-Date.now())/1000); r.restEnd=0; save(); }
+function runRest(){ const r=runState().ses; if(!r) return;
+  if(r.restEnd){ runRestBank(); stopRest(); playSfx("tap"); return; }
+  const left=runRestLeft();
+  if(left<=0.5){ toast("No rest allowance left \u2014 keep running"); return; }
+  r.restEnd=Date.now()+left*1000; save(); playSfx("tap");
+  startRest(Math.round(left),"Run rest \u2014 allowance");
+  const x=document.getElementById("rt_x");
+  if(x) x.onclick=function(){ runRestBank(); stopRest(); x.onclick=stopRest; }; }
+async function runResetC(){ if(!await sysConfirm("RESET RUN","Set the timer back to zero? Your rest allowance is restored too.","Reset")) return;
+  const st=runState(), r=st.ses; r.acc=0; r.t0=Date.now(); r.rest=Math.max(0,st.max-st.goal); r.restEnd=0;
+  save(); renderTrain(); toast("Run reset"); }
+async function runCancel(){ if(!await sysConfirm("CANCEL RUN","Leave the run without a log? All progress is lost.","Cancel run")) return;
+  runState().ses=null; save(); hideTrainProgress&&hideTrainProgress(); renderTrain(); toast("Run cancelled"); }
+async function runPickDist(){
+  const opts=RUN_DIST.map(x=>({value:String(x[1]),label:x[0]})).concat([{value:"__c",label:"Custom distance"}]);
+  const v=await sysSelect("RUN DISTANCE","Pick the distance for this run.",opts,String(runState().dist));
+  if(v===null) return;
+  if(v==="__c"){ const m=await sysPrompt({big:"DISTANCE",msg:"Distance in metres:",numeric:true,step:50,value:Math.round(runState().dist)});
+    if(m===null||!m) return; S.run.dist=Math.max(100,m); } else S.run.dist=+v;
+  save(); renderTrain(); }
+function runParseT(v,cur){ const m=String(v).match(/^\s*(\d+)\s*[:.]\s*(\d{1,2})\s*$/);
+  const s=m?(+m[1]*60+ +m[2]):(parseFloat(v)*60); return (isFinite(s)&&s>=60)?Math.round(s):null; }
+async function runPickGoal(){ const st=runState();
+  const v=await sysPrompt({big:"GOAL TIME",msg:"Target finish time, like 14:35.",value:mmss(st.goal)});
+  if(v===null) return; const s=runParseT(v); if(!s){ toast("Enter a time like 14:35"); return; }
+  st.goal=s; if(st.max<=s) st.max=s+60;
+  if(st.ses){ st.ses.rest=Math.max(0,st.max-st.goal); st.ses.restEnd=0; }
+  save(); renderTrain(); }
+async function runPickMax(){ const st=runState();
+  const v=await sysPrompt({big:"MAXIMUM TIME",msg:"The run must not take longer than this. The gap between goal and maximum becomes your rest allowance.",value:mmss(st.max)});
+  if(v===null) return; const s=runParseT(v); if(!s){ toast("Enter a time like 16:00"); return; }
+  if(s<=st.goal){ toast("Maximum must be later than the goal"); return; }
+  st.max=s; if(st.ses){ st.ses.rest=Math.max(0,st.max-st.goal); st.ses.restEnd=0; }
+  save(); renderTrain(); }
+async function runCustom(){ const v=await sysPrompt({big:"CUSTOM TRACK",msg:"Length of your track in metres:",numeric:true,step:10,value:runState().custom});
+  if(v===null||!v) return; S.run.custom=Math.max(20,Math.round(v)); save(); renderTrain(); }
+function runPageHTML(){
+  const st=runState(), trks=runTracks();
+  const bounds=[40,54,68,82].map(R=>`<path class="trklane" d="${trkPath(R)}"/>`).join("");
+  const defs=`<defs><radialGradient id="rnfade">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="0.5" stop-color="#fff" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
+    +trks.map((t,i)=>`<mask id="rnm${i}" maskUnits="userSpaceOnUse"><circle id="rn_m${i}" cx="0" cy="0" r="${RN_TRAIL}" fill="url(#rnfade)"/></mask>`).join("")+`</defs>`;
+  const startLine=`<path class="trkflash" id="rn_fl" d="${trkPath(40)}"/><line class="trkstart" x1="26" y1="101" x2="72" y2="101"/>`;
+  const trails=trks.map((t,i)=>`<path class="trktrail" id="rn_tr${i}" d="" style="stroke:${t.col}" mask="url(#rnm${i})"/>`).join("");
+  const dots=trks.map((t,i)=>`<path class="trkhead" id="rn_hd${i}" d="" style="stroke:${t.col};filter:drop-shadow(0 0 5px ${t.col})"/>`).join("");
+  const key=trks.map((t,i)=>`<span ${i===2?'onclick="runCustom()"':''}><i style="background:${t.col};box-shadow:0 0 7px ${t.col}"></i>${esc(t.name)}<b id="rn_lk${i}">\u2014</b></span>`).join("");
+  return `<div class="panel"><div class="panel-title"><span class="tri"></span>${esc(runDistLabel())} Run<span class="sub">IN PROGRESS</span></div>
+    <div class="trkrow"><span class="k">DISTANCE</span><span class="v tap" onclick="runPickDist()">${esc(runDistLabel())}</span>
+      <span class="k">GOAL</span><span class="v tap" onclick="runPickGoal()">${mmss(st.goal)}</span>
+      <span class="k">MAX</span><span class="v tap" onclick="runPickMax()">${mmss(st.max)}</span></div>
+    <div class="trkwrap"><svg viewBox="0 0 220 292">${defs}${startLine}${bounds}${trails}${dots}</svg>
+      <div class="trkmid"><span class="lb" id="rn_lb">LAP 1 / 1</span><span class="big" id="rn_t">0:00</span>
+        <span class="sm" id="rn_rem"></span><span class="dv" id="rn_dv"></span></div></div>
+    <div class="trkkey">${key}</div>
+    <div class="trkrow"><span class="k">PACE</span><span class="v" id="rn_pace">\u2014</span>
+      <span class="k">PER LAP</span><span class="v" id="rn_lap">\u2014</span>
+      <span class="k">REST</span><span class="v" id="rn_rest">\u2014</span></div>
+    <div class="grid3 mt"><button class="btn" type="button" id="rn_pp" onclick="runToggle()">${RN_PLAY}</button>
+      <button class="btn ghost" type="button" id="rn_rb" onclick="runRest()">REST</button>
+      <button class="btn ghost" type="button" onclick="runResetC()">RESET</button></div>
+    <div class="grid2 mt"><button class="btn" onclick="runEnd()">END RUN</button><button class="btn ghost" onclick="runCancel()">Cancel</button></div></div>`;
+}
+function runTick(){
+  cancelAnimationFrame(_rnRaf);
+  const st=runState(), r=st.ses; if(!r) return;
+  const tEl=document.getElementById("rn_t"); if(!tEl) return;
+  _rnRaf=requestAnimationFrame(runTick);
+  const el=runElapsed(), trks=runTracks();
+  if(!r.run&&el<0.2) _rnLap=[-1,-1,-1];
+  const resting=!!r.restEnd, left=runRestLeft();
+  if(resting&&left<=0){ r.restEnd=0; r.rest=0; save(); toast("Rest allowance used up \u2014 keep running"); }
+  tEl.textContent=mmss(el);
+  tEl.style.color=el>st.max?"var(--crimson)":(el>st.goal?"var(--gold)":"var(--ink-hi)");
+  const rem=document.getElementById("rn_rem");
+  if(rem) rem.textContent=el<=st.goal?("GOAL IN "+mmss(st.goal-el)):(el<=st.max?("OVER GOAL \u00b7 MAX IN "+mmss(st.max-el)):("PAST MAX BY "+mmss(el-st.max)));
+  const done=Math.min(1,el/st.goal), metres=done*st.dist;
+  const dv=document.getElementById("rn_dv");
+  if(dv){ dv.textContent="TARGET "+Math.round(metres)+" m \u00b7 "+(metres/MI).toFixed(2)+" mi";
+    dv.style.color=el>st.goal?"var(--am)":"var(--gr)"; }
+  trks.forEach((t,i)=>{ const lapT=st.goal*t.len/st.dist, f=lapT>0?(el/lapT):0;
+    const p=trkPos(t.r,f,t.ts), per=2*90+2*Math.PI*t.r/t.ts;
+    const hd=document.getElementById("rn_hd"+i);
+    if(hd){ const q=trkPos(t.r,f+0.0008,t.ts);
+      let ux=q.x-p.x, uy=q.y-p.y; const L=Math.hypot(ux,uy)||1; ux/=L; uy/=L;
+      const nx=-uy*RN_HALF, ny=ux*RN_HALF;
+      hd.setAttribute("d","M "+(p.x-nx).toFixed(1)+" "+(p.y-ny).toFixed(1)+" L "+(p.x+nx).toFixed(1)+" "+(p.y+ny).toFixed(1)); }
+    const mk=document.getElementById("rn_m"+i);
+    if(mk){ mk.setAttribute("cx",p.x.toFixed(1)); mk.setAttribute("cy",p.y.toFixed(1)); }
+    const tr=document.getElementById("rn_tr"+i);
+    if(tr){ const span=RN_TRAIL/per, N=16, pts=[];
+      for(let k=N;k>=0;k--){ const q=trkPos(t.r, f-span*(k/N), t.ts); pts.push((k===N?"M ":"L ")+q.x.toFixed(1)+" "+q.y.toFixed(1)); }
+      tr.setAttribute("d",pts.join(" ")); }
+    const kEl=document.getElementById("rn_lk"+i);
+    if(kEl){ const tot=Math.max(1,Math.ceil(st.dist/t.len)), cur=Math.min(tot,Math.floor(f)+1), togo=Math.max(0,tot-Math.floor(f));
+      kEl.textContent=cur+" / "+tot+" \u00b7 "+togo+" to go"; }
+    const lapN=Math.floor(f);
+    if(_rnLap[i]===undefined||_rnLap[i]<0) _rnLap[i]=lapN;
+    else if(lapN>_rnLap[i]){ _rnLap[i]=lapN; runFlash(); } });
+  const pp=document.getElementById("rn_pp"); if(pp){ const w=r.run?RN_PAUSE:RN_PLAY; if(pp._i!==w){ pp.innerHTML=w; pp._i=w; } }
+  const pc=document.getElementById("rn_pace"); if(pc) pc.textContent=mmss(st.goal/(st.dist/MI))+"/mi";
+  const lapT400=st.goal*400/st.dist, tot400=Math.ceil(st.dist/400);
+  const lp=document.getElementById("rn_lap");
+  if(lp) lp.textContent=mmss(lapT400)+" \u00b7 "+Math.min(Math.floor(el/lapT400)+1,tot400)+"/"+tot400;
+  const lb=document.getElementById("rn_lb");
+  if(lb) lb.textContent="LAP "+Math.min(Math.floor(el/lapT400)+1,tot400)+" / "+tot400;
+  const rs=document.getElementById("rn_rest");
+  if(rs){ rs.textContent=mmss(left)+(resting?" \u25cf":""); rs.style.color=resting?"var(--am)":(left<=0?"var(--crimson)":"var(--ink-hi)"); }
+  const rb=document.getElementById("rn_rb"); if(rb) rb.textContent=resting?"RESUME":"REST";
+  runHeader();
+}
+function runHeader(){
+  const hp=document.getElementById("tb_prog"); if(!hp) return;
+  if(typeof activeTab!=="undefined"&&activeTab!=="train"){ hp.style.display="none"; return; }
+  const st=runState(); if(!st.ses){ hp.style.display="none"; return; }
+  hp.style.display="flex";
+  const lapT=st.goal*400/st.dist, tot=Math.ceil(st.dist/400), el=runElapsed();
+  let seg="";
+  for(let i=0;i<tot;i++){ const p=(el-i*lapT)/lapT;
+    seg+=`<i class="${p>=1?"full":(p>0?"part":"")}"></i>`; }
+  seg+=`<i class="fin ${el>=st.goal?"full":""}"></i>`;
+  if(hp._sig!==seg){ hp.innerHTML=seg; hp._sig=seg; }
+}
+async function runEnd(){
+  const st=runState(), r=st.ses; if(!r) return;
+  const el=runElapsed();
+  if(el<10){ toast("Start the run first"); return; }
+  const ok=await sysConfirm("END RUN","Log this run? <b>"+runDistLabel()+"</b> in <b>"+mmss(el)+"</b>.","Log run");
+  if(!ok) return;
+  cancelAnimationFrame(_rnRaf);
+  const mins=el/60, perMi=el/(st.dist/MI), pass=el<=st.max;
+  const gained=addExp(45+Math.round(mins*4)+(pass?25:0),"run");
+  S.sessions.push({date:todayStr(),dayKey:"RUN",name:"Timed Run",forced:false,boss:false,
+    setsDone:1,exp:gained.gained,ex:[{id:"runpace",sets:[{w:0,reps:Math.round(mins)}]}],
+    custom:[runDistLabel()+" in "+mmss(el)+" \u00b7 "+mmss(perMi)+"/mile \u00b7 "+(pass?"within max":"over max")],manual:true});
+  S.sessions.sort((x,y)=>x.date<y.date?-1:1);
+  st.ses=null;
+  if(typeof markActivityToday==="function") markActivityToday();
+  save(); handleLevels(gained);
+  hideTrainProgress&&hideTrainProgress();
+  renderTrain(); renderStatus(); decorPanels();
+  toast("Run logged \u00b7 "+mmss(el)+" \u00b7 +"+gained.gained+" EXP"); }
 function arcCard(arc){ return `<div class="panel flat"><div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${currentWeek()}/${S.program.weeks||24}</span></div>
   <div class="name mono hi" style="font-size:15px">${arc.n}</div><p class="lead tiny">${arc.desc}</p></div>`; }
 
@@ -2963,15 +3365,16 @@ function openDayDetail(date){ const ses=workoutsOn(date), dow=DAYNAMES[new Date(
   const exc=(S.excused||[]).find(e=>e.date===date);
   const sched=S.profile&&S.profile.days.includes(new Date(date+"T00:00:00").getDay());
   const past=date<=todayStr()&&(!S.program||date>=S.program.startDate);
+  const loggable=date<=todayStr();
   const body = ses.length ? ses.map(s=>`<div class="drow"><div class="dk">${s.boss?'BOSS':s.dayKey||'GATE'}</div><div class="dv"><b>${s.name}</b><br>${s.setsDone} sets · +${s.exp} EXP<br><span class="muted tiny">${(s.ex||[]).map(e=>{ const nm=(EX[e.id]&&EX[e.id].n)||esc(e.id); const top=(e.sets||[]).reduce((a,b)=>((b.w||0)*100+(b.reps||0))>((a.w||0)*100+(a.reps||0))?b:a,{w:0,reps:0}); return nm+(top.w?` ${top.w}×${top.reps}`:` ×${top.reps||e.sets.length}`); }).join(" · ")||"—"}</span></div></div>`).join("")
     : exc ? `<p class="lead tiny center">Logged as <b class="am">${esc(exc.reason)}</b> — <span class="gr">streak kept</span>. Not a missed day.</p>`
-    : `<p class="lead tiny center">No Gate cleared on this day.${(sched&&date<todayStr())?' <span class="cr">Missed.</span>':''}</p>`;
+    : `<p class="lead tiny center">No Gate cleared on this day.${(sched&&date<todayStr())?' <span class="cr">Missed.</span>':(sched?'':' <span class="muted">Rest day \u2014 you can still log anything you did.</span>')}</p>`;
   const acts=[];
-  if(!ses.length&&past&&sched){
+  if(!ses.length&&loggable&&sched){
     if(exc) acts.push({label:"Remove excuse",kind:"ghost",onClick:()=>{ S.excused=(S.excused||[]).filter(e=>e.date!==date); save(); hideOverlay(()=>{ renderStatus(); decorPanels(); if(typeof renderTrain==="function")renderTrain(); }); toast("Excuse removed"); }});
     else acts.push({label:"Mark excused \u2014 log a reason",onClick:()=>{ hideOverlay(()=>excuseDate(date)); }});
   }
-  if(past) acts.unshift({label:ses.length?"\u002b Log another workout":"\u002b Log a workout for this day",kind:ses.length?"ghost":"",onClick:()=>{ hideOverlay(()=>manualLog(date)); }});
+  if(loggable) acts.unshift({label:ses.length?"\u002b Log another workout":"\u002b Log a workout for this day",kind:ses.length?"ghost":"",onClick:()=>{ hideOverlay(()=>manualLog(date)); }});
   acts.push({label:"Close",kind:"ghost",onClick:()=>hideOverlay()});
   detail("[ LOG ]",`${dow} · ${date.slice(5)}`,body,acts); }
 
@@ -3472,6 +3875,27 @@ var BGF=[
 "    float li=smoothstep(w2,0.0,abs(vUv.y-rowY));",
 "    float fade=smoothstep(14.0,2.0,zi)*smoothstep(0.02,0.15,zf);",
 "    col+=mix(uA,uB,0.35+0.4*sin(zi*0.6))*li*fade*0.34*reveal;",
+"  }",
+"  /* RISING LIGHT STREAKS \u2014 3 parallax layers, minus t so they travel upward */",
+"  for(float L=0.0;L<3.0;L++){",
+"    float sc=mix(14.0,30.0,L*0.5);",
+"    float sp=mix(1.5,0.6,L*0.5);",
+"    vec2 pu=vec2(vUv.x*sc+L*23.7, (vUv.y-H)*sc*0.42 - t*sp);",
+"    vec2 cell=floor(pu), fp=fract(pu)-0.5;",
+"    float rr=h21(cell);",
+"    if(rr>0.84){",
+"      float jx=(h21(cell+11.3)-0.5)*0.7;",
+"      float jy=(h21(cell+27.1)-0.5)*0.3;",
+"      float lean=sin(t*0.5+rr*31.0)*0.05;",
+"      float qx=fp.x-jx-lean, qy=fp.y-jy;",
+"      float core=0.0020/max(abs(qx),0.0045);",
+"      float along=smoothstep(0.52,0.0,abs(qy));",
+"      float tip=smoothstep(-0.5,0.1,qy);",
+"      float streak=core*along*tip;",
+"      float tw=0.7+0.3*sin(t*2.1+rr*40.0);",
+"      float hfade=smoothstep(-0.06,0.22,vUv.y-H)*smoothstep(1.2,0.5,vUv.y);",
+"      col+=mix(uA,uB,rr)*streak*tw*hfade*mix(1.0,0.45,L*0.5)*reveal;",
+"    }",
 "  }",
 "  col+=(h21(vUv*uR.xy+fract(t)*7.0)-0.5)*0.026;",
 "  col*=max(1.0-0.32*length(vUv-vec2(0.5,0.42)),0.0);",

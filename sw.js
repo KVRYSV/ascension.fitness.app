@@ -1,5 +1,5 @@
 /* ASCENSION service worker — offline cache. Bump VERSION on each deploy. */
-const VERSION = "ascension-v6.9.0";
+const VERSION = "ascension-v7.5.2";
 const CORE = [
   "./",
   "./index.html",
@@ -12,7 +12,12 @@ const CORE = [
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
-    caches.open(VERSION).then((c) => c.addAll(CORE)).then(() => self.skipWaiting())
+    caches.open(VERSION).then((c) =>
+      c.addAll(CORE).then(() =>
+        /* large optional asset: cache if present, never fail the install */
+        c.add("./hamr-audio.mp3").catch(() => {})
+      )
+    ).then(() => self.skipWaiting())
   );
 });
 
