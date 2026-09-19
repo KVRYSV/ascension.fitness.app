@@ -1,5 +1,6 @@
 # ASCENSION fitness
-Personal use fitness app vibecoded and developed using claude. Uses HTML for full deployment via PWA. Dependencies and cache is all local. Runs on browser as well. I can't code but I can design...
+Personal use fitness app vibecoded and developed using claude. Uses HTML for full deployment via PWA. 
+Dependencies and cache is all local. Runs on browser as well. I can't code but I can design...
 
 # ASCENSION v7 Changelog
 
@@ -32,7 +33,8 @@ ASCENSION — installable PWA bundle
 ==================================
 
 OPTION A — Run it now (offline, no install)
-  Open index.html in a browser. Works fully offline; progress saves on-device.
+  Open index.html in a browser. Works fully offline; progress saves on-device. Make sure to download the Service worker, Index.html,
+  and the HAMR audio file if you want to run it locally. the HAMR test won't work without the audio.
 
 OPTION B — Install as a real "lite app" (PWA)
   Open https://kvrysv.github.io/ascension.fitness.app/ in Chrome 
