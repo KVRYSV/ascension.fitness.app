@@ -208,7 +208,17 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 
 .bar{height:11px;background:rgb(0 0 0 / calc(.15 * var(--gm,1)));border:1px solid var(--line);position:relative;overflow:visible;cursor:pointer;}
 .bar>i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);box-shadow:0 0 4px var(--accent),0 0 10px var(--accent),0 0 18px rgb(var(--ac) / .33);transition:width .9s cubic-bezier(.2,.8,.2,1);}
-.bar.hp>i{background:var(--hp);box-shadow:0 0 4px var(--hp),0 0 10px var(--hp),0 0 18px rgb(63 224 163 / .33);}
+.bar.hp>i{background:var(--hp);box-shadow:0 0 4px var(--hp),0 0 10px var(--hp),0 0 18px rgb(var(--hpg,63 224 163) / .33);}
+.bar.hp.mid{--hp:#ff9a2e;--hpg:255 154 46;}
+.bar.hp.low,.bar.hp.crit{--hp:#ff3448;--hpg:255 52 72;}
+.bar.hp.crit>i{animation:hpcrit 1.8s ease-in-out infinite;}
+@keyframes hpcrit{0%,100%{opacity:1}50%{opacity:.22}}
+.bar.hp>i,.bar.mp>i{--tipc:var(--hp);}
+.bar.mp>i{--tipc:var(--mp);}
+.bar.hp>i,.bar.mp>i{border-radius:0 999px 999px 0;}
+.bar.hp>i::after,.bar.mp>i::after{content:"";position:absolute;right:0;top:0;bottom:0;aspect-ratio:1/1;border-radius:50%;background:#fff;
+  box-shadow:0 0 3px var(--tipc),0 0 7px var(--tipc);pointer-events:none;}
+.bar.empty>i::after{display:none;}
 .bar.mp>i{background:var(--mp);box-shadow:0 0 4px var(--mp),0 0 10px var(--mp),0 0 18px rgb(63 140 255 / .33);}
 .bar-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ghost);margin:12px 0 4px;cursor:pointer;}
 .bar-label b{color:var(--ink-hi);font-family:var(--display);font-weight:700;font-size:11px;}
@@ -410,7 +420,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(112px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(8px);z-index:900;
-  font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--accent);border:1px solid var(--accent);background:rgb(6 12 24 / .96);
+  font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--accent);border:1px solid var(--accent);background:rgb(0 0 0 / .96);
   padding:12px 16px;box-shadow:0 0 18px rgb(var(--ac) / .3);opacity:0;pointer-events:none;transition:.3s;max-width:90%;text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
@@ -452,8 +462,9 @@ html[data-accent="crimson"]{ --rn1:#ffd23a; --rn2:#ff2d3f; --rn3:#ff7a18; }
 .trkmid .dv{font-family:var(--mono);font-size:11px;font-weight:700;margin-top:4px;}
 .trkkey{display:flex;flex-direction:column;gap:5px;margin:4px 0 10px;}
 .trkkey span{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink);cursor:pointer;border-bottom:1px dashed rgb(var(--ac) / .14);padding-bottom:4px;}
-.trkkey b{margin-left:auto;font-family:var(--display);font-size:11px;font-weight:800;letter-spacing:.02em;color:var(--ink-hi);white-space:nowrap;
-  border:1px solid var(--line-2);background:rgb(var(--ac) / .12);padding:3px 8px;clip-path:var(--clip-s);text-shadow:0 0 8px rgb(var(--ac) / .5);}
+.trkkey b{margin-left:auto;font-family:var(--display);font-size:12.5px;font-weight:800;letter-spacing:.02em;color:var(--ink-hi);white-space:nowrap;
+  border:1px solid var(--line-2);background:rgb(var(--ac) / .12);padding:4px 10px;clip-path:var(--clip-s);text-shadow:0 0 8px rgb(var(--ac) / .5);}
+.trkkey b em{font-style:normal;font-size:16px;color:var(--kc,var(--gold));text-shadow:0 0 8px var(--kc,var(--gold)),0 0 16px var(--kc,var(--gold));}
 .trkkey i{width:11px;height:11px;border-radius:50%;flex:0 0 auto;}
 .trkrow{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);padding:8px 11px;clip-path:var(--clip-s);background:rgb(0 0 0 / calc(.12 * var(--gm,1)));margin-bottom:8px;}
 .trkrow .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--ghost);}
@@ -617,6 +628,17 @@ html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
 .dpc.exc{border-color:rgb(255 206 107 / .55);color:var(--gold);}
 .dpc.now{box-shadow:inset 0 0 0 1px rgb(var(--ac) / .55);}
 .dpc.sel{background:rgb(var(--ac) / .3);border-color:var(--accent);color:var(--ink-hi);box-shadow:0 0 9px rgb(var(--ac) / .4);}
+.vidwrap{margin-top:11px;border:1px solid var(--line-2);clip-path:var(--clip-s);background:rgb(0 0 0 / calc(.2 * var(--gm,1)));}
+.vidhd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 11px;cursor:pointer;user-select:none;
+  background:linear-gradient(90deg, rgb(var(--ac) / .2), rgb(var(--ac) / .05));border-bottom:1px solid var(--line);}
+.vidhd .vt{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--ink-hi);}
+.vidhd .vctl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--accent);}
+.vidhd .vctl .ex{display:none;}
+.vidwrap.min .vidhd .vctl .ex{display:inline;}
+.vidwrap.min .vidhd .vctl .co{display:none;}
+.vidwrap.min .vidhd{border-bottom:none;}
+.vidbody{padding:10px;}
+.vidwrap.min .vidbody{display:none;}
 .gaterow{position:relative;cursor:pointer;padding-right:26px;}
 .rowx{position:absolute;right:0;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--ghost-2);font-size:12px;padding:4px 6px;cursor:pointer;}
 .rowx:active{color:var(--crimson);}
@@ -821,7 +843,7 @@ html[data-accent="crimson"] .lvfx .fx-crimson{ display:block; }
 <body>
 <canvas id="bg"></canvas>
 <canvas id="bggl" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:none;"></canvas>
-<canvas id="fxovl" style="position:fixed;inset:0;width:100%;height:100%;z-index:90;pointer-events:none;"></canvas>
+<canvas id="fxovl" style="position:fixed;inset:0;width:100%;height:100%;z-index:250;pointer-events:none;"></canvas>
 <div id="bg-tint"></div>
 
 <!-- ============ BOOT / SPLASH ============ -->
@@ -1319,7 +1341,7 @@ function defaultState(){
     quests:{date:null,items:[],bonusGiven:false}, streak:{current:0,longest:0,last:null},
     metrics:{weight:[]}, nutrition:{log:[],goalOverride:null}, supps:{checks:{}},
     records:{pr:{},prLog:[]}, log:{exp:[]}, skips:[],
-    settings:{accent:"cyan",sound:true,barStyle:"glow",videoOverrides:{},units:"imperial",tz:{auto:true,zone:""}}, draft:null
+    settings:{accent:"cyan",sound:true,soundVol:0.5,barStyle:"minimal",videoOverrides:{},units:"imperial",tz:{auto:true,zone:""}}, draft:null
   };
 }
 function appTZ(){ try{ const z=S&&S.settings&&S.settings.tz; if(z && z.auto===false && z.zone) return z.zone; }catch(e){} return null; }
@@ -1674,7 +1696,7 @@ function initAudio(){ if(audioReady) return; audioReady=true; try{
   try{ var Ctx=window.AudioContext||window.webkitAudioContext; if(Ctx){ _AC=new Ctx(); Object.keys(_URI).forEach(function(k){ var ab=_b64buf(_URI[k]); if(ab){ try{ _AC.decodeAudioData(ab, function(b){ _BUF[k]=b; }, function(){}); }catch(e){} } }); } }catch(e){}
 }catch(e){} }
 function soundOn(){ return !(S&&S.settings&&S.settings.sound===false); }
-function soundVol(){ var v=S&&S.settings&&S.settings.soundVol; return (typeof v==="number"&&v>=0&&v<=1)?v:1; }
+function soundVol(){ var v=S&&S.settings&&S.settings.soundVol; return (typeof v==="number"&&v>=0&&v<=1)?v:0.5; }
 function soundLevel(){ if(!soundOn()) return "off"; return String(Math.round(soundVol()*100)); }
 function setSoundLevel(v){ if(v==="off"){ S.settings.sound=false; } else { S.settings.sound=true; S.settings.soundVol=(parseInt(v,10)||100)/100; } save(); }
 const _sfxAt={};
@@ -1831,10 +1853,13 @@ function lastNSessions(n){ const t=Date.now(),out=[]; for(let i=0;i<n;i++){ cons
 
 /* ============================================================ RENDER ======================================================== */
 let activeTab="status";
+function hpState(p){ p=+p||0; return p<=5?"crit":(p<20?"low":(p<50?"mid":"")); }
+function toggleVid(){ S.ui=S.ui||{}; S.ui.min=S.ui.min||{}; S.ui.min.vid=!S.ui.min.vid; save();
+  document.querySelectorAll(".vidwrap").forEach(w=>w.classList.toggle("min",!!S.ui.min.vid)); }
 function pmin(k){ return !!(S.ui&&S.ui.min&&S.ui.min[k]); }
 function needDot(k){ try{
   if(k==="skilltree") return S.rpg.skillPoints>0 && SKILLTREE.some(br=>br.nodes.some(nd=>!S.skills.owned.includes(nd.id)&&S.rpg.level>=nd.lv&&S.rpg.skillPoints>=nd.cost));
-  if(k==="fuel") return SUPPS.some(sp=>!((S.supps.checks[todayStr()]||[]).includes(sp.id)));
+  if(k==="potsq"||k==="fuel") return SUPPS.some(sp=>!((S.supps.checks[todayStr()]||[]).includes(sp.id)));
   }catch(e){} return false; }
 function pdot(k){ return (pmin(k)&&needDot(k))?`<span class="pdot"></span>`:""; }
 function togglePanelMin(k){ S.ui=S.ui||{}; S.ui.min=S.ui.min||{}; S.ui.min[k]=!S.ui.min[k]; save(); if(typeof renderFor==="function") renderFor(activeTab); decorPanels(); }
@@ -1908,9 +1933,9 @@ function renderStatus(){
       <div class="ladder" onclick="openRankInfo()" style="cursor:pointer">${ladder}</div>
       <div class="laddercap" onclick="openRankInfo()">Tap a rank to learn what it means ›</div>
       <div class="bar-label" onclick="openBarDetail('hp')"><span>HP — recovery</span><b>${hpMax()}</b></div>
-      <div class="bar hp" onclick="openBarDetail('hp')"><i style="width:${recoveryPct()}%"></i></div>
+      <div class="bar hp ${hpState(recoveryPct())} ${recoveryPct()<=0?'empty':''}" onclick="openBarDetail('hp')"><i style="width:${recoveryPct()}%"></i></div>
       <div class="bar-label" onclick="openBarDetail('mp')"><span>MP — readiness</span><b>${mpMax()}</b></div>
-      <div class="bar mp" onclick="openBarDetail('mp')"><i style="width:${readinessPct()}%"></i></div>
+      <div class="bar mp ${readinessPct()<=0?'empty':''}" onclick="openBarDetail('mp')"><i style="width:${readinessPct()}%"></i></div>
       ${debuffs.length?`<div class="row tiny mono" style="margin-top:12px;gap:7px;flex-wrap:wrap">${debuffs.map(d=>`<span style="border:1px solid rgb(255 84 104 / .4);color:var(--crimson);padding:4px 8px">⚠ ${d.n}</span>`).join("")}<span class="muted" style="cursor:pointer;align-self:center" onclick="openProfile()">details →</span></div>`:""}
     </div>
 
@@ -2056,7 +2081,7 @@ function renderQuests(){
       <button class="btn full" onclick="bossPrompt()">Log a PR (+EXP)</button>
     </div>
     <div class="panel flat">
-      <div class="panel-title"><span class="tri"></span>Items &amp; Potions<span class="sub">DAILY USE</span></div>
+      <div class="panel-title tmin ${pmin('potsq')?'min':''}" onclick="togglePanelMin('potsq')"><span class="tri"></span>Items &amp; Potions${pdot('potsq')}<span class="sub">DAILY USE</span></div>
       <p class="lead tiny">Consumables with real research behind them — log what you took today. Uptake is tracked in your Profile + Data.</p>
       ${SUPPS.map(sp=>{ const on=(S.supps.checks[todayStr()]||[]).includes(sp.id);
         return `<div class="quest ${on?'done':''}"><div class="qx" onclick="toggleSupp('${sp.id}')">${on?'✓':''}</div>
@@ -2395,7 +2420,7 @@ function renderTrain(){
       <button class="btn ghost full mt" onclick="skipToday()">Skip today — no penalty</button>
       <button class="btn ghost full mt" onclick="skipReason()">Can’t train — log a reason</button>
     </div>
-    <div class="panel flat"><div class="panel-title"><span class="tri"></span>Warm-Up<span class="sub">PRIME</span></div>
+    <div class="panel flat"><div class="panel-title tmin ${pmin('warm')?'min':''}" onclick="togglePanelMin('warm')"><span class="tri"></span>Warm-Up<span class="sub">PRIME</span></div>
       <p class="lead tiny">Prime before the Gate — raise temperature, mobilize joints, wake the muscles you’re about to load. Tap a move for a demo.</p>
       ${WARMUP.map(w=>`<div class="cdrow" onclick="warmupVideo('${w.id}')"><div class="cdi"><div class="ql">${w.n}</div><div class="muted tiny" style="margin-top:2px">${w.cue}</div></div><button class="cdtimer" type="button" onclick="event.stopPropagation();startRest(${w.sec},'Warm-up')">▷ ${w.sec}s</button></div>`).join("")}
     </div>
@@ -2453,11 +2478,11 @@ function exercisePage(e,idx){
       <div class="loadhint"><span class="lhk">SUGGESTED LOAD</span><span class="lhv">${e.deload?'Deload \u2014 ~50% load, leave 3+ reps in reserve':loadHintFor(e.id)}</span></div>
       ${holdSecs(e.reps)?`<button class="btn full holdbtn" type="button" onclick="startRest(${holdSecs(e.reps)},'Hold — ${x.n}')">▷ Start hold timer · ${holdSecs(e.reps)}s</button>`:""}
       <div class="machine">${mac.mch?`<span class="mchip mchmain">▣ Machine: ${mac.mch}</span>`:""}<span class="mchip">⋈ ${mac.use}</span>${mac.free&&mac.free!=="—"?`<span class="mchip free">free-weight: ${mac.free}</span>`:""}</div>
-      ${embed}
+      <div class="vidwrap ${pmin('vid')?'min':''}"><div class="vidhd" onclick="toggleVid()"><span class="vt">FORM VIDEO</span><span class="vctl"><span class="co">(collapse)</span><span class="ex">(expand)</span></span></div><div class="vidbody">${embed}
       <div class="row" style="gap:8px;flex-wrap:wrap">
         <button class="ytbtn" onclick="openYT('${e.id}')"><span class="play"></span> Open in YouTube app</button>
-        <a class="ytbtn ghost" href="${webHref}" target="_blank" rel="noopener">Form video ↗</a></div>
-      <div class="track"><span class="mu"></span><div><div class="tt">${trk.t}</div><div class="ta">${trk.a} · recommended track</div></div></div>
+        <a class="ytbtn ghost" href="${webHref}" target="_blank" rel="noopener">Form video ↗</a></div></div></div>
+      
       <div class="statbonus"><span class="sbk">${x.stat} ${sv}</span> ${statTip(x.stat,sv)}</div>
       <div class="cues" style="margin-top:11px">${x.cues}</div>
       <div class="sethdr"><div class="h">SET</div><div class="h">WEIGHT (${unitW()})</div><div class="h">REPS</div><div class="h">RPE</div><div class="h">✓</div></div>
@@ -2746,7 +2771,7 @@ function runPageHTML(){
   const startLine=`<path class="trkflash" id="rn_fl" d="${trkPath(40)}"/><line class="trkstart" x1="26" y1="101" x2="72" y2="101"/>`;
   const trails=trks.map((t,i)=>`<path class="trktrail" id="rn_tr${i}" d="" style="stroke:${t.col}" mask="url(#rnm${i})"/>`).join("");
   const dots=trks.map((t,i)=>`<path class="trkhead" id="rn_hd${i}" d="" style="stroke:${t.col};filter:drop-shadow(0 0 5px ${t.col})"/>`).join("");
-  const key=trks.map((t,i)=>`<span ${i===2?'onclick="runCustom()"':''}><i style="background:${t.col};box-shadow:0 0 7px ${t.col}"></i>${esc(t.name)}<b id="rn_lk${i}">\u2014</b></span>`).join("");
+  const key=trks.map((t,i)=>`<span ${i===2?'onclick="runCustom()"':''}><i style="background:${t.col};box-shadow:0 0 7px ${t.col}"></i>${esc(t.name)}<b id="rn_lk${i}" style="--kc:${t.col}">\u2014</b></span>`).join("");
   return `<div class="panel"><div class="panel-title"><span class="tri"></span>${esc(runDistLabel())} Run<span class="sub">IN PROGRESS</span></div>
     <div class="trkrow"><span class="k">DISTANCE</span><span class="v tap" onclick="runPickDist()">${esc(runDistLabel())}</span>
       <span class="k">GOAL</span><span class="v tap" onclick="runPickGoal()">${mmss(st.goal)}</span>
@@ -2795,7 +2820,7 @@ function runTick(){
       tr.setAttribute("d",pts.join(" ")); }
     const kEl=document.getElementById("rn_lk"+i);
     if(kEl){ const tot=Math.max(1,Math.ceil(st.dist/t.len)), cur=Math.min(tot,Math.floor(f)+1), togo=Math.max(0,tot-Math.floor(f));
-      kEl.textContent=cur+" / "+tot+" \u00b7 "+togo+" to go"; }
+      kEl.innerHTML=cur+" / "+tot+" \u00b7 <em>"+togo+"</em> to go"; }
     const lapN=Math.floor(f);
     if(_rnLap[i]===undefined||_rnLap[i]<0) _rnLap[i]=lapN;
     else if(lapN>_rnLap[i]){ _rnLap[i]=lapN; runFlash(); } });
@@ -2841,6 +2866,7 @@ async function runEnd(){
   save(); handleLevels(gained);
   hideTrainProgress&&hideTrainProgress();
   renderTrain(); renderStatus(); decorPanels();
+  playSfx("gateclear"); if(typeof fxBurst==="function") fxBurst();
   toast("Run logged \u00b7 "+mmss(el)+" \u00b7 +"+gained.gained+" EXP"); }
 function arcCard(arc){ return `<div class="panel flat"><div class="panel-title"><span class="tri"></span>Current Arc<span class="sub">WK ${currentWeek()}/${S.program.weeks||24}</span></div>
   <div class="name mono hi" style="font-size:15px">${arc.n}</div><p class="lead tiny">${arc.desc}</p></div>`; }
@@ -3189,6 +3215,9 @@ async function openAdmin(){
 function renderAdmin(){
   const st=S.rpg.stats, eff=effStats();
   const statRows=["STR","AGI","VIT","SEN","INT"].map(k=>`<div class="adminrow"><span>${k} <b>${st[k]}</b> <span class="muted">→ ${eff[k]} eff</span></span><div><button class="btn sm" onclick="adminStat('${k}',-1)">−</button><button class="btn sm" onclick="adminStat('${k}',1)">+</button></div></div>`).join("");
+  const allNodes=SKILLTREE.flatMap(b=>b.nodes);
+  const ownedSk=(S.skills.owned||[]).map(id=>allNodes.find(n=>n.id===id)||{id,n:id,cost:0});
+  const skillChips=ownedSk.length?ownedSk.map(n=>`<div class="title-chip eq" onclick="adminRevokeSkill('${esc(n.id)}')">\u2715 ${esc(n.n)} <span class="muted">(${n.cost} SP)</span></div>`).join(""):`<p class="lead tiny">No skills owned.</p>`;
   const titleChips=TITLES.map(t=>{ const owned=(S.rpg.titles.owned||[]).includes(t.id); return `<div class="title-chip ${owned?'eq':'locked'}" onclick="adminTitle('${t.id}')">${owned?'✓':'+'} ${t.n}</div>`; }).join("");
   const body=`<p class="lead tiny">Live edits — applied instantly. Bends the System's rules; use sparingly.</p>
     <div class="adminrow"><span>Level <b>${S.rpg.level}</b> · ${rankFor(S.rpg.level)}-Rank</span><div><button class="btn sm" onclick="adminLevel(-1)">−</button><button class="btn sm" onclick="adminLevel(1)">+</button><button class="btn sm" onclick="adminSet('level')">Set</button></div></div>
@@ -3198,6 +3227,8 @@ function renderAdmin(){
     <div class="adminrow"><span>Ability points <b>${S.rpg.statPoints}</b></span><div><button class="btn sm" onclick="adminSet('ap')">Set</button></div></div>
     <div class="fld-head mt">Titles — tap to grant / revoke</div><div class="tslot">${titleChips}</div>
     <button class="btn full mt" onclick="adminUnlockAll()">Grant all titles</button>
+    <div class="fld-head mt">Skills \u2014 tap to revoke (SP refunded)</div><div class="tslot">${skillChips}</div>
+    ${ownedSk.length?`<button class="btn ghost full mt" onclick="adminRevokeAllSkills()">Revoke all skills \u2014 refund ${ownedSk.reduce((a,n)=>a+(n.cost||0),0)} SP</button>`:""}
     <button class="btn ghost full mt" onclick="adminResetBoss()">Reset boss record + Giant Slayer</button>`;
   detail("[ ADMIN ]","CHARACTER EDITOR",body,[{label:"Done",kind:"ghost",onClick:()=>hideOverlay()}]);
 }
@@ -3207,6 +3238,18 @@ function adminTitle(id){ const t=S.rpg.titles=S.rpg.titles||{owned:[],equipped:[
   const i=(t.owned||[]).indexOf(id); if(i>=0){ t.owned.splice(i,1); const j=(t.equipped||[]).indexOf(id); if(j>=0)t.equipped.splice(j,1); } else { (t.owned=t.owned||[]).push(id); }
   save(); render(); renderAdmin(); }
 function adminUnlockAll(){ const t=S.rpg.titles=S.rpg.titles||{owned:[],equipped:[]}; t.owned=TITLES.map(x=>x.id); save(); toast("All titles granted"); render(); renderAdmin(); }
+async function adminRevokeSkill(id){
+  const nd=SKILLTREE.flatMap(b=>b.nodes).find(n=>n.id===id)||{n:id,cost:0};
+  const ok=await sysConfirm("REVOKE SKILL","Remove <b>"+esc(nd.n)+"</b> and refund <b>"+(nd.cost||0)+" SP</b>?","Revoke");
+  if(ok){ const i=(S.skills.owned||[]).indexOf(id);
+    if(i>=0){ S.skills.owned.splice(i,1); S.rpg.skillPoints+=(nd.cost||0); save(); render(); toast("Skill revoked \u00b7 +"+(nd.cost||0)+" SP"); } }
+  renderAdmin(); }
+async function adminRevokeAllSkills(){
+  const nodes=SKILLTREE.flatMap(b=>b.nodes), owned=S.skills.owned||[];
+  const refund=owned.reduce((a,id)=>{ const n=nodes.find(x=>x.id===id); return a+((n&&n.cost)||0); },0);
+  const ok=await sysConfirm("REVOKE ALL SKILLS","Remove all <b>"+owned.length+"</b> skills and refund <b>"+refund+" SP</b>?","Revoke all");
+  if(ok){ S.skills.owned=[]; S.rpg.skillPoints+=refund; save(); render(); toast("All skills revoked \u00b7 +"+refund+" SP"); }
+  renderAdmin(); }
 function adminResetBoss(){ S.rpg.bossesBeaten=[]; S.rpg.giantSlayer=false; save(); toast("Boss record reset"); render(); renderAdmin(); }
 async function adminSet(which){
   const map={level:["LEVEL",S.rpg.level,1,200],exp:["CURRENT EXP",S.rpg.exp,0,999999],sp:["SKILL POINTS",S.rpg.skillPoints,0,999],ap:["ABILITY POINTS",S.rpg.statPoints,0,999]};
@@ -3229,6 +3272,7 @@ function buySkill(id,cost){
   if(S.skills.owned.includes(id)||S.rpg.skillPoints<cost) return;
   S.skills.owned.push(id); S.rpg.skillPoints-=cost; save();
   const nd=SKILLTREE.flatMap(b=>b.nodes).find(n=>n.id===id);
+  if(typeof fxSkill==="function") fxSkill();
   notify("SKILL ACQUIRED",`<b>${nd.n}</b><br>${nd.d}`);
 }
 function setAccent(v){ S.settings.accent=v; save(); document.documentElement.setAttribute("data-accent",v); }
@@ -3498,8 +3542,18 @@ function bootWaves(){
   function frame(){ const b=document.getElementById("boot"); if(!b||b.classList.contains("hide")){ cancelAnimationFrame(raf); window.removeEventListener("resize",resize); return; } draw(); t+=0.016; raf=requestAnimationFrame(frame); }
   if(reduce){ draw(); } else { frame(); }
 }
+function playBootSfx(){
+  if(!soundOn()) return;                        /* Interface sound: Off -> silent boot */
+  initAudio(); const vol=soundVol()*0.5; let n=0;
+  (function go(){
+    if(_AC&&_AC.state==="running"&&_BUF.boot){ _acPlay("boot",vol); return; }   /* gain node honours the level */
+    if(++n<10){ setTimeout(go,40); return; }
+    const el=document.getElementById("sfx_boot"); if(!el||!el.src) return;
+    try{ el.volume=vol; el.currentTime=0; const p=el.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){}
+  })();
+}
 function bootSequence(){
-  const boot=document.getElementById("boot"), term=document.getElementById("bootterm"); bootWaves(); playSfx("boot");
+  const boot=document.getElementById("boot"), term=document.getElementById("bootterm"); bootWaves(); playBootSfx();
   const lines=["> initializing system ...","> linking neural interface ...","> calibrating vitals ...","> loading player data ...","> awakening protocol ready"];
   const finish=()=>{ boot.classList.add("hide"); setTimeout(()=>{ if(boot&&boot.parentNode) boot.parentNode.removeChild(boot); },520); };
   if(REDUCE){ lines.forEach(t=>{ const d=document.createElement("div"); d.className="ln in"; d.innerHTML=t+'<span class="ok">[&nbsp;&nbsp;OK&nbsp;&nbsp;]</span>'; term.appendChild(d); }); setTimeout(finish,700); return; }
@@ -3952,7 +4006,7 @@ function _b3Frame(){
   gl.uniformMatrix4fv(e.loc.uM,false,new Float32Array(M));
   gl.uniform1f(e.loc.uT,(performance.now()-e.t0)/1000);
   const A=[_B3.ac[0]/255,_B3.ac[1]/255,_B3.ac[2]/255];
-  const BASE=[.115,.115,.125], SEC=[A[0]*.42,A[1]*.42,A[2]*.42];
+  const BASE=[.025,.025,.03], SEC=[A[0]*.42,A[1]*.42,A[2]*.42];
   e.parts.forEach(p=>{ const pri=p.m&&_B3.pset.has(p.m), sec=p.m&&_B3.sset.has(p.m);
     gl.uniform3fv(e.loc.uC, pri?A:(sec?SEC:BASE)); gl.uniform1f(e.loc.uE, pri?1:0);
     gl.bindBuffer(gl.ARRAY_BUFFER,p.vb); gl.enableVertexAttribArray(e.loc.aP); gl.vertexAttribPointer(e.loc.aP,3,gl.FLOAT,false,0,0);
@@ -4157,6 +4211,21 @@ var OVF=[
 "uniform vec2 uR;uniform float uT;uniform float uMode;uniform vec2 uC;uniform vec3 uA;uniform vec3 uB;",
 "float h21(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }",
 "float h11(float n){ return fract(sin(n*127.1)*43758.5453); }",
+"vec3 sat(vec3 c,float s){ float l=dot(c,vec3(0.299,0.587,0.114)); return clamp(mix(vec3(l),c,s),0.0,1.0); }",
+"vec2 streaks(vec2 uv,float T){ float acc=0.0; float cm=0.5;",
+"  for(float L=0.0;L<2.0;L++){",
+"    float sc=mix(11.0,22.0,L);",
+"    vec2 pu=vec2(uv.x*sc+L*17.3, uv.y*sc*0.38 - T*mix(3.4,2.0,L));",
+"    vec2 cell=floor(pu); vec2 fp=fract(pu)-0.5;",
+"    float rr=h21(cell);",
+"    if(rr>0.78){",
+"      float qx=fp.x-(h21(cell+11.3)-0.5)*0.7; float qy=fp.y;",
+"      float v=0.0026/max(abs(qx),0.0042)*smoothstep(0.5,0.0,abs(qy))*smoothstep(-0.5,0.1,qy)*mix(1.0,0.55,L);",
+"      if(v>acc) cm=rr;",
+"      acc+=v;",
+"    }",
+"  }",
+"  return vec2(acc,fract(cm*7.0)); }",
 "void main(){ vec2 uv=vUv; vec2 p=uv-uC; p.x*=uR.x/uR.y; float d=length(p); float ang=atan(p.y,p.x);",
 "  vec3 col=vec3(0.0); float a=0.0; float t=uT;",
 "  if(uMode<0.5){ /* tap: crisp double ring + cross ticks */",
@@ -4169,7 +4238,7 @@ var OVF=[
 "    float r=t*1.05;",
 "    float ring=smoothstep(0.05,0.0,abs(d-r))*1.1;",
 "    float ring2=smoothstep(0.024,0.0,abs(d-t*0.68))*0.8;",
-"    a=(ring+ring2)*(1.0-t); col=mix(uA,vec3(1.0),0.4);",
+"    a=(ring+ring2)*(1.0-t); col=sat(mix(uA,vec3(1.0),0.08),1.7);",
 "    for(float i=0.0;i<24.0;i++){ /* shard particles w/ trails */",
 "      float hh=h11(i+1.0); float sa=hh*6.2831+t*0.5*(hh-0.5);",
 "      float sr=t*(0.45+hh*0.75);",
@@ -4185,14 +4254,17 @@ var OVF=[
 "    float pillar=smoothstep(0.5,0.0,abs(w)*2.2)*step(0.55,hc);",
 "    float rise=smoothstep(1.4,0.0,abs(uv.y-(t*1.9*(0.55+hc*0.7)-0.3))*3.0);",
 "    a+=pillar*rise*0.55;",
-"    vec2 mu=vec2(uv.x*30.0,uv.y*18.0-t*22.0*(0.6+0.5*h11(floor(uv.x*30.0))));",
-"    vec2 mf=fract(mu)-0.5; float mh=h21(floor(mu));",
-"    a+=smoothstep(0.10*mh,0.0,length(mf))*step(0.88,mh)*0.8*(1.0-t*0.6);",
 "    a+=smoothstep(0.05,0.0,abs(d-t*1.25))*1.0+smoothstep(0.028,0.0,abs(d-t*0.8))*0.7;",
 "    a+=exp(-t*8.0)*0.4;",
-"    a*=(1.0-t*0.8); col=mix(uA,vec3(1.0),0.5)+uB*0.2;",
+"    a*=(1.0-t*0.8); col=sat(uA+uB*0.18,1.7);",
 "  }",
-"  gl_FragColor=vec4(col*a,a); }"
+"  vec3 pc=col*a;",
+"  if(uMode>0.5){",
+"    vec2 s=streaks(uv, t*(uMode<1.5?1.6:2.2));",
+"    float sa=clamp(s.x*smoothstep(0.0,0.12,t)*(1.0-t),0.0,1.0);",
+"    pc+=sat(mix(uA,uB,s.y),1.9)*sa; a=clamp(a+sa,0.0,1.0);",
+"  }",
+"  gl_FragColor=vec4(pc,a); }"
 ].join("\n");
 var fx={gl:null,p:null,raf:0,q:[]};
 function fxResize(){ var cv=document.getElementById("fxovl"); if(!cv||!fx.gl) return;
@@ -4225,6 +4297,7 @@ function fxPush(m,x,y,dur){ if(RM||!window.fxEnabled||!fxInit()) return;
   if(!fx.raf) fx.raf=requestAnimationFrame(fxFrame); }
 window.fxBurst=function(){ fxPush(1,0.5,0.45,1100); };
 window.fxLevelUp=function(){ fxPush(3,0.5,0.5,1700); };
+window.fxSkill=function(){ fxPush(1,0.5,0.5,1300); };
 
 /* ---------- lifecycle ---------- */
 window.applyFxSetting=function(){ window.fxEnabled=(typeof fxOn!=="function")||fxOn();
