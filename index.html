@@ -967,7 +967,7 @@ html[data-accent="crimson"] .lvfx .fx-crimson{ display:block; }
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="importfile" accept="application/json,.json" style="display:none;">
 
 <!-- rest timer -->
@@ -1368,7 +1368,9 @@ function load(){
   if(raw){ try{ S=deepMerge(defaultState(),JSON.parse(raw)); }catch(e){ S=defaultState(); } }
   else S=defaultState();
 }
-function save(){ if(!storageOK) return; try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ storageOK=false; } }
+let _saveWarned=false;
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); storageOK=true; }
+  catch(e){ storageOK=false; if(!_saveWarned){ _saveWarned=true; try{ toast("Save failed \u2014 storage is full or blocked. Export a backup."); }catch(_){} } } }
 
 /* ============================================================ UNITS (imperial display) ===================================== */
 const LB_PER_KG=2.2046226218;
@@ -1707,6 +1709,20 @@ function playSfx(kind){ if(!soundOn()) return;
   try{ el.volume=vol; el.currentTime=0; const p=el.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
 let _timerPlays=0;
 function _timerEnded(){ const el=document.getElementById("sfx_timer"); if(!el) return; if(_timerPlays<2){ _timerPlays++; el.currentTime=0; const p=el.play(); if(p&&p.catch)p.catch(()=>{}); } else { el.removeEventListener("ended",_timerEnded); } }
+let _alarmNodes=[];
+function _cancelAlarm(){ _alarmNodes.forEach(n=>{ try{ n.stop(0); }catch(e){} }); _alarmNodes=[]; }
+function _schedAlarm(sec){
+  _cancelAlarm();
+  try{
+    initAudio(); if(!_AC||!_BUF.timer) return false;
+    if(_AC.state==="suspended") _AC.resume();
+    const t0=_AC.currentTime+sec, gap=(_BUF.timer.duration||0.7)+0.04;
+    [0,gap].forEach(off=>{ const s=_AC.createBufferSource(); s.buffer=_BUF.timer;
+      const g=_AC.createGain(); g.gain.value=1; s.connect(g); g.connect(_AC.destination);
+      s.start(t0+off); _alarmNodes.push(s); });
+    return true;
+  }catch(e){ _alarmNodes=[]; return false; }
+}
 function playTimerEnd(){ initAudio(); if(_AC&&_BUF.timer){ _acPlay("timer",1); var d=Math.round((_BUF.timer.duration||0.7)*1000)+40; setTimeout(function(){ _acPlay("timer",1); }, d); return; } const el=document.getElementById("sfx_timer"); if(!el||!el.src) return; el.volume=1; _timerPlays=1; el.removeEventListener("ended",_timerEnded); el.addEventListener("ended",_timerEnded); try{ el.currentTime=0; const p=el.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} }
 /* global click feedback (sound only) */
 document.addEventListener("pointerdown",(e)=>{
@@ -1726,6 +1742,7 @@ let restInt=null,restEnd=0,restTotal=0;
 function startRest(sec,label){
   if(restInt){ clearInterval(restInt); restInt=null; }
   restTotal=sec; restEnd=Date.now()+sec*1000;
+  _schedAlarm(sec);
   document.getElementById("rt_label").textContent=label||"Rest — recover";
   document.getElementById("resttimer").classList.add("show");
   tickRest(); restInt=setInterval(tickRest,200);
@@ -1735,12 +1752,14 @@ function tickRest(){
   document.getElementById("rt_num").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
   document.getElementById("rt_bar").style.width=(left/(restTotal*1000)*100)+"%";
   if(left<=0){
-    clearInterval(restInt); restInt=null; playTimerEnd();
+    clearInterval(restInt); restInt=null;
+    if(_alarmNodes.length&&_AC&&_AC.state==="running"){ _alarmNodes=[]; }   /* already sounding on the audio clock */
+    else { _cancelAlarm(); playTimerEnd(); }
     document.getElementById("rt_num").textContent="DONE";
     setTimeout(()=>document.getElementById("resttimer").classList.remove("show"),1300);
   }
 }
-function stopRest(){ if(restInt){ clearInterval(restInt); restInt=null; } document.getElementById("resttimer").classList.remove("show"); }
+function stopRest(){ _cancelAlarm(); if(restInt){ clearInterval(restInt); restInt=null; } document.getElementById("resttimer").classList.remove("show"); }
 document.getElementById("rt_x").onclick=stopRest;
 
 /* ============================================================ BODY DIAGRAM ================================================= */
@@ -2061,10 +2080,6 @@ function renderQuests(){
   const q=S.quests.items, all=q.every(i=>i.done);
   const bn=(S.quests.bonus||[]);
   document.getElementById("s-quests").innerHTML=`
-    <div class="panel"><div class="panel-title"><span class="tri"></span>Bodyweight<span class="sub">WEIGH-IN</span></div>
-      <div class="kv"><span class="k">Current</span><span class="v hi">${lb0(latestWeightKg()??S.profile.weightKg)} ${unitW()}</span></div>
-      <div class="row" style="gap:8px;align-items:stretch;margin-top:10px"><input id="qw_val" type="number" inputmode="decimal" step="0.1" placeholder="Today\u2019s weight (${unitW()})" style="flex:1"><button class="btn" style="width:auto;padding:0 18px" onclick="logWeightField()">Log</button></div>
-      <button class="btn ghost full mt" onclick="logWeightPrompt()">Open weigh-in window</button></div>
     ${bn.length?`<div class="panel questbox"><div class="panel-title"><span class="tri"></span>Bonus Quests<span class="sub">SURGE</span></div>
       <p class="lead tiny">The System opened extra contracts today. Optional — clear them for bonus EXP.</p>
       ${bn.map(b=>`<div class="quest bonusquest ${b.done?'done':''}"><div class="qx" onclick="toggleBonus('${b.id}')">${b.done?'✓':''}</div><div style="cursor:pointer" onclick="questInfo('${b.id}')"><div class="ql">${esc(b.label)}</div><div class="muted tiny" style="margin-top:2px">Tap for the protocol \u203a</div></div><div class="qr">+${b.exp}</div></div>`).join("")}</div>`:""}
@@ -2080,6 +2095,10 @@ function renderQuests(){
       <p class="lead tiny">Log a personal record on any lift or hold. Bosses grant large EXP.</p>
       <button class="btn full" onclick="bossPrompt()">Log a PR (+EXP)</button>
     </div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Bodyweight<span class="sub">WEIGH-IN</span></div>
+      <div class="kv"><span class="k">Current</span><span class="v hi">${lb0(latestWeightKg()??S.profile.weightKg)} ${unitW()}</span></div>
+      <div class="row" style="gap:8px;align-items:stretch;margin-top:10px"><input id="qw_val" type="number" inputmode="decimal" step="0.1" placeholder="Today\u2019s weight (${unitW()})" style="flex:1"><button class="btn" style="width:auto;padding:0 18px" onclick="logWeightField()">Log</button></div>
+      <button class="btn ghost full mt" onclick="logWeightPrompt()">Open weigh-in window</button></div>
     <div class="panel flat">
       <div class="panel-title tmin ${pmin('potsq')?'min':''}" onclick="togglePanelMin('potsq')"><span class="tri"></span>Items &amp; Potions${pdot('potsq')}<span class="sub">DAILY USE</span></div>
       <p class="lead tiny">Consumables with real research behind them — log what you took today. Uptake is tracked in your Profile + Data.</p>
@@ -2678,7 +2697,7 @@ const RUN_DIST=[["1.5 mi",1.5*MI],["2 mi",2*MI],["3 mi",3*MI],["5 K",5000]];
 const RN_TRAIL=42, RN_HALF=6.3;   /* trail length in viewBox units (~60-70 screen px) */
 const RN_PLAY='<svg class="rnico" viewBox="0 0 24 24"><path d="M8 5l12 7-12 7z"/></svg>';
 const RN_PAUSE='<svg class="rnico" viewBox="0 0 24 24"><rect x="7" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>';
-let _rnRaf=0, _rnLap=[-1,-1,-1];
+let _rnRaf=0, _rnIdle=0, _rnLap=[-1,-1,-1];
 function runFlash(){ const f=document.getElementById("rn_fl"); if(!f) return;
   f.classList.remove("on"); void f.getBoundingClientRect(); f.classList.add("on"); playSfx("done"); }
 function runState(){ S.run=S.run||{};
@@ -2687,7 +2706,7 @@ function runState(){ S.run=S.run||{};
   if(!S.run.max) S.run.max=S.run.goal+90;
   if(!S.run.custom) S.run.custom=300;
   return S.run; }
-function runLive(){ const r=S.run&&S.run.ses; return !!(r&&r.date===todayStr()); }
+function runLive(){ const r=S&&S.run&&S.run.ses; return !!(r&&(r.date===todayStr()||(r.startedAt&&Date.now()-r.startedAt<12*3600e3))); }
 function mmss(s){ const neg=s<0; s=Math.abs(Math.round(s));
   return (neg?"-":"")+Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
 function runDistLabel(){ const d=runState().dist;
@@ -2713,7 +2732,7 @@ function trkPath(R){ const cx=110, cy=146, S=90;
   return `M ${cx+R} ${cy+S/2} L ${cx+R} ${cy-S/2} A ${R} ${R} 0 0 0 ${cx-R} ${cy-S/2} L ${cx-R} ${cy+S/2} A ${R} ${R} 0 0 0 ${cx+R} ${cy+S/2} Z`; }
 /* session */
 function runStart(){ const st=runState();
-  st.ses={date:todayStr(),acc:0,t0:0,run:false,rest:Math.max(0,st.max-st.goal),restEnd:0};
+  st.ses={date:todayStr(),startedAt:Date.now(),acc:0,t0:0,run:false,rest:Math.max(0,st.max-st.goal),restEnd:0};
   save(); go("train"); }
 function runElapsed(){ const r=runState().ses; if(!r) return 0;
   return (r.acc+(r.run?(Date.now()-r.t0):0))/1000; }
@@ -2789,15 +2808,16 @@ function runPageHTML(){
     <div class="grid2 mt"><button class="btn" onclick="runEnd()">END RUN</button><button class="btn ghost" onclick="runCancel()">Cancel</button></div></div>`;
 }
 function runTick(){
-  cancelAnimationFrame(_rnRaf);
+  cancelAnimationFrame(_rnRaf); clearTimeout(_rnIdle);
   const st=runState(), r=st.ses; if(!r) return;
   const tEl=document.getElementById("rn_t"); if(!tEl) return;
+  if(tEl.offsetParent===null||document.hidden){ _rnIdle=setTimeout(runTick,500); return; }   /* off-screen: slow poll, no drawing */
   _rnRaf=requestAnimationFrame(runTick);
   const el=runElapsed(), trks=runTracks();
   if(!r.run&&el<0.2) _rnLap=[-1,-1,-1];
   const resting=!!r.restEnd, left=runRestLeft();
   if(resting&&left<=0){ r.restEnd=0; r.rest=0; save(); toast("Rest allowance used up \u2014 keep running"); }
-  tEl.textContent=mmss(el);
+  const tTxt=mmss(el); if(tEl._v!==tTxt){ tEl.textContent=tTxt; tEl._v=tTxt; }
   tEl.style.color=el>st.max?"var(--crimson)":(el>st.goal?"var(--gold)":"var(--ink-hi)");
   const rem=document.getElementById("rn_rem");
   if(rem) rem.textContent=el<=st.goal?("GOAL IN "+mmss(st.goal-el)):(el<=st.max?("OVER GOAL \u00b7 MAX IN "+mmss(st.max-el)):("PAST MAX BY "+mmss(el-st.max)));
@@ -2820,7 +2840,7 @@ function runTick(){
       tr.setAttribute("d",pts.join(" ")); }
     const kEl=document.getElementById("rn_lk"+i);
     if(kEl){ const tot=Math.max(1,Math.ceil(st.dist/t.len)), cur=Math.min(tot,Math.floor(f)+1), togo=Math.max(0,tot-Math.floor(f));
-      kEl.innerHTML=cur+" / "+tot+" \u00b7 <em>"+togo+"</em> to go"; }
+      const kh=cur+" / "+tot+" \u00b7 <em>"+togo+"</em> to go"; if(kEl._v!==kh){ kEl.innerHTML=kh; kEl._v=kh; } }
     const lapN=Math.floor(f);
     if(_rnLap[i]===undefined||_rnLap[i]<0) _rnLap[i]=lapN;
     else if(lapN>_rnLap[i]){ _rnLap[i]=lapN; runFlash(); } });
@@ -2854,10 +2874,10 @@ async function runEnd(){
   if(el<10){ toast("Start the run first"); return; }
   const ok=await sysConfirm("END RUN","Log this run? <b>"+runDistLabel()+"</b> in <b>"+mmss(el)+"</b>.","Log run");
   if(!ok) return;
-  cancelAnimationFrame(_rnRaf);
+  cancelAnimationFrame(_rnRaf); clearTimeout(_rnIdle);
   const mins=el/60, perMi=el/(st.dist/MI), pass=el<=st.max;
   const gained=addExp(45+Math.round(mins*4)+(pass?25:0),"run");
-  S.sessions.push({date:todayStr(),dayKey:"RUN",name:"Timed Run",forced:false,boss:false,
+  S.sessions.push({date:(r.date||todayStr()),dayKey:"RUN",name:"Timed Run",forced:false,boss:false,
     setsDone:1,exp:gained.gained,ex:[{id:"runpace",sets:[{w:0,reps:Math.round(mins)}]}],
     custom:[runDistLabel()+" in "+mmss(el)+" \u00b7 "+mmss(perMi)+"/mile \u00b7 "+(pass?"within max":"over max")],manual:true});
   S.sessions.sort((x,y)=>x.date<y.date?-1:1);
@@ -2906,6 +2926,25 @@ function renderStats(){
     </div>
 
     <div class="panel">
+      <div class="panel-title"><span class="tri"></span>Training Volume<span class="sub">SETS / WEEK</span></div>
+      ${volBy.length>=2 ? lineChart(volBy.map(d=>({x:d.label,y:d.val})),"sets") : (volBy.length ? `<p class="lead tiny">One week logged so far — finish another week's sessions to draw the trend line.</p>` : `<p class="lead tiny">Finish a session to start tracking weekly volume.</p>`)}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="tri"></span>7-Day Activity<span class="sub">PRODUCTIVITY</span></div>
+      ${lineChart(days7.map(d=>({x:d.label,y:d.val})),"score")}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title tmin ${pmin('bwD')?'min':''}" onclick="togglePanelMin('bwD')"><span class="tri"></span>Bodyweight${pdot('bwD')}<span class="sub">${wlog.length} entries · ${unitW()}</span></div>
+      ${wlog.length>=2 ? lineChart(wlog.map(w=>({x:w.date.slice(5),y:lb1(w.kg)})),unitW())
+        : `<p class="lead tiny">Log your weight a few times to see the trend. On Lean Build, aim for a slow climb (~0.5–1 ${unitW()}/week).</p>`}
+      ${wListHTML?`<div class="fld-head mt">Recent weigh-ins · tap to edit</div>${wListHTML}`:""}
+      <button class="btn full mt" onclick="logWeightPrompt()">Log today's weight</button>
+      <button class="btn ghost full mt" onclick="weightAddPast()">Add / edit a past day</button>
+    </div>
+
+    <div class="panel">
       <div class="panel-title tmin ${pmin('nutT')?'min':''}" onclick="togglePanelMin('nutT')"><span class="tri"></span>Nutrition Targets<span class="sub">${goalMode().toUpperCase()}</span></div>
       <div class="kv"><span class="k">BMR (Mifflin–St Jeor)</span><span class="v">${bmr()} kcal</span></div>
       <div class="kv"><span class="k">TDEE × activity</span><span class="v">${tdee()} kcal</span></div>
@@ -2941,25 +2980,6 @@ function renderStats(){
       <div class="fld-head mt">Per-day · tap to edit</div>
       ${calListHTML}
       <button class="btn ghost full mt" onclick="calAddPast()">Add / edit a day</button>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title tmin ${pmin('bwD')?'min':''}" onclick="togglePanelMin('bwD')"><span class="tri"></span>Bodyweight${pdot('bwD')}<span class="sub">${wlog.length} entries · ${unitW()}</span></div>
-      ${wlog.length>=2 ? lineChart(wlog.map(w=>({x:w.date.slice(5),y:lb1(w.kg)})),unitW())
-        : `<p class="lead tiny">Log your weight a few times to see the trend. On Lean Build, aim for a slow climb (~0.5–1 ${unitW()}/week).</p>`}
-      ${wListHTML?`<div class="fld-head mt">Recent weigh-ins · tap to edit</div>${wListHTML}`:""}
-      <button class="btn full mt" onclick="logWeightPrompt()">Log today's weight</button>
-      <button class="btn ghost full mt" onclick="weightAddPast()">Add / edit a past day</button>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title"><span class="tri"></span>7-Day Activity<span class="sub">PRODUCTIVITY</span></div>
-      ${lineChart(days7.map(d=>({x:d.label,y:d.val})),"score")}
-    </div>
-
-    <div class="panel">
-      <div class="panel-title"><span class="tri"></span>Training Volume<span class="sub">SETS / WEEK</span></div>
-      ${volBy.length>=2 ? lineChart(volBy.map(d=>({x:d.label,y:d.val})),"sets") : (volBy.length ? `<p class="lead tiny">One week logged so far — finish another week's sessions to draw the trend line.</p>` : `<p class="lead tiny">Finish a session to start tracking weekly volume.</p>`)}
     </div>
 
     <div class="panel">
@@ -3363,6 +3383,7 @@ function validateState(s){
   if(s.recovery!==undefined&&!isObj(s.recovery)) return "recovery is damaged";
   if(s.ui!==undefined&&!isObj(s.ui)) return "ui is damaged";
   if(s.run!==undefined&&!isObj(s.run)) return "run is damaged";
+  if(s.run&&s.run.ses!=null&&(!isObj(s.run.ses)||typeof s.run.ses.date!=="string")) return "the saved run is damaged";
   if(s.draft!==null&&s.draft!==undefined){
     if(!isObj(s.draft)||!Array.isArray(s.draft.ex)) return "the saved workout is damaged"; }
   if(!isObj(s.rpg.titles)||!Array.isArray(s.rpg.titles.owned)) return "rpg.titles is damaged";
@@ -3376,6 +3397,7 @@ function smokeTest(){
   try{
     sevenDays(); activeDebuffs(); missedCount(); realSessions(S);
     if(S.profile) todaysWorkout();
+    if(typeof runLive==="function") runLive();
     return true;
   }catch(e){ console.error("backup smoke test failed",e); return false; }
 }
@@ -3447,6 +3469,7 @@ const TABS=["quests","status","train","stats","system"];
 function renderFor(t){ if(t==="status")renderStatus(); else if(t==="quests")renderQuests(); else if(t==="train")renderTrain(); else if(t==="stats")renderStats(); else if(t==="system")renderSystem(); decorPanels(); }
 function moveMarker(){ const idx=Math.max(0,TABS.indexOf(activeTab)); document.getElementById("navmark").style.left=(idx*20)+"%"; }
 function go(t){
+  if(!document.getElementById("s-"+t)) return;
   activeTab=t;
   document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.t===t));
   moveMarker(); renderFor(t);
@@ -3530,7 +3553,7 @@ function startApp(){
 /* ============================================================ BOOT / SPLASH SEQUENCE ====================================== */
 function bootWaves(){
   const cv=document.getElementById("bootwaves"); if(!cv||!cv.getContext) return;
-  const ctx=cv.getContext("2d"); let raf=0,t=0;
+  const ctx=cv.getContext("2d"); if(!ctx) return; let raf=0,t=0;
   const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function acc(){ const v=getComputedStyle(document.documentElement).getPropertyValue("--ac").trim().split(/\s+/).map(Number); return (v.length===3&&v.every(x=>!isNaN(x)))?v:[84,215,255]; }
   function resize(){ cv.width=window.innerWidth; cv.height=window.innerHeight; }
@@ -3826,6 +3849,14 @@ window.addEventListener("DOMContentLoaded",function(){ try{ startApp(); }catch(e
 
 /* service worker (hosted only; harmless if absent) */
 if("serviceWorker" in navigator && location.protocol!=="file:"){
+  const _swHad=!!navigator.serviceWorker.controller, _swT0=Date.now();
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(!_swHad) return;                                            /* first install, not an update */
+    let seen=false; try{ seen=!!sessionStorage.getItem("asc_upd"); }catch(e){}
+    const busy=(S&&S.draft&&S.draft.date===todayStr())||(typeof runLive==="function"&&runLive());
+    if(Date.now()-_swT0<8000&&!busy&&!seen){ try{ sessionStorage.setItem("asc_upd","1"); }catch(e){} location.reload(); return; }
+    try{ toast("Update installed \u2014 reopen the app to apply"); }catch(e){}
+  });
   window.addEventListener("load",()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
 }
 </script>
@@ -3979,9 +4010,9 @@ function _mvec(m,v){ const o=[0,0,0,0]; for(let c=0;c<4;c++){ o[c]=m[0*4+c]*v[0]
 function _persp(f,a,n,fr){ const t=1/Math.tan(f/2); return [t/a,0,0,0, 0,t,0,0, 0,0,(fr+n)/(n-fr),-1, 0,0,2*fr*n/(n-fr),0]; }
 function _b3Frame(){
   const e=_B3.eng; if(!e||!e.gl||e.gl.isContextLost()) return;
-  e.raf=requestAnimationFrame(_b3Frame);
   const cv=_B3.cv;
-  if(!_B3.hold.isConnected||_B3.hold.offsetParent===null) return;
+  if(!_B3.hold.isConnected||_B3.hold.offsetParent===null){ clearTimeout(e.idle); e.idle=setTimeout(()=>{ e.raf=requestAnimationFrame(_b3Frame); },450); return; }
+  e.raf=requestAnimationFrame(_b3Frame);
   const gl=e.gl;
   const DPR=Math.min(2,devicePixelRatio||1), w=cv.clientWidth, hgt=cv.clientHeight;
   if(!w||!hgt) return;
@@ -4022,7 +4053,7 @@ function _b3Frame(){
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,p.eb); gl.drawElements(gl.LINES,p.ln,gl.UNSIGNED_SHORT,0); });
   gl.disable(gl.POLYGON_OFFSET_FILL);
   /* ---- projected labels with leader lines (rotate with the model) ---- */
-  const ctx=_B3.lb.getContext("2d"); const W=_B3.lb.width, Hh=_B3.lb.height;
+  const ctx=_B3.lb.getContext("2d"); if(!ctx) return; const W=_B3.lb.width, Hh=_B3.lb.height;
   ctx.clearRect(0,0,W,Hh);
   const centerV=_mvec(V,_mvec(M,[0,0.95,0,1]));
   const acCss="rgb("+_B3.ac[0]+" "+_B3.ac[1]+" "+_B3.ac[2]+")";
@@ -4053,7 +4084,7 @@ function _b3Frame(){
   place(left,-1); place(right,1);
 }
 function _b3Start(){ const e=_b3Engine(); if(!e) return false;
-  cancelAnimationFrame(e.raf); e.raf=requestAnimationFrame(_b3Frame); return true; }
+  cancelAnimationFrame(e.raf); clearTimeout(e.idle); e.raf=requestAnimationFrame(_b3Frame); return true; }
 function init3DBody(pset,sset,cid){ cid=cid||"body3d";
   const ph=document.getElementById(cid);
   _b3Holder();
