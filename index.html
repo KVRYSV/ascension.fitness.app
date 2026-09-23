@@ -309,6 +309,7 @@ label.fld>span{display:block;font-family:var(--mono);font-size:10px;letter-spaci
 .quest.done .qx{background:var(--green);border-color:var(--green);color:#02120a;box-shadow:0 0 12px var(--green);}
 .quest .ql{font-family:var(--ui);font-weight:600;font-size:14px;color:var(--ink);letter-spacing:.01em;}
 .quest.done .ql{color:var(--ghost);text-decoration:line-through;}
+.quest.nrow.done .ql{color:var(--ink-hi);text-decoration:none;}
 .quest .qr{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--amber);flex:0 0 auto;}
 .questbox{border:1px solid rgb(255 206 107 / .55);box-shadow:0 0 18px rgb(255 206 107 / .16);}
 
@@ -614,6 +615,22 @@ html[data-sweep="off"] .panel>.sheen::before{ display:none !important; }
 .daycell .dd{ width:19px; height:19px; margin:6px auto 0; border-radius:50%; border:1px solid var(--line-2); display:grid; place-items:center; font-size:10px; color:var(--ghost-2); }
 .daycell.done .dd{ background:var(--green); border-color:var(--green); color:#02120a; box-shadow:0 0 8px var(--green); }
 .daycell.missed .dd{ border-color:var(--crimson); color:var(--crimson); }
+.volrow{display:flex;align-items:center;gap:8px;}
+.volbar{position:relative;flex:1;height:14px;border:1px solid var(--line-2);background:rgb(0 0 0 / .45);cursor:pointer;touch-action:none;}
+.volbar>i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);box-shadow:0 0 6px var(--accent),0 0 12px rgb(var(--ac) / .5);pointer-events:none;}
+.volbtn{width:34px;height:34px;flex:0 0 auto;padding:0;border:1px solid var(--line-2);background:rgb(var(--ac) / .12);color:var(--ink-hi);cursor:pointer;clip-path:var(--clip-s);display:flex;align-items:center;justify-content:center;}
+.volico{width:16px;height:16px;fill:currentColor;}
+.volpct{font-family:var(--display);font-size:13px;min-width:46px;text-align:right;color:var(--ink-hi);}
+.pvlist{display:none;margin-top:6px;}
+.pvlist.open{display:block;}
+.pvbox{border:1px solid var(--line);padding:12px;clip-path:var(--clip-s);background:rgb(0 0 0 / .35);}
+.pvrow{display:flex;gap:8px;margin-bottom:12px;}
+.pvsw{width:28px;height:28px;clip-path:var(--clip-s);}
+.pvlab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ghost);margin-top:6px;}
+.pvlab b{color:var(--ink-hi);}
+.pvglass{padding:14px;background:#000 repeating-linear-gradient(0deg, transparent 0 9px, rgb(var(--ac) / .2) 9px 10px);}
+.pvglass .pvpanel{margin:0;}
+.pvglass .panel>.sheen::before{animation:sheenSweep 1.8s ease-in-out infinite;}
 .drow{position:relative;}
 .drowx{position:absolute;top:6px;right:4px;border:none;background:none;color:var(--ghost-2);font-size:13px;padding:4px 7px;cursor:pointer;}
 .drowx:active{color:var(--crimson);}
@@ -1661,7 +1678,7 @@ const SEL_DEFS={
   units:{big:"UNITS",cur:()=>S.settings.units||"imperial",apply:setUnits,after:()=>{},opts:()=>[{value:"imperial",label:"Imperial \u2014 lb \u00b7 ft/in"},{value:"metric",label:"Metric \u2014 kg \u00b7 cm"}]},
   sweep:{big:"GLASS SWEEP",cur:()=>sweepOn()?"on":"off",apply:setSweep,after:()=>renderSystem(),opts:()=>[{value:"on",label:"On — panel sheen sweep"},{value:"off",label:"Off — static panels"}]},
   glass:{big:"WINDOW GLASS",cur:()=>((S.settings&&S.settings.glass)||"normal"),apply:setGlass,after:()=>renderSystem(),opts:()=>[{value:"solid",label:"Off \u2014 solid windows"},{value:"less",label:"Light \u2014 mostly solid"},{value:"normal",label:"Normal \u2014 the default"},{value:"more",label:"More \u2014 see the background"},{value:"min",label:"Maximum \u2014 almost clear"}]},
-  fx:{big:"SHADER FX",cur:()=>fxOn()?"on":"off",apply:setFx,after:()=>renderSystem(),opts:()=>[{value:"on",label:"On — GPU effects (background, taps, transitions)"},{value:"off",label:"Off — classic canvas only"}]},
+  fx:{big:"SHADER FX",cur:()=>fxOn()?"on":"off",apply:setFx,after:()=>{ setTimeout(()=>appRestart(),150); },opts:()=>[{value:"on",label:"On — GPU effects (background, taps, transitions)"},{value:"off",label:"Off — classic canvas only"}]},
 };
 async function pickSetting(k){ const d=SEL_DEFS[k]; const v=await sysSelect(d.big,"",d.opts(),d.cur()); if(v===null) return; d.apply(v); if(d.after) d.after(); }
 function selLabel(k){ const d=SEL_DEFS[k], c=d.cur(), o=d.opts().find(x=>String(x.value)===String(c)); return o?o.label:d.opts()[0].label; }
@@ -2666,18 +2683,75 @@ function notifCheck(){
     notify("MISSED GATE",`<b>${dt.slice(5)}</b> passed with no Gate.<br><br>`+
       (ail.length?("Status ailments:<br>"+ail.map(a=>`<b class="cr">${esc(a.n)}</b> \u2014 ${esc(a.d)}`).join("<br>"))
                  :"No ailments yet. Clear the next Gate to stay clean.")+
-      `<br><br><span class="muted tiny">Open This Week to excuse the day if you had a reason.</span>`);
+      `<br><br><span class="muted tiny">Excuse it in This Week.</span>`);
     break;
   }
   notifSync();
 }
+/* ---------- volume bar ---------- */
+const VOL_DN='<svg class="volico" viewBox="0 0 24 24"><path d="M15 5l-8 7 8 7z"/></svg>';
+const VOL_UP='<svg class="volico" viewBox="0 0 24 24"><path d="M9 5l8 7-8 7z"/></svg>';
+let _volT=0, _volDrag=false;
+function volPct(){ return soundOn()?Math.round(soundVol()*100):0; }
+function volSet(p){ p=Math.max(0,Math.min(100,Math.round(p/5)*5));
+  if(p===0) S.settings.sound=false; else { S.settings.sound=true; S.settings.soundVol=p/100; }
+  save();
+  const f=document.getElementById("volfill"), l=document.getElementById("volpct");
+  if(f) f.style.width=p+"%"; if(l) l.textContent=p?p+"%":"OFF";
+  clearTimeout(_volT); _volT=setTimeout(()=>{ if(soundOn()) playSfx("confirm"); },160); }
+function volStep(d){ volSet(volPct()+d); }
+function volSeek(e,down){ const bar=document.getElementById("volbar"); if(!bar) return;
+  if(down){ _volDrag=true; try{ bar.setPointerCapture(e.pointerId); }catch(_){} }
+  if(!_volDrag) return;
+  const r=bar.getBoundingClientRect(); if(r.width>0) volSet((e.clientX-r.left)/r.width*100); }
+function volUp(){ _volDrag=false; }
+/* ---------- settings with a live preview ---------- */
+let _pv=null;
+function previewSetting(k){ const d=SEL_DEFS[k]; if(!d) return;
+  const o=d.cur(); _pv={k:k,orig:o,sel:o,open:false}; pvRender(true); }
+function pvToggle(){}
+function pvPick(v){ if(!_pv) return; const d=SEL_DEFS[_pv.k]; _pv.sel=v;
+  if(_pv.k!=="fx"){ try{ d.apply(v); }catch(e){} }
+  pvRender(false); }
+function pvDone(keep){ if(!_pv) return;
+  const k=_pv.k, d=SEL_DEFS[k], sel=_pv.sel, orig=_pv.orig, changed=String(sel)!==String(orig); _pv=null;
+  if(k==="fx"){ if(keep&&changed){ try{ d.apply(sel); }catch(e){} hideOverlay(()=>appRestart()); } else hideOverlay(); return; }
+  if(!keep&&changed){ try{ d.apply(orig); }catch(e){} }
+  hideOverlay(()=>{ try{ d.after&&d.after(); }catch(e){} renderSystem(); decorPanels(); });
+  if(keep&&changed) toast("Setting applied"); }
+function pvHTML(k,v){
+  if(k==="accent") return `<div class="pvrow"><span class="pvsw" style="background:rgb(var(--ac))"></span><span class="pvsw" style="background:rgb(var(--ac2))"></span><span class="pvsw" style="background:var(--rn1)"></span><span class="pvsw" style="background:var(--rn2)"></span><span class="pvsw" style="background:var(--rn3)"></span></div>
+    <div class="pvlab"><span>LEVEL</span><b>68%</b></div><div class="bar"><i style="width:68%"></i></div>`;
+  if(k==="bars") return `<div class="pvlab"><span>HP</span><b>72%</b></div><div class="bar hp"><i style="width:72%"></i></div>
+    <div class="pvlab"><span>MP</span><b>46%</b></div><div class="bar mp"><i style="width:46%"></i></div>
+    <div class="pvlab"><span>HP LOW</span><b>16%</b></div><div class="bar hp low"><i style="width:16%"></i></div>`;
+  if(k==="glass"||k==="sweep") return `<div class="pvglass"><div class="panel pvpanel"><div class="panel-title"><span class="tri"></span>Sample pane<span class="sub">${k==="glass"?"GLASS":"SWEEP"}</span></div>
+    <p class="lead tiny">Sample text.</p></div></div>`;
+  if(k==="fx") return v==="on"||v===true
+    ? `<p class="lead tiny"><b class="hi">On</b> \u2014 animated background and effects.</p>`
+    : `<p class="lead tiny"><b class="hi">Off</b> \u2014 still background, no effects.</p>`;
+  if(k==="sound"){ const pct=v==="off"?0:(+v||0);
+    return `<div class="pvlab"><span>VOLUME</span><b>${v==="off"?"OFF":pct+"%"}</b></div><div class="bar"><i style="width:${pct}%"></i></div>`; }
+  if(k==="units"){ const kg=(S.metrics.weight&&S.metrics.weight.length)?S.metrics.weight[S.metrics.weight.length-1].kg:((S.profile&&S.profile.weightKg)||70);
+    const met=v==="metric", w=met?(Math.round(kg*10)/10+" kg"):(Math.round(kg*2.20462*10)/10+" lb");
+    return `<div class="kv"><span class="k">Your bodyweight</span><span class="v">${w}</span></div>
+      <div class="kv"><span class="k">A 135 lb bar</span><span class="v">${met?"61.2 kg":"135 lb"}</span></div>
+      <div class="kv"><span class="k">Height</span><span class="v">${met?"cm":"ft / in"}</span></div>`; }
+  return "";
+}
+function pvRender(first){ if(!_pv) return; const d=SEL_DEFS[_pv.k], opts=d.opts();
+  const list=opts.map(o=>`<div class="selopt ${String(o.value)===String(_pv.sel)?"on":""}" onclick="pvPick('${esc(String(o.value))}')"><span class="selck">${String(o.value)===String(_pv.sel)?"\u2713":""}</span><span>${esc(o.label)}</span></div>`).join("");
+  const body=`<div class="sellist">${list}</div>
+    <div class="fld-head mt">Preview</div>
+    <div class="pvbox">${pvHTML(_pv.k,_pv.sel)}</div>
+    ${_pv.k==="fx"?`<p class="lead tiny mt">Apply restarts the app.</p>`:""}`;
+  const o={stamp:"[ SETTINGS ]",big:d.big,bodyHTML:body,actions:[{label:"Apply",onClick:()=>pvDone(true)},{label:"Cancel",kind:"ghost",onClick:()=>pvDone(false)}]};
+  if(first) detail(o.stamp,o.big,o.bodyHTML,o.actions); else renderWin(o);
+  try{ decorPanels(); }catch(e){} }
 function openNotifs(){
   const perm=("Notification" in window)?Notification.permission:"unsupported";
-  const rows=NT.map(x=>`<div class="quest ${notifOn(x[0])?"done":""}"><div class="qx" onclick="notifToggle('${x[0]}');openNotifs()">${notifOn(x[0])?"\u2713":""}</div><div class="ql">${esc(x[1])}</div></div>`).join("");
-  const body=`<p class="lead tiny">Your phone posts these. Nothing goes to a server, and your data stays on the device.</p>
-    <div class="statbonus"><div>\u25b8 The app writes a 14-day plan each time you open it.</div>
-      <div>\u25b8 Your phone plays what is due, about once a day, at a time it picks.</div>
-      <div>\u25b8 A missed Gate also opens a System window when you next open the app.</div></div>
+  const rows=NT.map(x=>`<div class="quest nrow ${notifOn(x[0])?"done":""}"><div class="qx" onclick="notifToggle('${x[0]}');openNotifs()">${notifOn(x[0])?"\u2713":""}</div><div class="ql">${esc(x[1])}</div></div>`).join("");
+  const body=`<p class="lead tiny">Sent about once a day. No server.</p>
     ${perm==="unsupported"?`<p class="lead tiny cr mt">This device cannot show notifications.</p>`:""}
     ${perm==="denied"?`<p class="lead tiny cr mt">Notifications are blocked. Allow them for this app in your browser settings.</p>`:""}
     <div class="mt">${rows}</div>`;
@@ -2696,7 +2770,7 @@ let _hm=null;
 function hamrCard(){
   const best=(S.records&&S.records.pr&&S.records.pr.hamr)||null;
   return `<div class="panel flat"><div class="panel-title tmin ${pmin('hamr')?'min':''}" onclick="togglePanelMin('hamr')"><span class="tri"></span>Fitness Tests<span class="sub">OPTIONAL</span></div>
-    <p class="lead tiny">${HAMR_M} m shuttle run to the official cadence, or a timed run with a track pacer. Either one clears today\u2019s Gate.</p>
+    <p class="lead tiny">Either test clears today’s Gate.</p>
     ${best?`<div class="kv"><span class="k">Best level</span><span class="v">${esc(String(best.reps||0))}</span></div>`:""}
     <div class="grid2 mt"><button class="btn" onclick="hamrOpen()">\u25b7 HAMR test</button><button class="btn" onclick="runStart()">\u25b7 Run</button></div></div>`;
 }
@@ -2890,7 +2964,7 @@ async function runPickGoal(){ const st=runState();
   if(st.ses){ st.ses.rest=Math.max(0,st.max-st.goal); st.ses.restEnd=0; }
   save(); renderTrain(); }
 async function runPickMax(){ const st=runState();
-  const v=await sysPrompt({big:"MAXIMUM TIME",msg:"The run must not take longer than this. The gap between goal and maximum becomes your rest allowance.",value:mmss(st.max)});
+  const v=await sysPrompt({big:"MAXIMUM TIME",msg:"Longest allowed time. The gap to your goal is your rest allowance.",value:mmss(st.max)});
   if(v===null) return; const s=runParseT(v); if(!s){ toast("Enter a time like 16:00"); return; }
   if(s<=st.goal){ toast("Maximum must be later than the goal"); return; }
   st.max=s; if(st.ses){ st.ses.rest=Math.max(0,st.max-st.goal); st.ses.restEnd=0; }
@@ -3168,7 +3242,7 @@ function calEdit(date){
     {label:"Cancel",kind:"ghost",onClick:()=>hideOverlay()}]);
 }
 async function logPastDay(){
-  const d=await sysDate("LOG ANOTHER DAY","Pick any past day. You can log a workout for it.",todayStr());
+  const d=await sysDate("LOG ANOTHER DAY","",todayStr());
   if(!d) return; manualLog(d);
 }
 /* ---- themed calendar picker ---- */
@@ -3256,34 +3330,40 @@ function weightAddPast(){
 function renderSystem(){
   const bars=S.settings.barStyle||"glow"; const tz=S.settings.tz||{auto:true,zone:""};
   document.getElementById("s-system").innerHTML=`
-    <div class="panel"><div class="panel-title"><span class="tri"></span>Settings<span class="sub">SYSTEM</span></div>
-      <label class="fld"><span>System accent</span><button class="selbtn" type="button" onclick="pickSetting('accent')">${selLabel('accent')}<span class="caret">▾</span></button></label>
-      <label class="fld"><span>Bar style</span><button class="selbtn" type="button" onclick="pickSetting('bars')">${selLabel('bars')}<span class="caret">▾</span></button></label>
-      <label class="fld"><span>Glass sweep</span><button class="selbtn" type="button" onclick="pickSetting('sweep')">${selLabel('sweep')}<span class="caret">▾</span></button></label>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Appearance<span class="sub">LOOK</span></div>
+      <label class="fld"><span>System accent</span><button class="selbtn" type="button" onclick="previewSetting('accent')">${selLabel('accent')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Bar style</span><button class="selbtn" type="button" onclick="previewSetting('bars')">${selLabel('bars')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Window glass</span><button class="selbtn" type="button" onclick="previewSetting('glass')">${selLabel('glass')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Glass sweep</span><button class="selbtn" type="button" onclick="previewSetting('sweep')">${selLabel('sweep')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Shader FX</span><button class="selbtn" type="button" onclick="previewSetting('fx')">${selLabel('fx')}<span class="caret">▾</span></button></label>
+    </div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Sound &amp; Reminders<span class="sub">ALERTS</span></div>
+      <div class="fld"><span>Interface sound</span>
+        <div class="volrow"><button class="volbtn" type="button" onclick="volStep(-10)" aria-label="Lower volume">${VOL_DN}</button>
+          <div class="volbar" id="volbar" onpointerdown="volSeek(event,true)" onpointermove="volSeek(event,false)" onpointerup="volUp()" onpointercancel="volUp()"><i id="volfill" style="width:${volPct()}%"></i></div>
+          <button class="volbtn" type="button" onclick="volStep(10)" aria-label="Raise volume">${VOL_UP}</button>
+          <b class="volpct" id="volpct">${volPct()?volPct()+"%":"OFF"}</b></div></div>
       <label class="fld"><span>Reminders</span><button class="selbtn" type="button" onclick="openNotifs()">${notifReady()?"On":"Off"}<span class="caret">▾</span></button></label>
-      <label class="fld"><span>Window glass</span><button class="selbtn" type="button" onclick="pickSetting('glass')">${selLabel('glass')}<span class="caret">▾</span></button></label>
-      <label class="fld"><span>Shader FX</span><button class="selbtn" type="button" onclick="pickSetting('fx')">${selLabel('fx')}<span class="caret">▾</span></button></label>
-      <label class="fld"><span>Interface sound</span><button class="selbtn" type="button" onclick="pickSetting('sound')">${selLabel('sound')}<span class="caret">▾</span></button></label>
-      <label class="fld"><span>Units</span><button class="selbtn" type="button" onclick="pickSetting('units')">${selLabel('units')}<span class="caret">▾</span></button></label>
+    </div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Units &amp; Time<span class="sub">REGION</span></div>
+      <label class="fld"><span>Units</span><button class="selbtn" type="button" onclick="previewSetting('units')">${selLabel('units')}<span class="caret">▾</span></button></label>
       <div class="fld-head mt">Time zone</div>
       <label class="fld checkrow"><span>Sync automatically (device time)</span><input type="checkbox" ${tz.auto?'checked':''} onchange="setTzAuto(this.checked)"></label>
       <label class="fld" ${tz.auto?'style="display:none"':''}><span>Select time zone</span><select onchange="setTzZone(this.value)">${tzOptions(tz.zone||detectTZ())}</select></label>
       <p class="lead tiny">Today reads as <b class="hi">${fmtDate(todayStr())}</b> · ${tz.auto?('auto — '+detectTZ().replace(/_/g,' ')):(tz.zone||detectTZ()).replace(/_/g,' ')}</p>
-      <button class="btn ghost full mt" onclick="editProfile()">Edit profile / schedule</button>
     </div>
-    <div class="panel"><div class="panel-title"><span class="tri"></span>Program Length<span class="sub">${S.program.weeks||24} WEEKS</span></div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Profile &amp; Program<span class="sub">${S.program.weeks||24} WEEKS</span></div>
+      <div class="fld-head mt">Program length</div>
       <p class="lead tiny">Week count + every stat track from your <b class="hi">start date</b> — so starting today never costs you penalties. Added weeks hold the final Arc's intensity.</p>
       <div class="kv"><span class="k">Start date</span><span class="v">${fmtDate(S.program.startDate)}</span></div>
       <div class="kv"><span class="k">Estimated end</span><span class="v">${fmtDate(programEndDate())}</span></div>
       <div class="grid3 mt"><button class="btn" onclick="setWeeks((S.program.weeks||24)+4)">+4 weeks</button><button class="btn" onclick="setWeeks((S.program.weeks||24)+8)">+8 weeks</button><button class="btn ghost" onclick="setWeeks(24)">Reset 24</button></div>
       <button class="btn ghost full mt" onclick="setStartDate()">Set start date</button>
+      <button class="btn full mt" onclick="editProfile()">Edit profile / schedule</button>
     </div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Form Videos<span class="sub">OVERRIDE LINKS</span></div>
       <p class="lead tiny">Each movement embeds a demo + opens YouTube. Override any link that's outdated.</p>
       <button class="btn full" onclick="openVideoEditor()">Edit video links</button></div>
-    <div class="panel"><div class="panel-title"><span class="tri"></span>Admin<span class="sub">DIRECT EDIT</span></div>
-      <p class="lead tiny">Directly edit your character — level, attributes, EXP, titles. Each change confirms first.</p>
-      <button class="btn full" onclick="openAdmin()">Open admin editor</button></div>
     <div class="panel"><div class="panel-title"><span class="tri"></span>Data — Backup &amp; Restore<span class="sub">REDUNDANCY</span></div>
       <p class="lead tiny">Progress auto-saves on this device. Export a backup so a cleared cache can't wipe your climb.</p>
       <div class="grid2"><button class="btn" onclick="exportData()">Export backup</button><button class="btn" onclick="document.getElementById('importfile').click()">Import backup</button></div>
@@ -3291,6 +3371,9 @@ function renderSystem(){
       <button class="btn ghost full mt" onclick="freshStart()">Fresh start \u2014 carry data, clear debuffs</button>
       ${!storageOK?`<div class="banner">This preview can't auto-save. On your phone it will. <b>Export regularly.</b></div>`:""}
       <button class="btn warn full mt" onclick="resetAll()">Reset all progress</button></div>
+    <div class="panel"><div class="panel-title"><span class="tri"></span>Admin<span class="sub">DIRECT EDIT</span></div>
+      <p class="lead tiny">Directly edit your character — level, attributes, EXP, titles. Each change confirms first.</p>
+      <button class="btn full" onclick="openAdmin()">Open admin editor</button></div>
     <div class="panel flat"><div class="panel-title tmin ${pmin('about')?'min':''}" onclick="togglePanelMin('about')"><span class="tri"></span>About<span class="sub">SYSTEM GUIDE</span></div>
       <p class="lead tiny">ASCENSION is a ${S.program.weeks||24}-week training program in a Solo-Leveling <b class="hi">System</b> shell — three Arcs, with levels, ranks, attributes, quests and boss gates. It also runs two Air Force tests: the <b class="hi">HAMR</b> shuttle run and a timed <b class="hi">Run</b> with a track pacer. One offline file on your device. Not medical advice.</p>
       <div class="fld-head mt">How it works</div>
@@ -3300,8 +3383,9 @@ function renderSystem(){
         <li><b>Attributes</b> (STR · AGI · VIT · SEN · INT) rise with ability points earned per Gate; each one nudges your in-workout targets.</li>
         <li><b>Daily Quest</b> is a quick, always-clearable baseline that keeps your streak and readiness up.</li>
         <li><b>Boss Gates</b> are HIIT trials every 4th week — clear one under-level for bonus rewards.</li>
-        <li><b>Fitness Tests</b> on Train hold the HAMR shuttle test and the Run pacer. Either one clears the day’s Gate.</li>
-        <li><b>Missed a day?</b> Tap it in This Week to excuse it. Recent Gates can log a workout for any past date.</li>
+        <li><b>Fitness Tests</b> — HAMR or a timed run. Either clears the day’s Gate.</li>
+        <li><b>Missed a day?</b> Excuse it in This Week, or log it from Recent Gates.</li>
+        <li><b>Reminders</b> — turn on in Settings. No server.</li>
         <li><b>Titles</b> are unlockable buffs; <b>debuffs</b> appear if you overtrain or skip nutrition, and clear on their own.</li>
       </ul>
       <div class="fld-head mt">Quick FAQ</div>
@@ -3320,6 +3404,7 @@ function setSweep(v){ S.settings.sweep=(v==="on"); save(); document.documentElem
 function fxOn(){ return !(S&&S.settings&&S.settings.fx===false); }
 function setGlass(v){ S.settings.glass=v||"normal"; save(); applyGlass(); }
 function applyGlass(){ document.documentElement.setAttribute("data-glass",(S.settings&&S.settings.glass)||"normal"); }
+function appRestart(){ try{ location.reload(); }catch(e){} }
 function setFx(v){ S.settings.fx=(v==="on"); save(); if(typeof applyFxSetting==="function") applyFxSetting(); }
 function setWeeks(n){ n=Math.max(8,Math.min(104,n)); S.program.weeks=n; save(); toast(`Program set to ${n} weeks`); render(); decorPanels(); }
 let adminUnlocked=false;
@@ -3555,7 +3640,7 @@ async function freshStart(){
   render(); decorPanels();
 }
 async function resetAll(){
-  const ok=await sysConfirm("RESET ALL PROGRESS","This permanently erases your level, sessions, stats and history on this device. This cannot be undone. Export a backup first if unsure.","Erase everything","warn");
+  const ok=await sysConfirm("RESET ALL PROGRESS","Erases all progress on this device. Export a backup first.","Erase everything","warn");
   if(!ok) return;
   const sure=await sysConfirm("FINAL CONFIRMATION","Are you absolutely sure? Everything resets to E-Rank, Level 1.","Yes, reset","warn");
   if(!sure) return;
@@ -3741,7 +3826,7 @@ function renderManualLog(){
   const rows=_ml.items.map((it,i)=>`<div class="drow"><div class="dk">${i+1}</div><div class="dv"><b>${esc(it.name)}</b><br><span class="muted tiny">${it.sets} sets \u00d7 ${esc(String(it.reps))}${it.w?` \u00b7 ${it.w} ${unitW()}`:""}</span></div><button class="btn ghost sm" type="button" onclick="mlRemove(${i})">\u2715</button></div>`).join("");
   const list=mlExList().map(id=>`<div class="selopt" onclick="mlPick('${id}')"><span class="selck">\u002b</span><span>${esc(EX[id].n)} <span class="muted tiny">\u00b7 ${EX[id].cat}</span></span></div>`).join("")
     ||`<p class="lead tiny center">No match. Use the custom field below.</p>`;
-  const body=`<p class="lead tiny">Logging for <b class="hi">${_ml.date}</b>. Add each movement you did \u2014 search the library or type your own.</p>
+  const body=`<p class="lead tiny">Logging for <b class="hi">${_ml.date}</b>.</p>
     ${rows?`<div class="mt">${rows}</div>`:""}
     <label class="fld mt"><span>Search the library</span><input id="mlq" type="text" placeholder="e.g. press, row, squat" value="${esc(_ml.q)}" oninput="mlSearch(this.value)"></label>
     <div class="sellist" style="max-height:min(46dvh,460px);overflow:auto;overscroll-behavior:contain">${list}</div>
@@ -3818,7 +3903,7 @@ async function excuseWeek(){
 async function deleteSession(date,idx){
   const s=(S.sessions||[])[idx];
   if(!s||s.date!==date){ toast("That entry is no longer there"); return; }
-  const ok=await sysConfirm("DELETE GATE","Remove <b>"+esc(s.name||"this Gate")+"</b> from "+esc(date.slice(5))+"?<br>Its EXP is taken back. This cannot be undone.","Delete","warn");
+  const ok=await sysConfirm("DELETE GATE","Delete <b>"+esc(s.name||"this Gate")+"</b> ("+esc(date.slice(5))+")? Its EXP is removed.","Delete","warn");
   if(!ok) return;
   if(s.exp&&typeof subExp==="function") subExp(s.exp,"gate-delete");
   S.sessions.splice(idx,1);
