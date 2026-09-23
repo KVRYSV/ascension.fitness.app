@@ -2568,6 +2568,124 @@ function lastBestFor(id){
     if(e&&e.sets.length){ const best=e.sets.reduce((a,b)=>(b.w*100+b.reps)>(a.w*100+a.reps)?b:a); return best.w?`${best.w} lb × ${best.reps}`:`${best.reps} reps`; } }
   return null;
 }
+
+/* ===================== REMINDERS (phone only, no server) ===================== */
+const NT=[["level","Leveling day"],["missed","Missed day + ailments"],["streak","Long absence (2/5/10)"],
+          ["weigh","Weigh-in"],["meal","Meal logging"],["bonus","Bonus gate"],["run","Run in progress"]];
+function notifOn(k){ const n=(S.settings&&S.settings.notif)||{}; return n[k]!==false; }
+function notifReady(){ return ("Notification" in window) && Notification.permission==="granted" && !!(S.settings&&S.settings.notifEnabled); }
+function notifToggle(k){ S.settings.notif=S.settings.notif||{}; S.settings.notif[k]=!notifOn(k); save(); notifSync(); }
+async function notifEnable(){
+  if(!("Notification" in window)){ toast("This device cannot show notifications"); return; }
+  let p=Notification.permission;
+  if(p==="default"){ try{ p=await Notification.requestPermission(); }catch(e){ p="denied"; } }
+  if(p!=="granted"){ toast("Blocked \u2014 allow notifications for this app, then try again"); return; }
+  S.settings.notifEnabled=true; save(); await notifSync(); renderSystem(); decorPanels(); toast("Reminders on");
+}
+function notifOff(){ S.settings.notifEnabled=false; save(); ["level","missed","streak","weigh","meal","bonus","run"].forEach(notifClear);
+  notifSync(); renderSystem(); decorPanels(); toast("Reminders off"); }
+function idbPut(val){ return new Promise(res=>{ try{
+  if(!("indexedDB" in window)||!indexedDB) return res(false);
+  const r=indexedDB.open("ascension-notif",1);
+  r.onupgradeneeded=()=>{ try{ r.result.createObjectStore("kv"); }catch(e){} };
+  r.onsuccess=()=>{ try{ const db=r.result, tx=db.transaction("kv","readwrite");
+    tx.objectStore("kv").put(val,"plan"); tx.oncomplete=()=>{ try{db.close();}catch(e){} res(true); }; tx.onerror=()=>res(false);
+  }catch(e){ res(false); } };
+  r.onerror=()=>res(false); }catch(e){ res(false); } }); }
+function notifPlan(){
+  const items=[], p=S.profile; if(!p||!p.days) return items;
+  const start=(S.program&&(S.program.freshStart||S.program.startDate))||"";
+  const day=n=>new Date(Date.now()+86400000*n), dstr=d=>todayStr(d);
+  const trained=dt=>workoutsOn(dt).length>0, excused=dt=>(S.excused||[]).some(e=>e.date===dt);
+  const sched=d=>p.days.indexOf(d.getDay())>=0;
+  if(notifOn("level")) for(let n=0;n<14;n++){ const d=day(n), dt=dstr(d);
+    if(!sched(d)||excused(dt)||trained(dt)) continue;
+    items.push({d:dt,tag:"level",pri:2,body:"Today is a leveling day \u2014 Gates are waiting, hunter"});
+    if(n>=1) items.push({d:dstr(day(n-1)),tag:"level",pri:3,body:"Leveling day tomorrow \u2014 rest well, hunter"});
+    if(n>=2) items.push({d:dstr(day(n-2)),tag:"level",pri:4,body:"Leveling day in 2 days"});
+  }
+  if(notifOn("missed")){ const ail=activeDebuffs().map(x=>x.n);
+    for(let n=-3;n<0;n++){ const d=day(n), dt=dstr(d);
+      if(!sched(d)||trained(dt)||excused(dt)) continue;
+      if(start&&dt<start) continue;
+      items.push({d:dstr(day(n+1)),tag:"missed",pri:1,
+        body:"Missed Gate \u2014 status ailments: "+(ail.length?ail.join(", "):"none yet, clear the next Gate")}); } }
+  if(notifOn("streak")){ let miss=0;
+    for(let n=-1;n>=-30;n--){ const d=day(n), dt=dstr(d);
+      if(!sched(d)) continue; if(start&&dt<start) break;
+      if(trained(dt)||excused(dt)) break; miss++; }
+    if(miss===2||miss===5||miss===10) items.push({d:dstr(day(0)),tag:"streak",pri:1,
+      body:miss+" scheduled Gates missed. The System is waiting, hunter."}); }
+  const today=dstr(day(0));
+  if(notifOn("weigh")&&!(S.metrics.weight||[]).some(w=>w.date===today))
+    items.push({d:today,tag:"weigh",pri:6,body:"Weighed yourself yet? A hunter needs discipline."});
+  if(notifOn("meal")&&!(S.nutrition.log||[]).some(x=>x.date===today))
+    items.push({d:today,tag:"meal",pri:5,body:"Log your meals \u2014 fuel is part of the climb."});
+  return items;
+}
+async function notifSync(){ const on=notifReady();
+  await idbPut({v:1,at:Date.now(),on:on,items:on?notifPlan():[]});
+  if(on) notifPeriodic(); }
+function notifPeriodic(){ try{
+  if(!navigator.serviceWorker) return;
+  navigator.serviceWorker.ready.then(async r=>{
+    if(!r||!("periodicSync" in r)) return;
+    try{ const st=await navigator.permissions.query({name:"periodic-background-sync"});
+      if(st&&st.state!=="granted") return; }catch(e){}
+    try{ await r.periodicSync.register("ascension-check",{minInterval:12*60*60*1000}); }catch(e){}
+  }).catch(()=>{}); }catch(e){} }
+function notifShow(tag,body,url){ try{
+  if(!notifReady()||!navigator.serviceWorker) return;
+  navigator.serviceWorker.ready.then(r=>r.showNotification("ASCENSION",{body:body,tag:tag,
+    icon:"./icons/icon-192.png",badge:"./icons/icon-192.png",data:{url:url||"./"}})).catch(()=>{});
+  }catch(e){} }
+function notifClear(tag){ try{
+  if(!navigator.serviceWorker) return;
+  navigator.serviceWorker.ready.then(r=>r.getNotifications({tag:tag}).then(ns=>ns.forEach(n=>n.close())).catch(()=>{})).catch(()=>{});
+  }catch(e){} }
+function notifCheck(){
+  if(!S||!S.profile) return;
+  const today=todayStr();
+  if(notifReady()){
+    if(notifOn("run")&&typeof runLive==="function"&&runLive()) notifShow("run","Run active \u2014 the clock is still going.");
+    else notifClear("run");
+    const bn=(S.quests&&S.quests.bonus)||[];
+    if(notifOn("bonus")&&bn.length&&bn.some(b=>!b.done)) notifShow("bonus","Bonus gate present \u2014 open for EXP");
+    else notifClear("bonus");
+    if(workoutsOn(today).length) notifClear("level");
+  }
+  const p=S.profile, start=(S.program&&(S.program.freshStart||S.program.startDate))||"";
+  S.notifShown=S.notifShown||{};
+  for(let n=1;n<=3;n++){ const d=new Date(Date.now()-86400000*n), dt=todayStr(d);
+    if(p.days.indexOf(d.getDay())<0) continue;
+    if(start&&dt<start) continue;
+    if(workoutsOn(dt).length||(S.excused||[]).some(e=>e.date===dt)) continue;
+    if(S.notifShown["miss:"+dt]) continue;
+    S.notifShown["miss:"+dt]=1; save();
+    const ail=activeDebuffs();
+    notify("MISSED GATE",`<b>${dt.slice(5)}</b> passed with no Gate.<br><br>`+
+      (ail.length?("Status ailments:<br>"+ail.map(a=>`<b class="cr">${esc(a.n)}</b> \u2014 ${esc(a.d)}`).join("<br>"))
+                 :"No ailments yet. Clear the next Gate to stay clean.")+
+      `<br><br><span class="muted tiny">Open This Week to excuse the day if you had a reason.</span>`);
+    break;
+  }
+  notifSync();
+}
+function openNotifs(){
+  const perm=("Notification" in window)?Notification.permission:"unsupported";
+  const rows=NT.map(x=>`<div class="quest ${notifOn(x[0])?"done":""}"><div class="qx" onclick="notifToggle('${x[0]}');openNotifs()">${notifOn(x[0])?"\u2713":""}</div><div class="ql">${esc(x[1])}</div></div>`).join("");
+  const body=`<p class="lead tiny">Your phone posts these. Nothing goes to a server, and your data stays on the device.</p>
+    <div class="statbonus"><div>\u25b8 The app writes a 14-day plan each time you open it.</div>
+      <div>\u25b8 Your phone plays what is due, about once a day, at a time it picks.</div>
+      <div>\u25b8 A missed Gate also opens a System window when you next open the app.</div></div>
+    ${perm==="unsupported"?`<p class="lead tiny cr mt">This device cannot show notifications.</p>`:""}
+    ${perm==="denied"?`<p class="lead tiny cr mt">Notifications are blocked. Allow them for this app in your browser settings.</p>`:""}
+    <div class="mt">${rows}</div>`;
+  detail("[ SYSTEM ]","REMINDERS",body,[
+    notifReady()?{label:"Turn reminders off",kind:"warn",onClick:()=>{ notifOff(); hideOverlay(); }}
+                :{label:"Turn reminders on",onClick:()=>{ notifEnable().then(()=>hideOverlay()); }},
+    {label:"Close",kind:"ghost",onClick:()=>hideOverlay()}]);
+}
 /* ===================== HAMR / PACER TEST ===================== */
 const HAMR_B=[10.25,19.11,28.08,37.05,45.98,54.95,63.91,72.73,81.11,89.05,97.01,104.98,112.95,120.91,128.85,136.8,144.55,152.08,159.58,167.15,174.68,182.21,189.78,197.3,204.57,211.73,218.9,226.07,233.23,240.4,247.53,254.7,261.82,268.77,275.6,282.37,289.23,296.0,302.83,309.67,316.5,323.28,329.9,336.4,342.87,349.37,355.87,362.37,368.9,375.37,381.85,388.23,394.4,400.6,406.8,413.0,419.23,425.43,431.63,437.83,444.05,450.13,456.07,462.03,467.97,473.93,479.9,485.87,491.8,497.73,503.72,509.5,515.23,520.93,526.67,532.37,538.07,543.77,549.53,555.23,560.93,566.65,572.23,577.73,583.23,588.73,594.23,599.7,605.17,610.63,616.13,621.63,627.12,632.5,637.77,643.07,648.33,653.63,658.9,664.17,669.47,674.7,680.0,685.3,690.62,696.1,701.2,706.27,711.37,716.47,721.57,726.67,731.73,736.83,741.93,747.0,752.08,757.13,762.07,766.97,771.9,776.8,781.73,786.67,791.57,796.5,801.37,806.27,811.2,816.15,820.97,825.73,830.53,835.27,840.03,844.77,849.53,854.27,859.03,863.77,868.53,873.27,878.02,882.7,887.3,891.9,896.5,901.1,905.7,910.3,914.9,919.47,924.07,928.7,933.27,937.85,942.4,946.9,951.33,955.8,960.23,964.73,969.17,973.57,978.03,982.5,986.93,991.4,995.83,1000.28,1004.73,1009.03,1013.37,1017.7,1022.0,1026.37,1030.63,1034.93,1039.27,1043.6,1047.9,1052.23,1056.53,1060.82,1065.13,1069.33,1073.5,1077.7,1081.87,1086.03,1090.2,1094.37,1098.57,1102.77,1106.93,1111.13,1115.33,1119.5,1123.65,1127.87,1131.93,1136.03,1140.1,1144.17,1148.23,1152.27,1156.37,1160.4,1164.43,1168.53,1172.6,1176.7,1180.7,1184.75,1188.97,1192.9,1196.87,1200.83,1204.77,1208.77,1212.73,1216.67,1220.63,1224.57,1228.53,1232.47,1236.4,1240.37,1244.3,1248.22,1252.17,1256.0,1259.83,1263.67,1267.53,1271.4,1275.23,1279.07,1282.93,1286.77,1290.6,1294.43,1298.27,1302.13,1305.97,1311.82];
 const HAMR_IDX=[0,7,15,23,32,41,50,60,70,81,92,104,116,129,142,155,169,183,198,213,229];
@@ -3142,6 +3260,7 @@ function renderSystem(){
       <label class="fld"><span>System accent</span><button class="selbtn" type="button" onclick="pickSetting('accent')">${selLabel('accent')}<span class="caret">▾</span></button></label>
       <label class="fld"><span>Bar style</span><button class="selbtn" type="button" onclick="pickSetting('bars')">${selLabel('bars')}<span class="caret">▾</span></button></label>
       <label class="fld"><span>Glass sweep</span><button class="selbtn" type="button" onclick="pickSetting('sweep')">${selLabel('sweep')}<span class="caret">▾</span></button></label>
+      <label class="fld"><span>Reminders</span><button class="selbtn" type="button" onclick="openNotifs()">${notifReady()?"On":"Off"}<span class="caret">▾</span></button></label>
       <label class="fld"><span>Window glass</span><button class="selbtn" type="button" onclick="pickSetting('glass')">${selLabel('glass')}<span class="caret">▾</span></button></label>
       <label class="fld"><span>Shader FX</span><button class="selbtn" type="button" onclick="pickSetting('fx')">${selLabel('fx')}<span class="caret">▾</span></button></label>
       <label class="fld"><span>Interface sound</span><button class="selbtn" type="button" onclick="pickSetting('sound')">${selLabel('sound')}<span class="caret">▾</span></button></label>
@@ -3540,6 +3659,7 @@ function updateGoalDesc(){ const el=document.getElementById("ob_goal_desc"); if(
 function startApp(){
   load();
   applyGlass();
+  setTimeout(()=>{ try{ notifCheck(); }catch(e){} },900);
   document.documentElement.setAttribute("data-accent",(S.settings&&S.settings.accent)||"cyan");
   wireChips("ob_equip",false); wireChips("ob_days",true); wireChips("ob_goal",false);
   try{ const _g=document.getElementById("ob_goal"); if(_g) _g.addEventListener("click",()=>setTimeout(updateGoalDesc,0)); }catch(e){}
@@ -4261,6 +4381,7 @@ var OVF=[
 "float h21(vec2 p){ return hq(fract(fract(p.x*0.1031)+fract(p.y*0.1030)*0.618+0.1)); }",
 "#endif",
 "vec3 sat(vec3 c,float s){ float l=dot(c,vec3(0.299,0.587,0.114)); return clamp(mix(vec3(l),c,s),0.0,1.0); }",
+"vec3 vivid(vec3 c){ float m=max(max(c.r,c.g),c.b); return sat(c/max(m,0.001),2.2); }",
 "vec2 streaks(vec2 uv,float T){ float acc=0.0; float cm=0.5;",
 "  for(float L=0.0;L<2.0;L++){",
 "    float sc=mix(11.0,22.0,L);",
@@ -4287,15 +4408,15 @@ var OVF=[
 "    float r=t*1.05;",
 "    float ring=smoothstep(0.05,0.0,abs(d-r))*1.1;",
 "    float ring2=smoothstep(0.024,0.0,abs(d-t*0.68))*0.8;",
-"    a=(ring+ring2)*(1.0-t); col=sat(mix(uA,vec3(1.0),0.08),1.7);",
+"    a=(ring+ring2)*(1.0-t); col=vivid(uA);",
 "    for(float i=0.0;i<24.0;i++){ /* shard particles w/ trails */",
 "      float hh=h11(i+1.0); float sa=hh*6.2831+t*0.5*(hh-0.5);",
 "      float sr=t*(0.45+hh*0.75);",
 "      vec2 sp2=vec2(cos(sa),sin(sa))*sr;",
 "      float sd=length(p-sp2);",
-"      a+=0.0035/max(sd,0.004)*(1.0-t)*0.7;",
+"      a+=0.0035/max(sd,0.004)*(1.0-t)*1.0;",
 "      vec2 tp=p-sp2*clamp(dot(p,sp2)/max(dot(sp2,sp2),0.0001),0.55,1.0);",
-"      a+=smoothstep(0.006,0.0,length(tp))*smoothstep(1.0,0.6,d/max(sr,0.01))*(1.0-t)*0.25;",
+"      a+=smoothstep(0.006,0.0,length(tp))*smoothstep(1.0,0.6,d/max(sr,0.01))*(1.0-t)*0.36;",
 "    }",
 "  } else { /* LEVEL UP: light pillars + rising motes + shock rings */",
 "    float c=floor(uv.x*22.0); float hc=h21(vec2(c,5.0));",
@@ -4305,14 +4426,15 @@ var OVF=[
 "    a+=pillar*rise*0.55;",
 "    a+=smoothstep(0.05,0.0,abs(d-t*1.25))*1.0+smoothstep(0.028,0.0,abs(d-t*0.8))*0.7;",
 "    a+=exp(-t*8.0)*0.4;",
-"    a*=(1.0-t*0.8); col=sat(uA+uB*0.18,1.7);",
+"    a*=(1.0-t*0.8); col=vivid(uA+uB*0.18);",
 "  }",
 "  vec3 pc=col*a;",
 "  if(uMode>0.5){",
 "    vec2 s=streaks(uv, t*(uMode<1.5?1.6:2.2));",
 "    float sa=clamp(s.x*smoothstep(0.0,0.12,t)*(1.0-t),0.0,1.0);",
-"    pc+=sat(mix(uA,uB,s.y),1.9)*sa; a=clamp(a+sa,0.0,1.0);",
+"    pc+=vivid(mix(uA,uB,s.y))*sa*1.5; a=clamp(a+sa,0.0,1.0);",
 "  }",
+"  float mx=max(max(pc.r,pc.g),pc.b); if(mx>1.0) pc/=mx;",
 "  gl_FragColor=vec4(pc,a); }"
 ].join("\n");
 var fx={gl:null,p:null,raf:0,q:[]};
@@ -4355,6 +4477,7 @@ window.applyFxSetting=function(){ window.fxEnabled=(typeof fxOn!=="function")||f
   if(!window.fxEnabled){ bgStop(); var bw=document.getElementById("bootwaves"); if(bw&&!document.getElementById("bootgl")) bw.style.display="block"; } };
 addEventListener("resize",function(){ if(bg.on) surResize(bg); if(fx.gl) fxResize(); },{passive:true});
 addEventListener("pageshow",function(){ if(bg.on) surResize(bg); },{passive:true});
+document.addEventListener("visibilitychange",function(){ if(!document.hidden){ try{ notifCheck(); }catch(e){} } });
 document.addEventListener("visibilitychange",function(){
   if(document.hidden){ cancelAnimationFrame(bg.raf); }
   else if(bg.on&&bg.gl&&!bg.gl.isContextLost()){ surResize(bg); cancelAnimationFrame(bg.raf); bg.raf=requestAnimationFrame(function f(){ surFrame(bg,f); }); }
