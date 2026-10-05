@@ -2,53 +2,55 @@
 Personal use fitness app vibecoded and developed using claude. Uses HTML for full deployment via PWA. 
 Dependencies and cache is all local. Runs on browser as well. I can't code but I can design...
 
-## v7.9.9 — 2026-09-20
+## v8.4.0
 
-Changes from v7.5.3 to v7.9.9.
+Big update since v7.13.0: research-based program, auto phase planner, cardio plan, new themes and fonts.
 
 ### Added
-**Data and logging**
-- Delete a logged Gate. Open a day and tap ✕ on the Gate. A confirm appears. The Gate's EXP is removed.
-- Recent Gates: tap a row to open that day. Tap ✕ to delete the Gate.
-- Log a workout for any past date from Recent Gates.
-- Gate history window on the Data tab. Grouped by month. Scrolls past 10 entries.
+- **Phase planner**: BMI, BMR and estimated body fat (from waist or BMI). Picks Cut or Lean Build, shows weeks to target and switches on its own. Learns your real TDEE from logged calories and the weight trend.
+- **Targets**: TARGET box and gray placeholder weight/reps on every set, based on your last log.
+- **Stall check**: flags a lift that is flat for 3 sessions. Offers an early deload when 2+ lifts stall.
+- **Cardio plan**: weekly 4×4 intervals, Zone 2, and a HAMR test in week 6 of each block. Run and HAMR windows open from the Gate with pace and heart-rate targets, then log back into it.
+- **Loadout picker**: choose machines, cables, dumbbells, barbell, bodyweight or full gym when you open a Gate. Each move has an equipment field and a swap button.
+- **New moves**: leg extension, sissy squat, overhead triceps (machine/cable), ab crunch machine, box and broad jumps, 4×4 intervals.
+- **Hunter Systems** (each can be turned off): shadow army, crates and buffs, momentum combo, quest timer, Hunter Assessment registry, trophy wall.
+- **Themes**: Deus Ex, Yellow, Green, Navy. Extra themes unlock from crates.
+- **Fonts**: System, Digital, Terminal, Grotesk, Serif.
+- Stat radar behind the 3D model on Recovery Map and Train.
+- Admin editor for soldiers, trophies, themes, buffs and crates.
+- Skill work setting for planche, lever and handstand holds (off by default).
+- Onboarding: Custom button for height (ft/in or cm) and bodyweight (lb or kg); profile edit no longer reads kg as lb.
 
-**Fitness tests**
-- HAMR: SHUTTLES DONE and THIS LEVEL counters.
-- HAMR: "Audio not found" message when `hamr-audio.mp3` is missing.
-- Run: Gate clear sound and effect when a run is logged.
-- Run: laps-left number shown in each marker's colour.
 
 ### Changed
-**Layout**
-- Data tab order: Today, Training Volume, 7-Day Activity, Bodyweight, Nutrition Targets, Calorie Log, Items & Potions, Recent Gates.
-- Quests tab order: Pop-up quests, Daily Quest, Boss Challenge, Bodyweight, Items & Potions, Nutrition & Fuel.
-- Run legend order: Field House, 400 m, Custom. Lap counters in a boxed display font.
-- Data tab: Today rings centred in their boxes.
-- 
-**Behaviour**
-- Default interface sound: Low (50%). Default bar style: Minimal.
-- Excuse Week also covers missed days already in the panel.
-- Session Guide and About text rewritten.
-- New builds install on the first open. If a workout or run is active, a toast asks you to reopen.
-- Rest timer alarm is scheduled on the audio clock. It sounds on time while another app is open.
-- Boot sound follows the interface sound setting.
+- Program rebuilt for a lean V-taper: more side delt, lat, leg and calf work. Weighted abs replace stomach vacuums. Overhead triceps first. Seated leg curl. Build weeks add sets to priority moves. Max 5 sets per move.
+- Stats now change the workout:
+  - STR: top set and an extra set.
+  - AGI: reps, holds and a jump primer.
+  - VIT: rest and Zone 2.
+  - SEN: hard last set.
+  - INT: estimated 1RM.
+- Rest: 150 / 90 s base, minimum 90 / 60 s. Load steps are set by equipment.
+- Nutrition: the cut scales with body weight. Calories adjust from weigh-ins, with a BMR floor. Fiber and water targets. Live targets in Nutrition & Fuel.
+- App text trimmed and matched to research: supplement doses, About, Session Guide (today's time, sets and effort).
+- Boss Gates move to weeks 4 and 7 of each block. Daily quest growth capped.
+- Primary target tags pulse. Gate-clear EXP counts up.
+- Move page: sets × reps now show as unboxed large digits. The target or suggested-load cell stays on the same row on phones.
+- Shorter suggested-load text for bodyweight, core and conditioning moves.
 
 ### Fixed
-- Malformed backups are rejected before anything is saved. The current save is kept.
-- Press sounds played more than once.
-- Cancel on the date picker trapped the parent pop-up.
-- Boot screen could hang when the 2D canvas was unavailable.
-- A failed save turned off all later saves with no warning. Saves now retry, and a toast warns once.
-- A run that crossed midnight disappeared.
-- The run page and the 3D model kept drawing while hidden.
-- Navigation to an unknown tab caused a crash.
+- WebGL crash (white background) when switching Train and Status.
+- Train model stopped spinning after a touch.
+- Theme picker showed raw markup.
+- Gate-clear animation played with no sets logged.
+- Fonts did not reach every text field.
+- Program stayed in deload after week 24.
+- Next target mixed rep ranges and used deload or boss logs.
 
 ### Removed
-- Machine icons on exercise pages.
-- Recommended music on exercise pages.
-- HAMR and Timed Run from the manual log search.
-- Machine-first paragraph in the Session Guide.
+- Avatar cosmetics.
+- Unproven cues (spot reduction, "without burning muscle", and similar).
+
 
 ### Deploy
 - Upload `index.html`, `sw.js`, and `hamr-audio.mp3` to the same folder.
