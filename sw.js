@@ -1,5 +1,5 @@
 /* ASCENSION service worker — offline cache. Bump VERSION on each deploy. */
-const VERSION = "ascension-v7.16.0";
+const VERSION = "ascension-v8.4.3";
 const CORE = [
   "./",
   "./index.html",
@@ -35,11 +35,22 @@ self.addEventListener("fetch", (e) => {
 
   // navigations: cache-first on index.html so the app always opens offline
   if (req.mode === "navigate") {
-    e.respondWith(
-      caches.match("./index.html").then((cached) =>
-        cached || fetch(req).catch(() => caches.match("./index.html"))
-      )
-    );
+    // only the app itself is served cache-first; any other page (e.g. a test build) goes to the network first
+    const isApp = /\/(index\.html)?$/.test(new URL(req.url).pathname);
+    if (isApp) {
+      e.respondWith(
+        caches.match("./index.html").then((cached) =>
+          cached || fetch(req).catch(() => caches.match("./index.html"))
+        )
+      );
+    } else {
+      e.respondWith(
+        fetch(req).then((res) => {
+          if (res && res.ok && res.type === "basic") { const c = res.clone(); caches.open(VERSION).then((x) => x.put(req, c)); }
+          return res;
+        }).catch(() => caches.match(req).then((c) => c || caches.match("./index.html")))
+      );
+    }
     return;
   }
 
