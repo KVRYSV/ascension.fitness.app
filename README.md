@@ -74,7 +74,7 @@ OPTION C - Download APK
   The APK is just a chrome container. It's not a standalone app. It needs to connect online once to sync with this repo. Clear chrome cache, force close it, and restart the app for new updates to take effect. 
 
 
-##
+### License
   Copyright (c) 2026 KVRYSV. All rights reserved.
 
 This repository is public for viewing and for using the hosted app only.
